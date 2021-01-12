@@ -33,6 +33,7 @@ spring:
       - swagger
       # Uncomment to activate TLS for the dev profile
       #- tls
+      - no-liquibase
   devtools:
     restart:
       enabled: true
@@ -46,7 +47,7 @@ spring:
     type: com.zaxxer.hikari.HikariDataSource
     url: jdbc:mysql://localhost:3306/ClientCenterService?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC&createDatabaseIfNotExist=true
     username: root
-    password:
+    password: root123456
     hikari:
       poolName: Hikari
       auto-commit: false
@@ -55,8 +56,12 @@ spring:
         prepStmtCacheSize: 250
         prepStmtCacheSqlLimit: 2048
         useServerPrepStmts: true
+    initialization-mode: always
   jpa:
     show-sql: true
+    generate-ddl: false
+    hibernate:
+      ddl-auto: none
   liquibase:
     # Remove 'faker' if you do not want the sample data to be loaded automatically
     contexts: dev, faker
@@ -78,7 +83,10 @@ spring:
     locator:
       discovery:
         enabled: true
-
+  batch:
+    job:
+      enabled: false
+#    initialize-schema: always
 server:
   port: 8081
 

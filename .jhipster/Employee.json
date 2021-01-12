@@ -1,0 +1,29 @@
+{
+  "fluentMethods": true,
+  "clientRootFolder": "ClientCenterService",
+  "relationships": [],
+  "fields": [
+    {
+      "fieldName": "firstName",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "lastName",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "department",
+      "fieldType": "String"
+    }
+  ],
+  "changelogDate": "20210111071536",
+  "dto": "mapstruct",
+  "searchEngine": false,
+  "service": "serviceImpl",
+  "entityTableName": "employee",
+  "databaseType": "sql",
+  "readOnly": true,
+  "jpaMetamodelFiltering": true,
+  "pagination": "infinite-scroll",
+  "microserviceName": "ClientCenterService"
+}

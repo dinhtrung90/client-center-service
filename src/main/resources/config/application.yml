@@ -165,6 +165,10 @@ spring:
           oidc:
             client-id: internal
             client-secret: internal
+  flyway:
+    enabled: true
+    out-of-order: true
+    locations: classpath:/db/migration
 
 server:
   servlet:
