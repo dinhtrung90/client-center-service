@@ -3,6 +3,7 @@ package com.vts.clientcenter.web.rest;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +16,7 @@ import com.vts.clientcenter.service.dto.TResult;
 import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.service.CloudinaryService;
 import com.vts.clientcenter.service.dto.UploadFileResponse;
+import org.apache.commons.io.FileUtils;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -73,14 +75,15 @@ public class JobResource {
 	public ResponseEntity uploadEmployeeCsv(@RequestParam("file") MultipartFile multipartFile) throws IOException {
 
 	    // store file to s3
-        File f= Files.createTempFile("temp", multipartFile.getOriginalFilename()).toFile();
-        multipartFile.transferTo(f);
+        File f = Files.createTempFile(String.format("%s_temp_", Timestamp.from(Instant.now()).getTime()), multipartFile.getOriginalFilename()).toFile();
 
-        UploadFileResponse uploadFileResponse = cloudinaryService.uploadFileToCloud(f, ObjectUtils.emptyMap());
+        String currentUserLogin = SecurityUtils.getCurrentUserLogin().orElseGet(() -> "anonymous");
+
+        Map metadata = ObjectUtils.asMap("created_by", currentUserLogin, "created_date", Instant.now());
+
+        UploadFileResponse uploadFileResponse = cloudinaryService.uploadFileToCloud(f, metadata);
         if (uploadFileResponse != null) {
             // store metadata db
-            String currentUserLogin = SecurityUtils.getCurrentUserLogin().orElseGet(() -> "anonymous");
-
             Eligibility eligibility = new Eligibility()
                 .createdBy(currentUserLogin)
                 .createdDate(Instant.now())
@@ -91,6 +94,8 @@ public class JobResource {
                 .refId(uploadFileResponse.getSignature());
             eligibilityRepository.save(eligibility);
         }
+
+        FileUtils.deleteQuietly(f);
 
         //process import
 

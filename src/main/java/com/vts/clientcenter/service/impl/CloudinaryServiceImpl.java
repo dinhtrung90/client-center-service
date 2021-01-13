@@ -7,12 +7,14 @@ import com.vts.clientcenter.service.CloudinaryService;
 import com.vts.clientcenter.service.dto.UploadFileResponse;
 import com.vts.clientcenter.web.rest.ClientCenterServiceKafkaResource;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
+import org.apache.commons.io.FileUtils;
 import org.cloudinary.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.cloudfoundry.com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -41,7 +43,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     @PostConstruct
     public void initialize() {
         log.info("initialize cloudinary");
-        Map<String, Object> options = ObjectUtils.asMap(
+        Map options = ObjectUtils.asMap(
             "cloud_name", cloudName,
             "api_key", apiKey,
             "api_secret", apiSecret);
@@ -58,9 +60,12 @@ public class CloudinaryServiceImpl implements CloudinaryService {
                 return objectMapper.readValue(objectMapper.writeValueAsString(jsonObject), UploadFileResponse.class);
             } catch (Exception e) {
                 log.error("Invalid JSON: {}", jsonObject);
+                FileUtils.deleteQuietly(file);
                 throw  new BadRequestAlertException( e.getMessage(), "JSON", "ERROR_PARSE_JSON");
             }
         } catch (Exception e) {
+            log.error("upload file with error: {}", e.getMessage());
+            FileUtils.deleteQuietly(file);
             throw  new BadRequestAlertException( e.getMessage(), "CLOUDINARY_UPLOADS", "ERROR_UPLOAD_FILE");
         }
 
