@@ -5,9 +5,11 @@ import com.vts.clientcenter.domain.EmployeeRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+
 
 public class EmployeeProcessor implements ItemProcessor<EmployeeRecord, EmployeeEntity> {
 

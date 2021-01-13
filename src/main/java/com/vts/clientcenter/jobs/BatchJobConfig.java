@@ -39,10 +39,11 @@ public class BatchJobConfig {
     private DataSource dataSource;
 
     @Bean
-    public Job readCSVFile() {
+    public Job readCSVFile(EmployeeListener listener) {
         return jobBuilder
             .get("process-employee-import")
             .incrementer(new RunIdIncrementer())
+            .listener(listener)
             .start(step())
             .build();
     }
