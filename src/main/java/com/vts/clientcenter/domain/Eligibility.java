@@ -12,7 +12,7 @@ import java.time.Instant;
  * A Eligibility.
  */
 @Entity
-@Table(name = "vts_eligibility")
+@Table(name = "tvs_eligibility")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Eligibility implements Serializable {
 

@@ -2,12 +2,10 @@ package com.vts.clientcenter.jobs;
 
 import com.vts.clientcenter.domain.EmployeeEntity;
 import com.vts.clientcenter.domain.EmployeeRecord;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.JobScope;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import io.undertow.server.handlers.resource.URLResource;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.batch.core.*;
+import org.springframework.batch.core.configuration.annotation.*;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
@@ -18,11 +16,16 @@ import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 
 import javax.sql.DataSource;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 @Configuration
 @EnableBatchProcessing
@@ -39,22 +42,37 @@ public class BatchJobConfig {
     private DataSource dataSource;
 
     @Bean
-    public Job readCSVFile(EmployeeListener listener) {
+    public Job readCSVFile(EmployeeListener listener, Step step) {
         return jobBuilder
             .get("process-employee-import")
             .incrementer(new RunIdIncrementer())
+            .validator(validator())
             .listener(listener)
-            .start(step())
+            .start(step)
             .build();
     }
 
     @Bean
+    private JobParametersValidator validator() {
+        return new JobParametersValidator() {
+            @Override
+            public void validate(JobParameters jobParameters) throws JobParametersInvalidException {
+                String fileUrl = jobParameters.getString("path-file");
+                if (StringUtils.isBlank(fileUrl)) {
+                    throw new JobParametersInvalidException("the path file is required.");
+                }
+
+            }
+        }
+    }
+
+    @Bean
     @JobScope
-    public Step step() {
+    public Step step(FlatFileItemReader<EmployeeRecord> reader) {
         return stepBuilder
             .get("step")
             .<EmployeeRecord, EmployeeEntity>chunk(5)
-            .reader(reader())
+            .reader(reader)
             .processor(processor())
             .writer(writer())
             .build();
@@ -67,11 +85,14 @@ public class BatchJobConfig {
 
     // reading from csv file
     @Bean
-    public FlatFileItemReader<EmployeeRecord> reader() {
+    @StepScope
+    public FlatFileItemReader<EmployeeRecord> reader(@Value("#{jobParameters['path-file']}") String pathFile) throws MalformedURLException {
+        Resource resource = new UrlResource(pathFile);
+
         FlatFileItemReader<EmployeeRecord> itemReader = new FlatFileItemReader<>();
         itemReader.setLineMapper(lineMapper());
         itemReader.setLinesToSkip(1);
-        itemReader.setResource(new ClassPathResource("csv/test.csv"));
+        itemReader.setResource(resource);
         return itemReader;
     }
 
@@ -94,7 +115,7 @@ public class BatchJobConfig {
     public JdbcBatchItemWriter<EmployeeEntity> writer() {
         JdbcBatchItemWriter<EmployeeEntity> itemWriter = new JdbcBatchItemWriter<>();
         itemWriter.setDataSource(dataSource);
-        itemWriter.setSql("insert into employees (source_id,first_name,middle_initial,last_name,email_address,phone_number, street, city, state, zip_code, birth_date, social_security_number) VALUES (:sourceId, :firstName, :middleInitial, :lastName, :emailAddress, :phoneNumber, :street, :city, :state, :zipCode, :birthDate, :socialSecurityNumber)");
+        itemWriter.setSql("insert into tvs_employees (source_id,first_name,middle_initial,last_name,email_address,phone_number, street, city, state, zip_code, birth_date, social_security_number) VALUES (:sourceId, :firstName, :middleInitial, :lastName, :emailAddress, :phoneNumber, :street, :city, :state, :zipCode, :birthDate, :socialSecurityNumber)");
         itemWriter.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<EmployeeEntity>());
         return itemWriter;
     }

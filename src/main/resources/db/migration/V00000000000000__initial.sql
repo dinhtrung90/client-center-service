@@ -186,8 +186,8 @@ CREATE TABLE `DATABASECHANGELOGLOCK` (
 -- ----------------------------
 -- Table structure for employees
 -- ----------------------------
-DROP TABLE IF EXISTS `employees`;
-CREATE TABLE `employees` (
+DROP TABLE IF EXISTS `tvs_employees`;
+CREATE TABLE `tvs_employees` (
                              `id` bigint NOT NULL AUTO_INCREMENT,
                              `source_id` varchar(100) NOT NULL,
                              `first_name` varchar(100) NOT NULL,

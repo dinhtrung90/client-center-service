@@ -144,7 +144,14 @@ jhipster:
 
 # application:
 server-uploads:
-  cloudinary_url: cloudinary://868559836586836:x7ha43lE_-vTt2AHxNmt8yphHmw@tvsales
-  cloud_name: tvsales
-  api_key: 868559836586836
-  api_secret: x7ha43lE_-vTt2AHxNmt8yphHmw
+  cloudinary:
+    cloudinary_url: cloudinary://868559836586836:x7ha43lE_-vTt2AHxNmt8yphHmw@tvsales
+    cloud_name: tvsales
+    api_key: 868559836586836
+    api_secret: x7ha43lE_-vTt2AHxNmt8yphHmw
+  firebase:
+    bucket-name: tvsales-fa493.appspot.com
+    bucket-url: tvsales-fa493.appspot.com
+    image-url: https://storage.googleapis.com
+    project-id: tvsales-fa493
+    config-file: tvsales-config-admin.json
