@@ -2,7 +2,6 @@ package com.vts.clientcenter.jobs;
 
 import com.vts.clientcenter.domain.EmployeeEntity;
 import com.vts.clientcenter.domain.EmployeeRecord;
-import io.undertow.server.handlers.resource.URLResource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.*;
@@ -19,13 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 
 import javax.sql.DataSource;
 import java.net.MalformedURLException;
-import java.net.URL;
 
 @Configuration
 @EnableBatchProcessing
@@ -53,7 +50,7 @@ public class BatchJobConfig {
     }
 
     @Bean
-    private JobParametersValidator validator() {
+    public JobParametersValidator validator() {
         return new JobParametersValidator() {
             @Override
             public void validate(JobParameters jobParameters) throws JobParametersInvalidException {
@@ -63,7 +60,7 @@ public class BatchJobConfig {
                 }
 
             }
-        }
+        };
     }
 
     @Bean
