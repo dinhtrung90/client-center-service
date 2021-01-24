@@ -23,22 +23,18 @@ import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 @SpringBootApplication
 @EnableScheduling
 @EnableConfigurationProperties({ LiquibaseProperties.class, ApplicationProperties.class })
+@EnableAsync
 public class ClientCenterServiceApp {
     private static final Logger log = LoggerFactory.getLogger(ClientCenterServiceApp.class);
 
     private final Environment env;
-
-    @Autowired
-    JobLauncher jobLauncher;
-
-    @Autowired
-    Job job;
 
     public ClientCenterServiceApp(Environment env) {
         this.env = env;
