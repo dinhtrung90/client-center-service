@@ -23,6 +23,7 @@ import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.env.Environment;
+import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,6 +32,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 @EnableScheduling
 @EnableConfigurationProperties({ LiquibaseProperties.class, ApplicationProperties.class })
 @EnableAsync
+@EnableKafka
 public class ClientCenterServiceApp {
     private static final Logger log = LoggerFactory.getLogger(ClientCenterServiceApp.class);
 
@@ -123,13 +125,12 @@ public class ClientCenterServiceApp {
             configServerStatus
         );
     }
-
-//    @Scheduled(cron = "0/10 * * * * ?")
-//    public void perform() throws Exception
-//    {
-//        JobParameters params = new JobParametersBuilder()
-//            .addString("JobID", String.valueOf(System.currentTimeMillis()))
-//            .toJobParameters();
-//        jobLauncher.run(job, params);
-//    }
+    //    @Scheduled(cron = "0/10 * * * * ?")
+    //    public void perform() throws Exception
+    //    {
+    //        JobParameters params = new JobParametersBuilder()
+    //            .addString("JobID", String.valueOf(System.currentTimeMillis()))
+    //            .toJobParameters();
+    //        jobLauncher.run(job, params);
+    //    }
 }

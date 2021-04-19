@@ -160,11 +160,11 @@ spring:
       client:
         provider:
           oidc:
-            issuer-uri: http://localhost:9080/auth/realms/jhipster
+            issuer-uri: https://dev-50654898.okta.com/oauth2/default
         registration:
           oidc:
-            client-id: internal
-            client-secret: internal
+            client-id: 0oacfluyt7Q66W0xz5d6
+            client-secret: -AokVfKCOnoT42UAX0unsq-W9uhm6s1hPfEjsWEc
   flyway:
     enabled: true
     out-of-order: true
@@ -217,15 +217,15 @@ jhipster:
         - account
         - api://default
 kafka:
-  bootstrap-servers: localhost:9092
+  bootstrap-servers: ${app.kafka-url}:9092
   consumer:
     key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    group.id: client-center-service
+    value.deserializer: org.springframework.kafka.support.serializer.JsonSerializer
+    group.id: tvsales-message-groups
     auto.offset.reset: earliest
   producer:
     key.serializer: org.apache.kafka.common.serialization.StringSerializer
-    value.serializer: org.apache.kafka.common.serialization.StringSerializer
+    value.serializer: org.springframework.kafka.support.serializer.JsonSerializer
 # ===================================================================
 # Application specific properties
 # Add your own application properties here, see the ApplicationProperties class
