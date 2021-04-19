@@ -1,14 +1,17 @@
 package com.vts.clientcenter.service;
 
 import com.vts.clientcenter.service.dto.EmployeeDTO;
-import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.Optional;
 
 /**
  * Service Interface for managing {@link com.vts.clientcenter.domain.Employee}.
  */
 public interface EmployeeService {
+
     /**
      * Save a employee.
      *
@@ -24,6 +27,7 @@ public interface EmployeeService {
      * @return the list of entities.
      */
     Page<EmployeeDTO> findAll(Pageable pageable);
+
 
     /**
      * Get the "id" employee.

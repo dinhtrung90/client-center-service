@@ -1,0 +1,81 @@
+{
+  "fluentMethods": true,
+  "clientRootFolder": "ClientCenterService",
+  "relationships": [
+    {
+      "relationshipName": "employerDepartment",
+      "otherEntityName": "employerDepartment",
+      "relationshipType": "one-to-many",
+      "otherEntityRelationshipName": "employer"
+    },
+    {
+      "relationshipName": "employee",
+      "otherEntityName": "employee",
+      "relationshipType": "one-to-many",
+      "otherEntityRelationshipName": "employer"
+    },
+    {
+      "relationshipName": "employerBrand",
+      "otherEntityName": "employerBrand",
+      "relationshipType": "one-to-many",
+      "otherEntityRelationshipName": "employer"
+    }
+  ],
+  "fields": [
+    {
+      "fieldName": "employerKey",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "100"
+    },
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "255"
+    },
+    {
+      "fieldName": "address",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "longitude",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "100"
+    },
+    {
+      "fieldName": "latitude",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "100"
+    },
+    {
+      "fieldName": "createdDate",
+      "fieldType": "Instant"
+    },
+    {
+      "fieldName": "lastModifiedDate",
+      "fieldType": "Instant"
+    },
+    {
+      "fieldName": "createdBy",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "lastModifiedBy",
+      "fieldType": "String"
+    }
+  ],
+  "changelogDate": "20210419071346",
+  "dto": "mapstruct",
+  "searchEngine": false,
+  "service": "serviceImpl",
+  "entityTableName": "employer",
+  "databaseType": "sql",
+  "readOnly": true,
+  "jpaMetamodelFiltering": true,
+  "pagination": "infinite-scroll",
+  "microserviceName": "ClientCenterService"
+}

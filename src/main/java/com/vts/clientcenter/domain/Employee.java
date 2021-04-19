@@ -1,26 +1,27 @@
 package com.vts.clientcenter.domain;
 
-import java.io.Serializable;
-import java.time.Instant;
-import javax.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import javax.persistence.*;
+
+import java.io.Serializable;
+import java.time.Instant;
 
 /**
  * A Employee.
  */
 @Entity
-@Table(name = "vts_employee")
+@Table(name = "tv_employee")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Employee implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "employee_id")
-    private String employeeId;
 
     @Column(name = "source_id")
     private String sourceId;
@@ -61,6 +62,26 @@ public class Employee implements Serializable {
     @Column(name = "social_security_number")
     private String socialSecurityNumber;
 
+    @Column(name = "created_date")
+    private Instant createdDate;
+
+    @Column(name = "last_modified_date")
+    private Instant lastModifiedDate;
+
+    @Column(name = "created_by")
+    private String createdBy;
+
+    @Column(name = "last_modified_by")
+    private String lastModifiedBy;
+
+    @ManyToOne
+    @JsonIgnoreProperties(value = "employees", allowSetters = true)
+    private Employer employer;
+
+    @ManyToOne
+    @JsonIgnoreProperties(value = "employees", allowSetters = true)
+    private EmployerDepartment employerDepartment;
+
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
         return id;
@@ -68,19 +89,6 @@ public class Employee implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getEmployeeId() {
-        return employeeId;
-    }
-
-    public Employee employeeId(String employeeId) {
-        this.employeeId = employeeId;
-        return this;
-    }
-
-    public void setEmployeeId(String employeeId) {
-        this.employeeId = employeeId;
     }
 
     public String getSourceId() {
@@ -252,6 +260,83 @@ public class Employee implements Serializable {
         this.socialSecurityNumber = socialSecurityNumber;
     }
 
+    public Instant getCreatedDate() {
+        return createdDate;
+    }
+
+    public Employee createdDate(Instant createdDate) {
+        this.createdDate = createdDate;
+        return this;
+    }
+
+    public void setCreatedDate(Instant createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public Instant getLastModifiedDate() {
+        return lastModifiedDate;
+    }
+
+    public Employee lastModifiedDate(Instant lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
+        return this;
+    }
+
+    public void setLastModifiedDate(Instant lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public Employee createdBy(String createdBy) {
+        this.createdBy = createdBy;
+        return this;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
+    }
+
+    public Employee lastModifiedBy(String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
+        return this;
+    }
+
+    public void setLastModifiedBy(String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
+    }
+
+    public Employer getEmployer() {
+        return employer;
+    }
+
+    public Employee employer(Employer employer) {
+        this.employer = employer;
+        return this;
+    }
+
+    public void setEmployer(Employer employer) {
+        this.employer = employer;
+    }
+
+    public EmployerDepartment getEmployerDepartment() {
+        return employerDepartment;
+    }
+
+    public Employee employerDepartment(EmployerDepartment employerDepartment) {
+        this.employerDepartment = employerDepartment;
+        return this;
+    }
+
+    public void setEmployerDepartment(EmployerDepartment employerDepartment) {
+        this.employerDepartment = employerDepartment;
+    }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override
@@ -275,7 +360,6 @@ public class Employee implements Serializable {
     public String toString() {
         return "Employee{" +
             "id=" + getId() +
-            ", employeeId='" + getEmployeeId() + "'" +
             ", sourceId='" + getSourceId() + "'" +
             ", firstName='" + getFirstName() + "'" +
             ", lastName='" + getLastName() + "'" +
@@ -289,6 +373,10 @@ public class Employee implements Serializable {
             ", birthDate='" + getBirthDate() + "'" +
             ", department='" + getDepartment() + "'" +
             ", socialSecurityNumber='" + getSocialSecurityNumber() + "'" +
+            ", createdDate='" + getCreatedDate() + "'" +
+            ", lastModifiedDate='" + getLastModifiedDate() + "'" +
+            ", createdBy='" + getCreatedBy() + "'" +
+            ", lastModifiedBy='" + getLastModifiedBy() + "'" +
             "}";
     }
 }

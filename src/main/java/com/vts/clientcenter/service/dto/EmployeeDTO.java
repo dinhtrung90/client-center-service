@@ -1,15 +1,14 @@
 package com.vts.clientcenter.service.dto;
 
-import java.io.Serializable;
 import java.time.Instant;
+import java.io.Serializable;
 
 /**
  * A DTO for the {@link com.vts.clientcenter.domain.Employee} entity.
  */
 public class EmployeeDTO implements Serializable {
+    
     private Long id;
-
-    private String employeeId;
 
     private String sourceId;
 
@@ -37,20 +36,25 @@ public class EmployeeDTO implements Serializable {
 
     private String socialSecurityNumber;
 
+    private Instant createdDate;
+
+    private Instant lastModifiedDate;
+
+    private String createdBy;
+
+    private String lastModifiedBy;
+
+
+    private Long employerId;
+
+    private Long employerDepartmentId;
+    
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getEmployeeId() {
-        return employeeId;
-    }
-
-    public void setEmployeeId(String employeeId) {
-        this.employeeId = employeeId;
     }
 
     public String getSourceId() {
@@ -157,6 +161,54 @@ public class EmployeeDTO implements Serializable {
         this.socialSecurityNumber = socialSecurityNumber;
     }
 
+    public Instant getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Instant createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public Instant getLastModifiedDate() {
+        return lastModifiedDate;
+    }
+
+    public void setLastModifiedDate(Instant lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
+    }
+
+    public void setLastModifiedBy(String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
+    }
+
+    public Long getEmployerId() {
+        return employerId;
+    }
+
+    public void setEmployerId(Long employerId) {
+        this.employerId = employerId;
+    }
+
+    public Long getEmployerDepartmentId() {
+        return employerDepartmentId;
+    }
+
+    public void setEmployerDepartmentId(Long employerDepartmentId) {
+        this.employerDepartmentId = employerDepartmentId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -179,7 +231,6 @@ public class EmployeeDTO implements Serializable {
     public String toString() {
         return "EmployeeDTO{" +
             "id=" + getId() +
-            ", employeeId='" + getEmployeeId() + "'" +
             ", sourceId='" + getSourceId() + "'" +
             ", firstName='" + getFirstName() + "'" +
             ", lastName='" + getLastName() + "'" +
@@ -193,6 +244,12 @@ public class EmployeeDTO implements Serializable {
             ", birthDate='" + getBirthDate() + "'" +
             ", department='" + getDepartment() + "'" +
             ", socialSecurityNumber='" + getSocialSecurityNumber() + "'" +
+            ", createdDate='" + getCreatedDate() + "'" +
+            ", lastModifiedDate='" + getLastModifiedDate() + "'" +
+            ", createdBy='" + getCreatedBy() + "'" +
+            ", lastModifiedBy='" + getLastModifiedBy() + "'" +
+            ", employerId=" + getEmployerId() +
+            ", employerDepartmentId=" + getEmployerDepartmentId() +
             "}";
     }
 }

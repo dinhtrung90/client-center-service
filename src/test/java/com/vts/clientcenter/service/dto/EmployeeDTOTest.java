@@ -1,9 +1,8 @@
 package com.vts.clientcenter.service.dto;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import com.vts.clientcenter.web.rest.TestUtil;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import com.vts.clientcenter.web.rest.TestUtil;
 
 public class EmployeeDTOTest {
 

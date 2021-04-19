@@ -85,6 +85,12 @@ public class CacheConfiguration {
             createCache(cm, com.vts.clientcenter.domain.User.class.getName() + ".authorities", jcacheConfiguration);
             createCache(cm, com.vts.clientcenter.domain.Eligibility.class.getName(), jcacheConfiguration);
             createCache(cm, com.vts.clientcenter.domain.Employee.class.getName(), jcacheConfiguration);
+            createCache(cm, com.vts.clientcenter.domain.Employer.class.getName(), jcacheConfiguration);
+            createCache(cm, com.vts.clientcenter.domain.EmployerDepartment.class.getName(), jcacheConfiguration);
+            createCache(cm, com.vts.clientcenter.domain.Employer.class.getName() + ".employerDepartments", jcacheConfiguration);
+            createCache(cm, com.vts.clientcenter.domain.EmployerBrand.class.getName(), jcacheConfiguration);
+            createCache(cm, com.vts.clientcenter.domain.Employer.class.getName() + ".employees", jcacheConfiguration);
+            createCache(cm, com.vts.clientcenter.domain.Employer.class.getName() + ".employerBrands", jcacheConfiguration);
             // jhipster-needle-redis-add-entry
         };
     }

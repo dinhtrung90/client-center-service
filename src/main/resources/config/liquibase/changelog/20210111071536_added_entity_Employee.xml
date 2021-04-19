@@ -16,9 +16,6 @@
             <column name="id" type="bigint" autoIncrement="${autoIncrement}">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="employee_id" type="varchar(255)">
-                <constraints nullable="true" />
-            </column>
             <column name="source_id" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
@@ -58,9 +55,29 @@
             <column name="social_security_number" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
+            <column name="created_date" type="datetime">
+                <constraints nullable="true" />
+            </column>
+            <column name="last_modified_date" type="datetime">
+                <constraints nullable="true" />
+            </column>
+            <column name="created_by" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="last_modified_by" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="employer_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
+            <column name="employer_department_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
         </createTable>
         <dropDefaultValue tableName="employee" columnName="birth_date" columnDataType="datetime"/>
+        <dropDefaultValue tableName="employee" columnName="created_date" columnDataType="datetime"/>
+        <dropDefaultValue tableName="employee" columnName="last_modified_date" columnDataType="datetime"/>
     </changeSet>
 
     <changeSet id="20210111071536-1-relations" author="jhipster">
@@ -82,7 +99,6 @@
                   separator=";"
                   tableName="employee">
             <column name="id" type="numeric"/>
-            <column name="employee_id" type="string"/>
             <column name="source_id" type="string"/>
             <column name="first_name" type="string"/>
             <column name="last_name" type="string"/>
@@ -96,6 +112,10 @@
             <column name="birth_date" type="datetime"/>
             <column name="department" type="string"/>
             <column name="social_security_number" type="string"/>
+            <column name="created_date" type="datetime"/>
+            <column name="last_modified_date" type="datetime"/>
+            <column name="created_by" type="string"/>
+            <column name="last_modified_by" type="string"/>
             <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
         </loadData>
     </changeSet>

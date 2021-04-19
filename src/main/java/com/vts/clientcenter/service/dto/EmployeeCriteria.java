@@ -1,16 +1,16 @@
 package com.vts.clientcenter.service.dto;
 
+import java.io.Serializable;
+import java.util.Objects;
 import io.github.jhipster.service.Criteria;
 import io.github.jhipster.service.filter.BooleanFilter;
 import io.github.jhipster.service.filter.DoubleFilter;
 import io.github.jhipster.service.filter.Filter;
 import io.github.jhipster.service.filter.FloatFilter;
-import io.github.jhipster.service.filter.InstantFilter;
 import io.github.jhipster.service.filter.IntegerFilter;
 import io.github.jhipster.service.filter.LongFilter;
 import io.github.jhipster.service.filter.StringFilter;
-import java.io.Serializable;
-import java.util.Objects;
+import io.github.jhipster.service.filter.InstantFilter;
 
 /**
  * Criteria class for the {@link com.vts.clientcenter.domain.Employee} entity. This class is used
@@ -22,11 +22,10 @@ import java.util.Objects;
  * fix type specific filters.
  */
 public class EmployeeCriteria implements Serializable, Criteria {
+
     private static final long serialVersionUID = 1L;
 
     private LongFilter id;
-
-    private StringFilter employeeId;
 
     private StringFilter sourceId;
 
@@ -54,11 +53,23 @@ public class EmployeeCriteria implements Serializable, Criteria {
 
     private StringFilter socialSecurityNumber;
 
-    public EmployeeCriteria() {}
+    private InstantFilter createdDate;
+
+    private InstantFilter lastModifiedDate;
+
+    private StringFilter createdBy;
+
+    private StringFilter lastModifiedBy;
+
+    private LongFilter employerId;
+
+    private LongFilter employerDepartmentId;
+
+    public EmployeeCriteria() {
+    }
 
     public EmployeeCriteria(EmployeeCriteria other) {
         this.id = other.id == null ? null : other.id.copy();
-        this.employeeId = other.employeeId == null ? null : other.employeeId.copy();
         this.sourceId = other.sourceId == null ? null : other.sourceId.copy();
         this.firstName = other.firstName == null ? null : other.firstName.copy();
         this.lastName = other.lastName == null ? null : other.lastName.copy();
@@ -72,6 +83,12 @@ public class EmployeeCriteria implements Serializable, Criteria {
         this.birthDate = other.birthDate == null ? null : other.birthDate.copy();
         this.department = other.department == null ? null : other.department.copy();
         this.socialSecurityNumber = other.socialSecurityNumber == null ? null : other.socialSecurityNumber.copy();
+        this.createdDate = other.createdDate == null ? null : other.createdDate.copy();
+        this.lastModifiedDate = other.lastModifiedDate == null ? null : other.lastModifiedDate.copy();
+        this.createdBy = other.createdBy == null ? null : other.createdBy.copy();
+        this.lastModifiedBy = other.lastModifiedBy == null ? null : other.lastModifiedBy.copy();
+        this.employerId = other.employerId == null ? null : other.employerId.copy();
+        this.employerDepartmentId = other.employerDepartmentId == null ? null : other.employerDepartmentId.copy();
     }
 
     @Override
@@ -85,14 +102,6 @@ public class EmployeeCriteria implements Serializable, Criteria {
 
     public void setId(LongFilter id) {
         this.id = id;
-    }
-
-    public StringFilter getEmployeeId() {
-        return employeeId;
-    }
-
-    public void setEmployeeId(StringFilter employeeId) {
-        this.employeeId = employeeId;
     }
 
     public StringFilter getSourceId() {
@@ -199,6 +208,55 @@ public class EmployeeCriteria implements Serializable, Criteria {
         this.socialSecurityNumber = socialSecurityNumber;
     }
 
+    public InstantFilter getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(InstantFilter createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public InstantFilter getLastModifiedDate() {
+        return lastModifiedDate;
+    }
+
+    public void setLastModifiedDate(InstantFilter lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
+    }
+
+    public StringFilter getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(StringFilter createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public StringFilter getLastModifiedBy() {
+        return lastModifiedBy;
+    }
+
+    public void setLastModifiedBy(StringFilter lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
+    }
+
+    public LongFilter getEmployerId() {
+        return employerId;
+    }
+
+    public void setEmployerId(LongFilter employerId) {
+        this.employerId = employerId;
+    }
+
+    public LongFilter getEmployerDepartmentId() {
+        return employerDepartmentId;
+    }
+
+    public void setEmployerDepartmentId(LongFilter employerDepartmentId) {
+        this.employerDepartmentId = employerDepartmentId;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -208,9 +266,8 @@ public class EmployeeCriteria implements Serializable, Criteria {
             return false;
         }
         final EmployeeCriteria that = (EmployeeCriteria) o;
-        return (
+        return
             Objects.equals(id, that.id) &&
-            Objects.equals(employeeId, that.employeeId) &&
             Objects.equals(sourceId, that.sourceId) &&
             Objects.equals(firstName, that.firstName) &&
             Objects.equals(lastName, that.lastName) &&
@@ -223,28 +280,38 @@ public class EmployeeCriteria implements Serializable, Criteria {
             Objects.equals(zip, that.zip) &&
             Objects.equals(birthDate, that.birthDate) &&
             Objects.equals(department, that.department) &&
-            Objects.equals(socialSecurityNumber, that.socialSecurityNumber)
-        );
+            Objects.equals(socialSecurityNumber, that.socialSecurityNumber) &&
+            Objects.equals(createdDate, that.createdDate) &&
+            Objects.equals(lastModifiedDate, that.lastModifiedDate) &&
+            Objects.equals(createdBy, that.createdBy) &&
+            Objects.equals(lastModifiedBy, that.lastModifiedBy) &&
+            Objects.equals(employerId, that.employerId) &&
+            Objects.equals(employerDepartmentId, that.employerDepartmentId);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(
-            id,
-            employeeId,
-            sourceId,
-            firstName,
-            lastName,
-            middleInitial,
-            emailAddress,
-            numberPhone,
-            street,
-            city,
-            stateCode,
-            zip,
-            birthDate,
-            department,
-            socialSecurityNumber
+        id,
+        sourceId,
+        firstName,
+        lastName,
+        middleInitial,
+        emailAddress,
+        numberPhone,
+        street,
+        city,
+        stateCode,
+        zip,
+        birthDate,
+        department,
+        socialSecurityNumber,
+        createdDate,
+        lastModifiedDate,
+        createdBy,
+        lastModifiedBy,
+        employerId,
+        employerDepartmentId
         );
     }
 
@@ -253,7 +320,6 @@ public class EmployeeCriteria implements Serializable, Criteria {
     public String toString() {
         return "EmployeeCriteria{" +
                 (id != null ? "id=" + id + ", " : "") +
-                (employeeId != null ? "employeeId=" + employeeId + ", " : "") +
                 (sourceId != null ? "sourceId=" + sourceId + ", " : "") +
                 (firstName != null ? "firstName=" + firstName + ", " : "") +
                 (lastName != null ? "lastName=" + lastName + ", " : "") +
@@ -267,6 +333,13 @@ public class EmployeeCriteria implements Serializable, Criteria {
                 (birthDate != null ? "birthDate=" + birthDate + ", " : "") +
                 (department != null ? "department=" + department + ", " : "") +
                 (socialSecurityNumber != null ? "socialSecurityNumber=" + socialSecurityNumber + ", " : "") +
+                (createdDate != null ? "createdDate=" + createdDate + ", " : "") +
+                (lastModifiedDate != null ? "lastModifiedDate=" + lastModifiedDate + ", " : "") +
+                (createdBy != null ? "createdBy=" + createdBy + ", " : "") +
+                (lastModifiedBy != null ? "lastModifiedBy=" + lastModifiedBy + ", " : "") +
+                (employerId != null ? "employerId=" + employerId + ", " : "") +
+                (employerDepartmentId != null ? "employerDepartmentId=" + employerDepartmentId + ", " : "") +
             "}";
     }
+
 }

@@ -1,14 +1,9 @@
 package com.vts.clientcenter.service;
 
-import com.vts.clientcenter.domain.*; // for static metamodels
-import com.vts.clientcenter.domain.Employee;
-import com.vts.clientcenter.repository.EmployeeRepository;
-import com.vts.clientcenter.service.dto.EmployeeCriteria;
-import com.vts.clientcenter.service.dto.EmployeeDTO;
-import com.vts.clientcenter.service.mapper.EmployeeMapper;
-import io.github.jhipster.service.QueryService;
 import java.util.List;
+
 import javax.persistence.criteria.JoinType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -16,6 +11,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import io.github.jhipster.service.QueryService;
+
+import com.vts.clientcenter.domain.Employee;
+import com.vts.clientcenter.domain.*; // for static metamodels
+import com.vts.clientcenter.repository.EmployeeRepository;
+import com.vts.clientcenter.service.dto.EmployeeCriteria;
+import com.vts.clientcenter.service.dto.EmployeeDTO;
+import com.vts.clientcenter.service.mapper.EmployeeMapper;
 
 /**
  * Service for executing complex queries for {@link Employee} entities in the database.
@@ -26,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 public class EmployeeQueryService extends QueryService<Employee> {
+
     private final Logger log = LoggerFactory.getLogger(EmployeeQueryService.class);
 
     private final EmployeeRepository employeeRepository;
@@ -59,7 +64,8 @@ public class EmployeeQueryService extends QueryService<Employee> {
     public Page<EmployeeDTO> findByCriteria(EmployeeCriteria criteria, Pageable page) {
         log.debug("find by criteria : {}, page: {}", criteria, page);
         final Specification<Employee> specification = createSpecification(criteria);
-        return employeeRepository.findAll(specification, page).map(employeeMapper::toDto);
+        return employeeRepository.findAll(specification, page)
+            .map(employeeMapper::toDto);
     }
 
     /**
@@ -84,9 +90,6 @@ public class EmployeeQueryService extends QueryService<Employee> {
         if (criteria != null) {
             if (criteria.getId() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getId(), Employee_.id));
-            }
-            if (criteria.getEmployeeId() != null) {
-                specification = specification.and(buildStringSpecification(criteria.getEmployeeId(), Employee_.employeeId));
             }
             if (criteria.getSourceId() != null) {
                 specification = specification.and(buildStringSpecification(criteria.getSourceId(), Employee_.sourceId));
@@ -125,8 +128,27 @@ public class EmployeeQueryService extends QueryService<Employee> {
                 specification = specification.and(buildStringSpecification(criteria.getDepartment(), Employee_.department));
             }
             if (criteria.getSocialSecurityNumber() != null) {
-                specification =
-                    specification.and(buildStringSpecification(criteria.getSocialSecurityNumber(), Employee_.socialSecurityNumber));
+                specification = specification.and(buildStringSpecification(criteria.getSocialSecurityNumber(), Employee_.socialSecurityNumber));
+            }
+            if (criteria.getCreatedDate() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getCreatedDate(), Employee_.createdDate));
+            }
+            if (criteria.getLastModifiedDate() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getLastModifiedDate(), Employee_.lastModifiedDate));
+            }
+            if (criteria.getCreatedBy() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getCreatedBy(), Employee_.createdBy));
+            }
+            if (criteria.getLastModifiedBy() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getLastModifiedBy(), Employee_.lastModifiedBy));
+            }
+            if (criteria.getEmployerId() != null) {
+                specification = specification.and(buildSpecification(criteria.getEmployerId(),
+                    root -> root.join(Employee_.employer, JoinType.LEFT).get(Employer_.id)));
+            }
+            if (criteria.getEmployerDepartmentId() != null) {
+                specification = specification.and(buildSpecification(criteria.getEmployerDepartmentId(),
+                    root -> root.join(Employee_.employerDepartment, JoinType.LEFT).get(EmployerDepartment_.id)));
             }
         }
         return specification;

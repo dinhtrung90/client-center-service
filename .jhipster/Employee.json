@@ -1,12 +1,23 @@
 {
   "fluentMethods": true,
   "clientRootFolder": "ClientCenterService",
-  "relationships": [],
-  "fields": [
+  "relationships": [
     {
-      "fieldName": "employeeId",
-      "fieldType": "String"
+      "relationshipName": "employer",
+      "otherEntityName": "employer",
+      "relationshipType": "many-to-one",
+      "otherEntityField": "id",
+      "otherEntityRelationshipName": "employee"
     },
+    {
+      "relationshipName": "employerDepartment",
+      "otherEntityName": "employerDepartment",
+      "relationshipType": "many-to-one",
+      "otherEntityField": "id",
+      "otherEntityRelationshipName": "employee"
+    }
+  ],
+  "fields": [
     {
       "fieldName": "sourceId",
       "fieldType": "String"
@@ -60,6 +71,22 @@
       "fieldName": "socialSecurityNumber",
       "fieldType": "String",
       "required": true
+    },
+    {
+      "fieldName": "createdDate",
+      "fieldType": "Instant"
+    },
+    {
+      "fieldName": "lastModifiedDate",
+      "fieldType": "Instant"
+    },
+    {
+      "fieldName": "createdBy",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "lastModifiedBy",
+      "fieldType": "String"
     }
   ],
   "changelogDate": "20210111071536",
