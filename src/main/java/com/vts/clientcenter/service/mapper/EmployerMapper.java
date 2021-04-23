@@ -1,6 +1,5 @@
 package com.vts.clientcenter.service.mapper;
 
-
 import com.vts.clientcenter.domain.*;
 import com.vts.clientcenter.service.dto.EmployerDTO;
 

@@ -74,11 +74,13 @@ public class Employee implements Serializable {
     @Column(name = "last_modified_by")
     private String lastModifiedBy;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employer_id")
     @JsonIgnoreProperties(value = "employees", allowSetters = true)
     private Employer employer;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
     @JsonIgnoreProperties(value = "employees", allowSetters = true)
     private EmployerDepartment employerDepartment;
 

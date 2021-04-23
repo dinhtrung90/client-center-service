@@ -1,5 +1,4 @@
 package com.vts.clientcenter.domain;
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -16,8 +15,8 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "tv_employer")
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class Employer extends AbstractAuditingEntity {
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+public class Employer implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -36,8 +35,24 @@ public class Employer extends AbstractAuditingEntity {
     private String name;
 
     @NotNull
-    @Column(name = "address", nullable = false)
+    @Column(name = "email", nullable = false)
+    private String email;
+
+    @NotNull
+    @Column(name = "phone", nullable = false)
+    private String phone;
+
+    @Column(name = "address")
     private String address;
+
+    @Column(name = "street")
+    private String street;
+
+    @Column(name = "city")
+    private String city;
+
+    @Column(name = "county")
+    private String county;
 
     @NotNull
     @Size(max = 100)
@@ -62,18 +77,18 @@ public class Employer extends AbstractAuditingEntity {
     private String lastModifiedBy;
 
     @OneToMany(mappedBy = "employer")
-    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Set<EmployerDepartment> employerDepartments = new HashSet<>();
 
     @OneToMany(mappedBy = "employer")
-    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Set<Employee> employees = new HashSet<>();
 
     @OneToMany(mappedBy = "employer")
-    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Set<EmployerBrand> employerBrands = new HashSet<>();
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here
+    // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
         return id;
     }
@@ -108,6 +123,32 @@ public class Employer extends AbstractAuditingEntity {
         this.name = name;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public Employer email(String email) {
+        this.email = email;
+        return this;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public Employer phone(String phone) {
+        this.phone = phone;
+        return this;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
     public String getAddress() {
         return address;
     }
@@ -119,6 +160,45 @@ public class Employer extends AbstractAuditingEntity {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getStreet() {
+        return street;
+    }
+
+    public Employer street(String street) {
+        this.street = street;
+        return this;
+    }
+
+    public void setStreet(String street) {
+        this.street = street;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public Employer city(String city) {
+        this.city = city;
+        return this;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getCounty() {
+        return county;
+    }
+
+    public Employer county(String county) {
+        this.county = county;
+        return this;
+    }
+
+    public void setCounty(String county) {
+        this.county = county;
     }
 
     public String getLongitude() {
@@ -273,7 +353,7 @@ public class Employer extends AbstractAuditingEntity {
     public void setEmployerBrands(Set<EmployerBrand> employerBrands) {
         this.employerBrands = employerBrands;
     }
-    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
+    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
     @Override
     public boolean equals(Object o) {
@@ -291,14 +371,18 @@ public class Employer extends AbstractAuditingEntity {
         return 31;
     }
 
-    // prettier-ignore
     @Override
     public String toString() {
         return "Employer{" +
             "id=" + getId() +
             ", employerKey='" + getEmployerKey() + "'" +
             ", name='" + getName() + "'" +
+            ", email='" + getEmail() + "'" +
+            ", phone='" + getPhone() + "'" +
             ", address='" + getAddress() + "'" +
+            ", street='" + getStreet() + "'" +
+            ", city='" + getCity() + "'" +
+            ", county='" + getCounty() + "'" +
             ", longitude='" + getLongitude() + "'" +
             ", latitude='" + getLatitude() + "'" +
             ", createdDate='" + getCreatedDate() + "'" +

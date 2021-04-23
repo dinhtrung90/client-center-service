@@ -97,8 +97,23 @@ public class EmployerQueryService extends QueryService<Employer> {
             if (criteria.getName() != null) {
                 specification = specification.and(buildStringSpecification(criteria.getName(), Employer_.name));
             }
+            if (criteria.getEmail() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getEmail(), Employer_.email));
+            }
+            if (criteria.getPhone() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getPhone(), Employer_.phone));
+            }
             if (criteria.getAddress() != null) {
                 specification = specification.and(buildStringSpecification(criteria.getAddress(), Employer_.address));
+            }
+            if (criteria.getStreet() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getStreet(), Employer_.street));
+            }
+            if (criteria.getCity() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getCity(), Employer_.city));
+            }
+            if (criteria.getCounty() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getCounty(), Employer_.county));
             }
             if (criteria.getLongitude() != null) {
                 specification = specification.and(buildStringSpecification(criteria.getLongitude(), Employer_.longitude));

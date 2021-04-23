@@ -103,7 +103,12 @@ class EmployerGatlingTest extends Simulation {
                 "id":null
                 , "employerKey":"SAMPLE_TEXT"
                 , "name":"SAMPLE_TEXT"
+                , "email":"SAMPLE_TEXT"
+                , "phone":"SAMPLE_TEXT"
                 , "address":"SAMPLE_TEXT"
+                , "street":"SAMPLE_TEXT"
+                , "city":"SAMPLE_TEXT"
+                , "county":"SAMPLE_TEXT"
                 , "longitude":"SAMPLE_TEXT"
                 , "latitude":"SAMPLE_TEXT"
                 , "createdDate":"2020-01-01T00:00:00.000Z"

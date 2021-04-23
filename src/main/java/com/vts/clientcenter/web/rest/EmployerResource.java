@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -47,7 +48,9 @@ public class EmployerResource {
     /**
      * {@code GET  /employers} : get all the employers.
      *
+
      * @param pageable the pagination information.
+
      * @param criteria the criteria which the requested entities should match.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of employers in body.
      */
@@ -60,11 +63,11 @@ public class EmployerResource {
     }
 
     /**
-     * {@code GET  /employers/count} : count all the employers.
-     *
-     * @param criteria the criteria which the requested entities should match.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the count in body.
-     */
+    * {@code GET  /employers/count} : count all the employers.
+    *
+    * @param criteria the criteria which the requested entities should match.
+    * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the count in body.
+    */
     @GetMapping("/employers/count")
     public ResponseEntity<Long> countEmployers(EmployerCriteria criteria) {
         log.debug("REST request to count Employers by criteria: {}", criteria);

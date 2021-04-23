@@ -7,16 +7,13 @@ import com.vts.clientcenter.service.UserClientService;
 import com.vts.clientcenter.service.dto.EmployeeDTO;
 import com.vts.clientcenter.service.dto.TResult;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
-import java.util.Optional;
-import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
-import org.keycloak.OAuth2Constants;
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @Transactional

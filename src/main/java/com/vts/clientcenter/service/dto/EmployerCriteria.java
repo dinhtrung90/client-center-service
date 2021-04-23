@@ -31,7 +31,17 @@ public class EmployerCriteria implements Serializable, Criteria {
 
     private StringFilter name;
 
+    private StringFilter email;
+
+    private StringFilter phone;
+
     private StringFilter address;
+
+    private StringFilter street;
+
+    private StringFilter city;
+
+    private StringFilter county;
 
     private StringFilter longitude;
 
@@ -51,14 +61,19 @@ public class EmployerCriteria implements Serializable, Criteria {
 
     private LongFilter employerBrandId;
 
-    public EmployerCriteria() {
+    public EmployerCriteria(){
     }
 
-    public EmployerCriteria(EmployerCriteria other) {
+    public EmployerCriteria(EmployerCriteria other){
         this.id = other.id == null ? null : other.id.copy();
         this.employerKey = other.employerKey == null ? null : other.employerKey.copy();
         this.name = other.name == null ? null : other.name.copy();
+        this.email = other.email == null ? null : other.email.copy();
+        this.phone = other.phone == null ? null : other.phone.copy();
         this.address = other.address == null ? null : other.address.copy();
+        this.street = other.street == null ? null : other.street.copy();
+        this.city = other.city == null ? null : other.city.copy();
+        this.county = other.county == null ? null : other.county.copy();
         this.longitude = other.longitude == null ? null : other.longitude.copy();
         this.latitude = other.latitude == null ? null : other.latitude.copy();
         this.createdDate = other.createdDate == null ? null : other.createdDate.copy();
@@ -99,12 +114,52 @@ public class EmployerCriteria implements Serializable, Criteria {
         this.name = name;
     }
 
+    public StringFilter getEmail() {
+        return email;
+    }
+
+    public void setEmail(StringFilter email) {
+        this.email = email;
+    }
+
+    public StringFilter getPhone() {
+        return phone;
+    }
+
+    public void setPhone(StringFilter phone) {
+        this.phone = phone;
+    }
+
     public StringFilter getAddress() {
         return address;
     }
 
     public void setAddress(StringFilter address) {
         this.address = address;
+    }
+
+    public StringFilter getStreet() {
+        return street;
+    }
+
+    public void setStreet(StringFilter street) {
+        this.street = street;
+    }
+
+    public StringFilter getCity() {
+        return city;
+    }
+
+    public void setCity(StringFilter city) {
+        this.city = city;
+    }
+
+    public StringFilter getCounty() {
+        return county;
+    }
+
+    public void setCounty(StringFilter county) {
+        this.county = county;
     }
 
     public StringFilter getLongitude() {
@@ -193,7 +248,12 @@ public class EmployerCriteria implements Serializable, Criteria {
             Objects.equals(id, that.id) &&
             Objects.equals(employerKey, that.employerKey) &&
             Objects.equals(name, that.name) &&
+            Objects.equals(email, that.email) &&
+            Objects.equals(phone, that.phone) &&
             Objects.equals(address, that.address) &&
+            Objects.equals(street, that.street) &&
+            Objects.equals(city, that.city) &&
+            Objects.equals(county, that.county) &&
             Objects.equals(longitude, that.longitude) &&
             Objects.equals(latitude, that.latitude) &&
             Objects.equals(createdDate, that.createdDate) &&
@@ -211,7 +271,12 @@ public class EmployerCriteria implements Serializable, Criteria {
         id,
         employerKey,
         name,
+        email,
+        phone,
         address,
+        street,
+        city,
+        county,
         longitude,
         latitude,
         createdDate,
@@ -224,14 +289,18 @@ public class EmployerCriteria implements Serializable, Criteria {
         );
     }
 
-    // prettier-ignore
     @Override
     public String toString() {
         return "EmployerCriteria{" +
                 (id != null ? "id=" + id + ", " : "") +
                 (employerKey != null ? "employerKey=" + employerKey + ", " : "") +
                 (name != null ? "name=" + name + ", " : "") +
+                (email != null ? "email=" + email + ", " : "") +
+                (phone != null ? "phone=" + phone + ", " : "") +
                 (address != null ? "address=" + address + ", " : "") +
+                (street != null ? "street=" + street + ", " : "") +
+                (city != null ? "city=" + city + ", " : "") +
+                (county != null ? "county=" + county + ", " : "") +
                 (longitude != null ? "longitude=" + longitude + ", " : "") +
                 (latitude != null ? "latitude=" + latitude + ", " : "") +
                 (createdDate != null ? "createdDate=" + createdDate + ", " : "") +

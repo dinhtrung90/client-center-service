@@ -11,39 +11,40 @@ import com.vts.clientcenter.repository.EmployerRepository;
 import com.vts.clientcenter.service.EmployerService;
 import com.vts.clientcenter.service.dto.EmployerDTO;
 import com.vts.clientcenter.service.mapper.EmployerMapper;
+import com.vts.clientcenter.web.rest.errors.ExceptionTranslator;
 import com.vts.clientcenter.service.dto.EmployerCriteria;
 import com.vts.clientcenter.service.EmployerQueryService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.Validator;
+
 import javax.persistence.EntityManager;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import static com.vts.clientcenter.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Integration tests for the {@link EmployerResource} REST controller.
  */
-@SpringBootTest(classes = { ClientCenterServiceApp.class, TestSecurityConfiguration.class })
-@ExtendWith({ RedisTestContainerExtension.class, MockitoExtension.class })
-@AutoConfigureMockMvc
-@WithMockUser
+@SpringBootTest(classes = {ClientCenterServiceApp.class, TestSecurityConfiguration.class})
+@ExtendWith(RedisTestContainerExtension.class)
 public class EmployerResourceIT {
 
     private static final String DEFAULT_EMPLOYER_KEY = "AAAAAAAAAA";
@@ -52,8 +53,23 @@ public class EmployerResourceIT {
     private static final String DEFAULT_NAME = "AAAAAAAAAA";
     private static final String UPDATED_NAME = "BBBBBBBBBB";
 
+    private static final String DEFAULT_EMAIL = "AAAAAAAAAA";
+    private static final String UPDATED_EMAIL = "BBBBBBBBBB";
+
+    private static final String DEFAULT_PHONE = "AAAAAAAAAA";
+    private static final String UPDATED_PHONE = "BBBBBBBBBB";
+
     private static final String DEFAULT_ADDRESS = "AAAAAAAAAA";
     private static final String UPDATED_ADDRESS = "BBBBBBBBBB";
+
+    private static final String DEFAULT_STREET = "AAAAAAAAAA";
+    private static final String UPDATED_STREET = "BBBBBBBBBB";
+
+    private static final String DEFAULT_CITY = "AAAAAAAAAA";
+    private static final String UPDATED_CITY = "BBBBBBBBBB";
+
+    private static final String DEFAULT_COUNTY = "AAAAAAAAAA";
+    private static final String UPDATED_COUNTY = "BBBBBBBBBB";
 
     private static final String DEFAULT_LONGITUDE = "AAAAAAAAAA";
     private static final String UPDATED_LONGITUDE = "BBBBBBBBBB";
@@ -86,12 +102,35 @@ public class EmployerResourceIT {
     private EmployerQueryService employerQueryService;
 
     @Autowired
+    private MappingJackson2HttpMessageConverter jacksonMessageConverter;
+
+    @Autowired
+    private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
+
+    @Autowired
+    private ExceptionTranslator exceptionTranslator;
+
+    @Autowired
     private EntityManager em;
 
     @Autowired
+    private Validator validator;
+
     private MockMvc restEmployerMockMvc;
 
     private Employer employer;
+
+    @BeforeEach
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+        final EmployerResource employerResource = new EmployerResource(employerService, employerQueryService);
+        this.restEmployerMockMvc = MockMvcBuilders.standaloneSetup(employerResource)
+            .setCustomArgumentResolvers(pageableArgumentResolver)
+            .setControllerAdvice(exceptionTranslator)
+            .setConversionService(createFormattingConversionService())
+            .setMessageConverters(jacksonMessageConverter)
+            .setValidator(validator).build();
+    }
 
     /**
      * Create an entity for this test.
@@ -103,7 +142,12 @@ public class EmployerResourceIT {
         Employer employer = new Employer()
             .employerKey(DEFAULT_EMPLOYER_KEY)
             .name(DEFAULT_NAME)
+            .email(DEFAULT_EMAIL)
+            .phone(DEFAULT_PHONE)
             .address(DEFAULT_ADDRESS)
+            .street(DEFAULT_STREET)
+            .city(DEFAULT_CITY)
+            .county(DEFAULT_COUNTY)
             .longitude(DEFAULT_LONGITUDE)
             .latitude(DEFAULT_LATITUDE)
             .createdDate(DEFAULT_CREATED_DATE)
@@ -122,7 +166,12 @@ public class EmployerResourceIT {
         Employer employer = new Employer()
             .employerKey(UPDATED_EMPLOYER_KEY)
             .name(UPDATED_NAME)
+            .email(UPDATED_EMAIL)
+            .phone(UPDATED_PHONE)
             .address(UPDATED_ADDRESS)
+            .street(UPDATED_STREET)
+            .city(UPDATED_CITY)
+            .county(UPDATED_COUNTY)
             .longitude(UPDATED_LONGITUDE)
             .latitude(UPDATED_LATITUDE)
             .createdDate(UPDATED_CREATED_DATE)
@@ -146,11 +195,16 @@ public class EmployerResourceIT {
         // Get all the employerList
         restEmployerMockMvc.perform(get("/api/employers?sort=id,desc"))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(employer.getId().intValue())))
             .andExpect(jsonPath("$.[*].employerKey").value(hasItem(DEFAULT_EMPLOYER_KEY)))
             .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
+            .andExpect(jsonPath("$.[*].email").value(hasItem(DEFAULT_EMAIL)))
+            .andExpect(jsonPath("$.[*].phone").value(hasItem(DEFAULT_PHONE)))
             .andExpect(jsonPath("$.[*].address").value(hasItem(DEFAULT_ADDRESS)))
+            .andExpect(jsonPath("$.[*].street").value(hasItem(DEFAULT_STREET)))
+            .andExpect(jsonPath("$.[*].city").value(hasItem(DEFAULT_CITY)))
+            .andExpect(jsonPath("$.[*].county").value(hasItem(DEFAULT_COUNTY)))
             .andExpect(jsonPath("$.[*].longitude").value(hasItem(DEFAULT_LONGITUDE)))
             .andExpect(jsonPath("$.[*].latitude").value(hasItem(DEFAULT_LATITUDE)))
             .andExpect(jsonPath("$.[*].createdDate").value(hasItem(DEFAULT_CREATED_DATE.toString())))
@@ -168,11 +222,16 @@ public class EmployerResourceIT {
         // Get the employer
         restEmployerMockMvc.perform(get("/api/employers/{id}", employer.getId()))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.id").value(employer.getId().intValue()))
             .andExpect(jsonPath("$.employerKey").value(DEFAULT_EMPLOYER_KEY))
             .andExpect(jsonPath("$.name").value(DEFAULT_NAME))
+            .andExpect(jsonPath("$.email").value(DEFAULT_EMAIL))
+            .andExpect(jsonPath("$.phone").value(DEFAULT_PHONE))
             .andExpect(jsonPath("$.address").value(DEFAULT_ADDRESS))
+            .andExpect(jsonPath("$.street").value(DEFAULT_STREET))
+            .andExpect(jsonPath("$.city").value(DEFAULT_CITY))
+            .andExpect(jsonPath("$.county").value(DEFAULT_COUNTY))
             .andExpect(jsonPath("$.longitude").value(DEFAULT_LONGITUDE))
             .andExpect(jsonPath("$.latitude").value(DEFAULT_LATITUDE))
             .andExpect(jsonPath("$.createdDate").value(DEFAULT_CREATED_DATE.toString()))
@@ -359,6 +418,162 @@ public class EmployerResourceIT {
 
     @Test
     @Transactional
+    public void getAllEmployersByEmailIsEqualToSomething() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where email equals to DEFAULT_EMAIL
+        defaultEmployerShouldBeFound("email.equals=" + DEFAULT_EMAIL);
+
+        // Get all the employerList where email equals to UPDATED_EMAIL
+        defaultEmployerShouldNotBeFound("email.equals=" + UPDATED_EMAIL);
+    }
+
+    @Test
+    @Transactional
+    public void getAllEmployersByEmailIsNotEqualToSomething() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where email not equals to DEFAULT_EMAIL
+        defaultEmployerShouldNotBeFound("email.notEquals=" + DEFAULT_EMAIL);
+
+        // Get all the employerList where email not equals to UPDATED_EMAIL
+        defaultEmployerShouldBeFound("email.notEquals=" + UPDATED_EMAIL);
+    }
+
+    @Test
+    @Transactional
+    public void getAllEmployersByEmailIsInShouldWork() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where email in DEFAULT_EMAIL or UPDATED_EMAIL
+        defaultEmployerShouldBeFound("email.in=" + DEFAULT_EMAIL + "," + UPDATED_EMAIL);
+
+        // Get all the employerList where email equals to UPDATED_EMAIL
+        defaultEmployerShouldNotBeFound("email.in=" + UPDATED_EMAIL);
+    }
+
+    @Test
+    @Transactional
+    public void getAllEmployersByEmailIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where email is not null
+        defaultEmployerShouldBeFound("email.specified=true");
+
+        // Get all the employerList where email is null
+        defaultEmployerShouldNotBeFound("email.specified=false");
+    }
+                @Test
+    @Transactional
+    public void getAllEmployersByEmailContainsSomething() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where email contains DEFAULT_EMAIL
+        defaultEmployerShouldBeFound("email.contains=" + DEFAULT_EMAIL);
+
+        // Get all the employerList where email contains UPDATED_EMAIL
+        defaultEmployerShouldNotBeFound("email.contains=" + UPDATED_EMAIL);
+    }
+
+    @Test
+    @Transactional
+    public void getAllEmployersByEmailNotContainsSomething() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where email does not contain DEFAULT_EMAIL
+        defaultEmployerShouldNotBeFound("email.doesNotContain=" + DEFAULT_EMAIL);
+
+        // Get all the employerList where email does not contain UPDATED_EMAIL
+        defaultEmployerShouldBeFound("email.doesNotContain=" + UPDATED_EMAIL);
+    }
+
+
+    @Test
+    @Transactional
+    public void getAllEmployersByPhoneIsEqualToSomething() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where phone equals to DEFAULT_PHONE
+        defaultEmployerShouldBeFound("phone.equals=" + DEFAULT_PHONE);
+
+        // Get all the employerList where phone equals to UPDATED_PHONE
+        defaultEmployerShouldNotBeFound("phone.equals=" + UPDATED_PHONE);
+    }
+
+    @Test
+    @Transactional
+    public void getAllEmployersByPhoneIsNotEqualToSomething() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where phone not equals to DEFAULT_PHONE
+        defaultEmployerShouldNotBeFound("phone.notEquals=" + DEFAULT_PHONE);
+
+        // Get all the employerList where phone not equals to UPDATED_PHONE
+        defaultEmployerShouldBeFound("phone.notEquals=" + UPDATED_PHONE);
+    }
+
+    @Test
+    @Transactional
+    public void getAllEmployersByPhoneIsInShouldWork() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where phone in DEFAULT_PHONE or UPDATED_PHONE
+        defaultEmployerShouldBeFound("phone.in=" + DEFAULT_PHONE + "," + UPDATED_PHONE);
+
+        // Get all the employerList where phone equals to UPDATED_PHONE
+        defaultEmployerShouldNotBeFound("phone.in=" + UPDATED_PHONE);
+    }
+
+    @Test
+    @Transactional
+    public void getAllEmployersByPhoneIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where phone is not null
+        defaultEmployerShouldBeFound("phone.specified=true");
+
+        // Get all the employerList where phone is null
+        defaultEmployerShouldNotBeFound("phone.specified=false");
+    }
+                @Test
+    @Transactional
+    public void getAllEmployersByPhoneContainsSomething() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where phone contains DEFAULT_PHONE
+        defaultEmployerShouldBeFound("phone.contains=" + DEFAULT_PHONE);
+
+        // Get all the employerList where phone contains UPDATED_PHONE
+        defaultEmployerShouldNotBeFound("phone.contains=" + UPDATED_PHONE);
+    }
+
+    @Test
+    @Transactional
+    public void getAllEmployersByPhoneNotContainsSomething() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where phone does not contain DEFAULT_PHONE
+        defaultEmployerShouldNotBeFound("phone.doesNotContain=" + DEFAULT_PHONE);
+
+        // Get all the employerList where phone does not contain UPDATED_PHONE
+        defaultEmployerShouldBeFound("phone.doesNotContain=" + UPDATED_PHONE);
+    }
+
+
+    @Test
+    @Transactional
     public void getAllEmployersByAddressIsEqualToSomething() throws Exception {
         // Initialize the database
         employerRepository.saveAndFlush(employer);
@@ -432,6 +647,240 @@ public class EmployerResourceIT {
 
         // Get all the employerList where address does not contain UPDATED_ADDRESS
         defaultEmployerShouldBeFound("address.doesNotContain=" + UPDATED_ADDRESS);
+    }
+
+
+    @Test
+    @Transactional
+    public void getAllEmployersByStreetIsEqualToSomething() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where street equals to DEFAULT_STREET
+        defaultEmployerShouldBeFound("street.equals=" + DEFAULT_STREET);
+
+        // Get all the employerList where street equals to UPDATED_STREET
+        defaultEmployerShouldNotBeFound("street.equals=" + UPDATED_STREET);
+    }
+
+    @Test
+    @Transactional
+    public void getAllEmployersByStreetIsNotEqualToSomething() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where street not equals to DEFAULT_STREET
+        defaultEmployerShouldNotBeFound("street.notEquals=" + DEFAULT_STREET);
+
+        // Get all the employerList where street not equals to UPDATED_STREET
+        defaultEmployerShouldBeFound("street.notEquals=" + UPDATED_STREET);
+    }
+
+    @Test
+    @Transactional
+    public void getAllEmployersByStreetIsInShouldWork() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where street in DEFAULT_STREET or UPDATED_STREET
+        defaultEmployerShouldBeFound("street.in=" + DEFAULT_STREET + "," + UPDATED_STREET);
+
+        // Get all the employerList where street equals to UPDATED_STREET
+        defaultEmployerShouldNotBeFound("street.in=" + UPDATED_STREET);
+    }
+
+    @Test
+    @Transactional
+    public void getAllEmployersByStreetIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where street is not null
+        defaultEmployerShouldBeFound("street.specified=true");
+
+        // Get all the employerList where street is null
+        defaultEmployerShouldNotBeFound("street.specified=false");
+    }
+                @Test
+    @Transactional
+    public void getAllEmployersByStreetContainsSomething() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where street contains DEFAULT_STREET
+        defaultEmployerShouldBeFound("street.contains=" + DEFAULT_STREET);
+
+        // Get all the employerList where street contains UPDATED_STREET
+        defaultEmployerShouldNotBeFound("street.contains=" + UPDATED_STREET);
+    }
+
+    @Test
+    @Transactional
+    public void getAllEmployersByStreetNotContainsSomething() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where street does not contain DEFAULT_STREET
+        defaultEmployerShouldNotBeFound("street.doesNotContain=" + DEFAULT_STREET);
+
+        // Get all the employerList where street does not contain UPDATED_STREET
+        defaultEmployerShouldBeFound("street.doesNotContain=" + UPDATED_STREET);
+    }
+
+
+    @Test
+    @Transactional
+    public void getAllEmployersByCityIsEqualToSomething() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where city equals to DEFAULT_CITY
+        defaultEmployerShouldBeFound("city.equals=" + DEFAULT_CITY);
+
+        // Get all the employerList where city equals to UPDATED_CITY
+        defaultEmployerShouldNotBeFound("city.equals=" + UPDATED_CITY);
+    }
+
+    @Test
+    @Transactional
+    public void getAllEmployersByCityIsNotEqualToSomething() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where city not equals to DEFAULT_CITY
+        defaultEmployerShouldNotBeFound("city.notEquals=" + DEFAULT_CITY);
+
+        // Get all the employerList where city not equals to UPDATED_CITY
+        defaultEmployerShouldBeFound("city.notEquals=" + UPDATED_CITY);
+    }
+
+    @Test
+    @Transactional
+    public void getAllEmployersByCityIsInShouldWork() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where city in DEFAULT_CITY or UPDATED_CITY
+        defaultEmployerShouldBeFound("city.in=" + DEFAULT_CITY + "," + UPDATED_CITY);
+
+        // Get all the employerList where city equals to UPDATED_CITY
+        defaultEmployerShouldNotBeFound("city.in=" + UPDATED_CITY);
+    }
+
+    @Test
+    @Transactional
+    public void getAllEmployersByCityIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where city is not null
+        defaultEmployerShouldBeFound("city.specified=true");
+
+        // Get all the employerList where city is null
+        defaultEmployerShouldNotBeFound("city.specified=false");
+    }
+                @Test
+    @Transactional
+    public void getAllEmployersByCityContainsSomething() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where city contains DEFAULT_CITY
+        defaultEmployerShouldBeFound("city.contains=" + DEFAULT_CITY);
+
+        // Get all the employerList where city contains UPDATED_CITY
+        defaultEmployerShouldNotBeFound("city.contains=" + UPDATED_CITY);
+    }
+
+    @Test
+    @Transactional
+    public void getAllEmployersByCityNotContainsSomething() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where city does not contain DEFAULT_CITY
+        defaultEmployerShouldNotBeFound("city.doesNotContain=" + DEFAULT_CITY);
+
+        // Get all the employerList where city does not contain UPDATED_CITY
+        defaultEmployerShouldBeFound("city.doesNotContain=" + UPDATED_CITY);
+    }
+
+
+    @Test
+    @Transactional
+    public void getAllEmployersByCountyIsEqualToSomething() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where county equals to DEFAULT_COUNTY
+        defaultEmployerShouldBeFound("county.equals=" + DEFAULT_COUNTY);
+
+        // Get all the employerList where county equals to UPDATED_COUNTY
+        defaultEmployerShouldNotBeFound("county.equals=" + UPDATED_COUNTY);
+    }
+
+    @Test
+    @Transactional
+    public void getAllEmployersByCountyIsNotEqualToSomething() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where county not equals to DEFAULT_COUNTY
+        defaultEmployerShouldNotBeFound("county.notEquals=" + DEFAULT_COUNTY);
+
+        // Get all the employerList where county not equals to UPDATED_COUNTY
+        defaultEmployerShouldBeFound("county.notEquals=" + UPDATED_COUNTY);
+    }
+
+    @Test
+    @Transactional
+    public void getAllEmployersByCountyIsInShouldWork() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where county in DEFAULT_COUNTY or UPDATED_COUNTY
+        defaultEmployerShouldBeFound("county.in=" + DEFAULT_COUNTY + "," + UPDATED_COUNTY);
+
+        // Get all the employerList where county equals to UPDATED_COUNTY
+        defaultEmployerShouldNotBeFound("county.in=" + UPDATED_COUNTY);
+    }
+
+    @Test
+    @Transactional
+    public void getAllEmployersByCountyIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where county is not null
+        defaultEmployerShouldBeFound("county.specified=true");
+
+        // Get all the employerList where county is null
+        defaultEmployerShouldNotBeFound("county.specified=false");
+    }
+                @Test
+    @Transactional
+    public void getAllEmployersByCountyContainsSomething() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where county contains DEFAULT_COUNTY
+        defaultEmployerShouldBeFound("county.contains=" + DEFAULT_COUNTY);
+
+        // Get all the employerList where county contains UPDATED_COUNTY
+        defaultEmployerShouldNotBeFound("county.contains=" + UPDATED_COUNTY);
+    }
+
+    @Test
+    @Transactional
+    public void getAllEmployersByCountyNotContainsSomething() throws Exception {
+        // Initialize the database
+        employerRepository.saveAndFlush(employer);
+
+        // Get all the employerList where county does not contain DEFAULT_COUNTY
+        defaultEmployerShouldNotBeFound("county.doesNotContain=" + DEFAULT_COUNTY);
+
+        // Get all the employerList where county does not contain UPDATED_COUNTY
+        defaultEmployerShouldBeFound("county.doesNotContain=" + UPDATED_COUNTY);
     }
 
 
@@ -916,11 +1365,16 @@ public class EmployerResourceIT {
     private void defaultEmployerShouldBeFound(String filter) throws Exception {
         restEmployerMockMvc.perform(get("/api/employers?sort=id,desc&" + filter))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(employer.getId().intValue())))
             .andExpect(jsonPath("$.[*].employerKey").value(hasItem(DEFAULT_EMPLOYER_KEY)))
             .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
+            .andExpect(jsonPath("$.[*].email").value(hasItem(DEFAULT_EMAIL)))
+            .andExpect(jsonPath("$.[*].phone").value(hasItem(DEFAULT_PHONE)))
             .andExpect(jsonPath("$.[*].address").value(hasItem(DEFAULT_ADDRESS)))
+            .andExpect(jsonPath("$.[*].street").value(hasItem(DEFAULT_STREET)))
+            .andExpect(jsonPath("$.[*].city").value(hasItem(DEFAULT_CITY)))
+            .andExpect(jsonPath("$.[*].county").value(hasItem(DEFAULT_COUNTY)))
             .andExpect(jsonPath("$.[*].longitude").value(hasItem(DEFAULT_LONGITUDE)))
             .andExpect(jsonPath("$.[*].latitude").value(hasItem(DEFAULT_LATITUDE)))
             .andExpect(jsonPath("$.[*].createdDate").value(hasItem(DEFAULT_CREATED_DATE.toString())))
@@ -931,7 +1385,7 @@ public class EmployerResourceIT {
         // Check, that the count call also returns 1
         restEmployerMockMvc.perform(get("/api/employers/count?sort=id,desc&" + filter))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(content().string("1"));
     }
 
@@ -941,16 +1395,17 @@ public class EmployerResourceIT {
     private void defaultEmployerShouldNotBeFound(String filter) throws Exception {
         restEmployerMockMvc.perform(get("/api/employers?sort=id,desc&" + filter))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$").isArray())
             .andExpect(jsonPath("$").isEmpty());
 
         // Check, that the count call also returns 0
         restEmployerMockMvc.perform(get("/api/employers/count?sort=id,desc&" + filter))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(content().string("0"));
     }
+
 
     @Test
     @Transactional

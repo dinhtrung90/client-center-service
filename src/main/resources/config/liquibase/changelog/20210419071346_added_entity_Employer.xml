@@ -3,7 +3,7 @@
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
         <property name="autoIncrement" value="true"/>
@@ -22,8 +22,23 @@
             <column name="name" type="varchar(255)">
                 <constraints nullable="false" />
             </column>
-            <column name="address" type="varchar(255)">
+            <column name="email" type="varchar(255)">
                 <constraints nullable="false" />
+            </column>
+            <column name="phone" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="address" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="street" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="city" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="county" type="varchar(255)">
+                <constraints nullable="true" />
             </column>
             <column name="longitude" type="varchar(100)">
                 <constraints nullable="false" />
@@ -43,7 +58,7 @@
             <column name="last_modified_by" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
-            <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
+            <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here, do not remove-->
         </createTable>
         <dropDefaultValue tableName="employer" columnName="created_date" columnDataType="datetime"/>
         <dropDefaultValue tableName="employer" columnName="last_modified_date" columnDataType="datetime"/>
@@ -52,7 +67,7 @@
     <changeSet id="20210419071346-1-relations" author="jhipster">
 
     </changeSet>
-    <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here -->
+    <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here, do not remove-->
 
     <!--
         Load sample data generated with Faker.js
@@ -70,14 +85,19 @@
             <column name="id" type="numeric"/>
             <column name="employer_key" type="string"/>
             <column name="name" type="string"/>
+            <column name="email" type="string"/>
+            <column name="phone" type="string"/>
             <column name="address" type="string"/>
+            <column name="street" type="string"/>
+            <column name="city" type="string"/>
+            <column name="county" type="string"/>
             <column name="longitude" type="string"/>
             <column name="latitude" type="string"/>
             <column name="created_date" type="datetime"/>
             <column name="last_modified_date" type="datetime"/>
             <column name="created_by" type="string"/>
             <column name="last_modified_by" type="string"/>
-            <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
+            <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here, do not remove-->
         </loadData>
     </changeSet>
 

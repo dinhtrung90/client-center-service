@@ -33,6 +33,12 @@ public class EmployerServiceImpl implements EmployerService {
         this.employerMapper = employerMapper;
     }
 
+    /**
+     * Save a employer.
+     *
+     * @param employerDTO the entity to save.
+     * @return the persisted entity.
+     */
     @Override
     public EmployerDTO save(EmployerDTO employerDTO) {
         log.debug("Request to save Employer : {}", employerDTO);
@@ -41,6 +47,12 @@ public class EmployerServiceImpl implements EmployerService {
         return employerMapper.toDto(employer);
     }
 
+    /**
+     * Get all the employers.
+     *
+     * @param pageable the pagination information.
+     * @return the list of entities.
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<EmployerDTO> findAll(Pageable pageable) {
@@ -50,6 +62,12 @@ public class EmployerServiceImpl implements EmployerService {
     }
 
 
+    /**
+     * Get one employer by id.
+     *
+     * @param id the id of the entity.
+     * @return the entity.
+     */
     @Override
     @Transactional(readOnly = true)
     public Optional<EmployerDTO> findOne(Long id) {
@@ -58,6 +76,11 @@ public class EmployerServiceImpl implements EmployerService {
             .map(employerMapper::toDto);
     }
 
+    /**
+     * Delete the employer by id.
+     *
+     * @param id the id of the entity.
+     */
     @Override
     public void delete(Long id) {
         log.debug("Request to delete Employer : {}", id);

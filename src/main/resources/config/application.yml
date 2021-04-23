@@ -216,6 +216,7 @@ jhipster:
       audience:
         - account
         - api://default
+        - 0oalhgrpkTSLs0spA5d6
 kafka:
   bootstrap-servers: ${app.kafka-url}:9092
   consumer:

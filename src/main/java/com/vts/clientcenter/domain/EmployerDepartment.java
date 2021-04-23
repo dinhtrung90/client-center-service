@@ -41,6 +41,7 @@ public class EmployerDepartment implements Serializable {
     private String lastModifiedBy;
 
     @ManyToOne
+    @JoinColumn(name = "employer_id")
     @JsonIgnoreProperties(value = "employerDepartments", allowSetters = true)
     private Employer employer;
 

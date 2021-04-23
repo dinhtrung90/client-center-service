@@ -13,16 +13,16 @@ public class KafkaListenerService {
 
     private static final String DATA_PROGRESS_GROUP = "client-center-service";
 
-    @KafkaListener(topics = EMPLOYEE, groupId = DATA_PROGRESS_GROUP, containerFactory = "employeeKafkaListenerContainerFactory")
-    void processCreateAccountForEmployee(String message) {
-        log.debug("process create account: {}", message);
-    }
+//    @KafkaListener(topics = EMPLOYEE, groupId = DATA_PROGRESS_GROUP, containerFactory = "employeeKafkaListenerContainerFactory")
+//    void processCreateAccountForEmployee(String message) {
+//        log.debug("process create account: {}", message);
+//    }
 
-    @KafkaListener(
-        topics = ERROR_EMPLOYEE_PROCESS,
-        groupId = DATA_PROGRESS_GROUP,
-        containerFactory = "employeeKafkaListenerContainerFactory"
-    )
+//    @KafkaListener(
+//        topics = ERROR_EMPLOYEE_PROCESS,
+//        groupId = DATA_PROGRESS_GROUP,
+//        containerFactory = "employeeKafkaListenerContainerFactory"
+//    )
     void handleErrorEmployee(String messageError) {
         log.debug("process create account: {}", messageError);
     }
