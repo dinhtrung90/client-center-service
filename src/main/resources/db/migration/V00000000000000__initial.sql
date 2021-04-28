@@ -184,27 +184,6 @@ CREATE TABLE `DATABASECHANGELOGLOCK` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ----------------------------
--- Table structure for employees
--- ----------------------------
-DROP TABLE IF EXISTS `employees`;
-CREATE TABLE `employees` (
-                             `id` bigint NOT NULL AUTO_INCREMENT,
-                             `source_id` varchar(100) NOT NULL,
-                             `first_name` varchar(100) NOT NULL,
-                             `middle_initial` varchar(1) NOT NULL,
-                             `last_name` varchar(100) NOT NULL,
-                             `email_address` varchar(200) NOT NULL,
-                             `phone_number` varchar(50) NOT NULL,
-                             `street` varchar(255) NOT NULL,
-                             `city` varchar(255) NOT NULL,
-                             `state` varchar(100) NOT NULL,
-                             `zip_code` varchar(20) NOT NULL,
-                             `birth_date` date NOT NULL,
-                             `social_security_number` varchar(20) NOT NULL,
-                             PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=20001 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
--- ----------------------------
 -- Table structure for jhi_authority
 -- ----------------------------
 DROP TABLE IF EXISTS `jhi_authority`;
