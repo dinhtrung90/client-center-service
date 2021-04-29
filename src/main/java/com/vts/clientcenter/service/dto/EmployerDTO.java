@@ -1,17 +1,16 @@
 package com.vts.clientcenter.service.dto;
-import java.time.Instant;
-import javax.validation.constraints.*;
+
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Objects;
+import javax.validation.constraints.*;
 
 /**
  * A DTO for the {@link com.vts.clientcenter.domain.Employer} entity.
  */
 public class EmployerDTO implements Serializable {
-
     private Long id;
 
-    @NotNull
     @Size(max = 100)
     private String employerKey;
 
@@ -33,11 +32,9 @@ public class EmployerDTO implements Serializable {
 
     private String county;
 
-    @NotNull
     @Size(max = 100)
     private String longitude;
 
-    @NotNull
     @Size(max = 100)
     private String latitude;
 
@@ -48,7 +45,6 @@ public class EmployerDTO implements Serializable {
     private String createdBy;
 
     private String lastModifiedBy;
-
 
     public Long getId() {
         return id;
@@ -193,22 +189,53 @@ public class EmployerDTO implements Serializable {
 
     @Override
     public String toString() {
-        return "EmployerDTO{" +
-            "id=" + getId() +
-            ", employerKey='" + getEmployerKey() + "'" +
-            ", name='" + getName() + "'" +
-            ", email='" + getEmail() + "'" +
-            ", phone='" + getPhone() + "'" +
-            ", address='" + getAddress() + "'" +
-            ", street='" + getStreet() + "'" +
-            ", city='" + getCity() + "'" +
-            ", county='" + getCounty() + "'" +
-            ", longitude='" + getLongitude() + "'" +
-            ", latitude='" + getLatitude() + "'" +
-            ", createdDate='" + getCreatedDate() + "'" +
-            ", lastModifiedDate='" + getLastModifiedDate() + "'" +
-            ", createdBy='" + getCreatedBy() + "'" +
-            ", lastModifiedBy='" + getLastModifiedBy() + "'" +
-            "}";
+        return (
+            "EmployerDTO{" +
+            "id=" +
+            getId() +
+            ", employerKey='" +
+            getEmployerKey() +
+            "'" +
+            ", name='" +
+            getName() +
+            "'" +
+            ", email='" +
+            getEmail() +
+            "'" +
+            ", phone='" +
+            getPhone() +
+            "'" +
+            ", address='" +
+            getAddress() +
+            "'" +
+            ", street='" +
+            getStreet() +
+            "'" +
+            ", city='" +
+            getCity() +
+            "'" +
+            ", county='" +
+            getCounty() +
+            "'" +
+            ", longitude='" +
+            getLongitude() +
+            "'" +
+            ", latitude='" +
+            getLatitude() +
+            "'" +
+            ", createdDate='" +
+            getCreatedDate() +
+            "'" +
+            ", lastModifiedDate='" +
+            getLastModifiedDate() +
+            "'" +
+            ", createdBy='" +
+            getCreatedBy() +
+            "'" +
+            ", lastModifiedBy='" +
+            getLastModifiedBy() +
+            "'" +
+            "}"
+        );
     }
 }

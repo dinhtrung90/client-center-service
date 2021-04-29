@@ -12,6 +12,7 @@ public final class Constants {
     public static final String ANONYMOUS_USER = "anonymoususer";
     public static final String JOB_PARAM_FILE_NAME = "employee-batch-loader.fileName";
     public static final String DATA_PROCESSING_GROUP_ID = "data-processing";
+    public static final String MY_COUNTRY = "Viet Nam";
 
     private Constants() {}
 }
