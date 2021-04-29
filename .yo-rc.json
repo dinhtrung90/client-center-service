@@ -36,7 +36,8 @@
     "blueprints": [],
     "skipClient": true,
     "skipUserManagement": true,
-    "prettierJava": true
+    "prettierJava": true,
+    "lastLiquibaseTimestamp": 1618817928000
   },
   "git-provider": "GitHub",
   "git-company": "dinhtrung90",

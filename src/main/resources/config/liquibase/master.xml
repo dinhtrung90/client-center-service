@@ -14,7 +14,17 @@
     <property name="uuidType" value="varchar(36)" dbms="h2, mysql, mariadb"/>
 
     <include file="config/liquibase/changelog/00000000000000_initial_schema.xml" relativeToChangelogFile="false"/>
+<!--    <include file="config/liquibase/changelog/01012018000000_create_spring_batch_objects.xml" relativeToChangelogFile="false"/>-->
+    <include file="config/liquibase/changelog/01022018000001_create_employees_objects.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20210112093134_added_entity_Eligibility.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20210111071536_added_entity_Employee.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20210419071346_added_entity_Employer.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20210419071900_added_entity_EmployerDepartment.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20210419073848_added_entity_EmployerBrand.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
+    <include file="config/liquibase/changelog/20210419071900_added_entity_constraints_EmployerDepartment.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20210111071536_added_entity_constraints_Employee.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20210419073848_added_entity_constraints_EmployerBrand.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
     <!-- jhipster-needle-liquibase-add-incremental-changelog - JHipster will add incremental liquibase changelogs here -->
 </databaseChangeLog>
