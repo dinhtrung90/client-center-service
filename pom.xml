@@ -389,6 +389,7 @@
     </dependencies>
 
     <build>
+        <finalName>clientcenter-service</finalName>
         <defaultGoal>spring-boot:run</defaultGoal>
         <plugins>
             <plugin>

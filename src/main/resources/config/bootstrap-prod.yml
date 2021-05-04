@@ -20,3 +20,10 @@ spring:
 jhipster:
   registry:
     password: admin
+
+app:
+  registry-url: vps-5785f290.vps.ovh.ca
+  redis-url: vps-5785f290.vps.ovh.ca
+  redis-password: Pa55w0rd
+  kafka-url: vps-5785f290.vps.ovh.ca
+  mysql-url: vps-5785f290.vps.ovh.ca
