@@ -8,11 +8,11 @@ jhipster:
     password: admin
 
 app:
-  registry-url: localhost
+  registry-url: registry.fingmeup.com
   redis-url: redis.fingmeup.com
   redis-password: Pa55w0rd
   kafka-url: vps-5785f290.vps.ovh.ca
-  mysql-url: localhost
+  mysql-url: vps-5785f290.vps.ovh.ca
 
 spring:
   application:

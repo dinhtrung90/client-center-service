@@ -49,9 +49,9 @@ spring:
       indent-output: true
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://${app.mysql-url}:3306/ClientCenterService?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC&createDatabaseIfNotExist=true
+    url: jdbc:mysql://${app.mysql-url}:3306/ClientCenterService?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
     username: root
-    password: root123456
+    password: Pa55w0rd
     hikari:
       poolName: Hikari
       auto-commit: false
@@ -100,7 +100,7 @@ spring:
       enabled: false
 #    initialize-schema: always
 server:
-  port: 8081
+  port: 8088
 
 # ===================================================================
 # JHipster specific properties
@@ -118,13 +118,13 @@ jhipster:
       # cluster: true
   # CORS is disabled by default on microservices, as you should access them through a gateway.
   # If you want to enable it, please uncomment the configuration below.
-  #  cors:
-  #      allowed-origins: "*"
-  #      allowed-methods: "DELETE, POST, GET, OPTIONS"
-  #      allowed-headers: "*"
-  #      exposed-headers: "Authorization,Link,X-Total-Count"
-  #      allow-credentials: true
-  #      max-age: 1800
+  cors:
+    allowed-origins: '*'
+    allowed-methods: 'DELETE, POST, GET, OPTIONS'
+    allowed-headers: '*'
+    exposed-headers: 'Authorization,Link,X-Total-Count'
+    allow-credentials: true
+    max-age: 1800
   mail: # specific JHipster mail property, for standard properties see MailProperties
     base-url: http://127.0.0.1:8081
   metrics:
