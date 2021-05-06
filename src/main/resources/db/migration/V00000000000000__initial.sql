@@ -303,3 +303,6 @@ WHERE
     NOT EXISTS (SELECT * FROM BATCH_JOB_SEQ);
 
 
+
+insert into jhi_authority(name) values ("ROLE_ADMIN");
+insert into jhi_authority(name) values ("ROLE_SUPERVISOR");

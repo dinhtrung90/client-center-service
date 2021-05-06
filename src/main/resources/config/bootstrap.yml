@@ -8,7 +8,7 @@ jhipster:
     password: admin
 
 app:
-  registry-url: registry.fingmeup.com
+  registry-url: vps-5785f290.vps.ovh.ca
   redis-url: redis.fingmeup.com
   redis-password: Pa55w0rd
   kafka-url: vps-5785f290.vps.ovh.ca

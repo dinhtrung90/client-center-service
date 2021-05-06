@@ -13,6 +13,7 @@ public final class Constants {
     public static final String JOB_PARAM_FILE_NAME = "employee-batch-loader.fileName";
     public static final String DATA_PROCESSING_GROUP_ID = "data-processing";
     public static final String MY_COUNTRY = "Viet Nam";
+    public static final String NAME_EMPLOYER_EXISTED = "NAME_EMPLOYER_EXISTED";
 
     private Constants() {}
 }
