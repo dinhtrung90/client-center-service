@@ -47,6 +47,11 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @Column(length = 254, unique = true)
     private String email;
 
+    @Email
+    @Size(min = 5, max = 254)
+    @Column(length = 254, unique = true)
+    private String phone;
+
     @NotNull
     @Column(nullable = false)
     private boolean activated = false;
@@ -141,6 +146,14 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     public void setAuthorities(Set<Authority> authorities) {
         this.authorities = authorities;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     @Override
