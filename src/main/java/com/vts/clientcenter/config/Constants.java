@@ -13,6 +13,12 @@ public final class Constants {
     public static final String JOB_PARAM_FILE_NAME = "employee-batch-loader.fileName";
     public static final String DATA_PROCESSING_GROUP_ID = "data-processing";
     public static final String MY_COUNTRY = "Viet Nam";
-
+    public static final String NAME_EMPLOYER_EXISTED = "NAME_EMPLOYER_EXISTED";
+    public static final String ID_NOT_NULL = "ID_NOT_NULL";
+    public static final String USER_NOT_FOUND = "USER_NOT_FOUND";
+    public static final String USER_ROLE_NOT_FOUND = "USER_ROLE_NOT_FOUND";
+    public static final String USER_HAS_EXISTED = "USER_HAS_EXISTED";
+    public static final String ROLE_ADMIN = "ROLE_ADMIN";
+    public static final String TOPIC_CREATE_USER_ACCOUNT_MAIL = "TOPIC_CREATE_USER_ACCOUNT_MAIL";
     private Constants() {}
 }

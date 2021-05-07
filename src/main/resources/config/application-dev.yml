@@ -169,3 +169,8 @@ keycloak:
   realm: jhipster
   username: admin
   password: Pa55w0rd
+
+okta:
+  client-id: 0oalhgrpkTSLs0spA5d6
+  domain: https://dev-50654898.okta.com
+  api-token: 007EPnMkRqf9Bj90T8eN0kyHuza7aNebCK-4Iv4wou
