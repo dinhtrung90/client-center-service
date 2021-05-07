@@ -60,7 +60,7 @@ public class AccountService {
 
         User user = new User();
         user.setId(oktaUser.getId());
-        user.setLangKey(Constants.DEFAULT_LANGUAGE);
+        user.setLangKey(userDTO.getLangKey() != null ? userDTO.getLangKey() : Constants.DEFAULT_LANGUAGE);
         user.setLogin(userDTO.getEmail());
         user.setActivated(false);
         user.setFirstName(userDTO.getFirstName());
