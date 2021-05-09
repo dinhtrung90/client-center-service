@@ -3,6 +3,10 @@
 # In prod profile, properties will be overwritten by the ones defined in bootstrap-prod.yml
 # ===================================================================
 
+CLOUDKARAFKA_BROKERS: dory-01.srvs.cloudkafka.com:9094,dory-02.srvs.cloudkafka.com:9094,dory-03.srvs.cloudkafka.com:9094
+CLOUDKARAFKA_USERNAME: ztm7e2w2
+CLOUDKARAFKA_PASSWORD: FKYR1fJmXoCrJ6dY4vyCwNRdLU65Z4cD
+
 jhipster:
   registry:
     password: admin
