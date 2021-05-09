@@ -1,5 +1,6 @@
 package com.vts.clientcenter.kafka;
 
+import com.vts.clientcenter.config.KafkaProperties;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
@@ -17,17 +18,24 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
+import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 
 @Component
 public class KafkaSender<T> {
+
     private final Logger log = LoggerFactory.getLogger(KafkaSender.class);
 
-    @Autowired
-    @Qualifier(value = "defaultKafkaTemplate")
     private KafkaTemplate<String, T> kafkaTemplate;
 
+    @PostConstruct
+    void init() {
+        kafkaTemplate = defaultKafkaTemplate();
+    }
+
+    @Autowired
+    private KafkaProperties kafkaProperties;
 
     @Value("${kafka.bootstrap-servers}")
     private String bootstrapServers;
@@ -57,18 +65,18 @@ public class KafkaSender<T> {
         });
     }
 
-    @Bean
+
     public KafkaTemplate<String, T> defaultKafkaTemplate() {
-        return new KafkaTemplate<String, T>(producerFactory());
+        return new KafkaTemplate<>(producerFactory());
     }
 
     private ProducerFactory<String,T> producerFactory() {
-        return new DefaultKafkaProducerFactory<String, T>(producerObjectConfigs());
+        return new DefaultKafkaProducerFactory<>(producerObjectConfigs());
     }
 
     private Map<String, Object> producerObjectConfigs() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootStrapServers());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         return props;

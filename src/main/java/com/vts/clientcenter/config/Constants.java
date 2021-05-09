@@ -21,5 +21,9 @@ public final class Constants {
     public static final String USER_HAS_EXISTED = "USER_HAS_EXISTED";
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
     public static final String TOPIC_CREATE_USER_ACCOUNT_MAIL = "TOPIC_CREATE_USER_ACCOUNT_MAIL";
+    public static final String ROLE_NOT_MATCH = "ROLE_NOT_MATCH";
+    public static final String USER_CAN_NOT_CREATED = "USER_CAN_NOT_CREATED";
+    public static final String USER_VALIDATOR_ERR = "USER_VALIDATOR_ERR";
+
     private Constants() {}
 }

@@ -1,11 +1,10 @@
 package com.vts.clientcenter.service;
 
-import com.sun.xml.bind.v2.runtime.reflect.opt.Const;
 import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.domain.Authority;
 import com.vts.clientcenter.domain.User;
+import com.vts.clientcenter.events.UserCreatedEvent;
 import com.vts.clientcenter.helpers.PasswordGenerator;
-import com.vts.clientcenter.kafka.KafkaSender;
 import com.vts.clientcenter.repository.AuthorityRepository;
 import com.vts.clientcenter.repository.UserRepository;
 import com.vts.clientcenter.security.SecurityUtils;
@@ -14,11 +13,15 @@ import com.vts.clientcenter.service.dto.UserDTO;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import javax.security.auth.login.AccountNotFoundException;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -40,7 +43,7 @@ public class AccountService {
     private CacheManager cacheManager;
 
     @Autowired
-    private KafkaSender<UserDTO> kafkaSender;
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
     public UserDTO createUserAccount(UserDTO userDTO) throws Exception {
@@ -52,14 +55,11 @@ public class AccountService {
         }
 
         String password = PasswordGenerator.generateRandomPassword(8);
-
         com.okta.sdk.resource.user.User oktaUser = oktaService.createOktaAccount(userDTO, password);
 
         String login = SecurityUtils.getCurrentUserLogin().orElse("System");
 
-
         User user = new User();
-        user.setId(oktaUser.getId());
         user.setLangKey(userDTO.getLangKey() != null ? userDTO.getLangKey() : Constants.DEFAULT_LANGUAGE);
         user.setLogin(userDTO.getEmail());
         user.setActivated(false);
@@ -84,11 +84,19 @@ public class AccountService {
         }
         user.setAuthorities(new HashSet<>(authorities));
 
-        userRepository.save(user);
+        userDTO.setId(oktaUser.getId());
+        user.setId(oktaUser.getId());
 
-        userDTO.setId(user.getId());
+        Validator validator = buildValidator();
+        Set<ConstraintViolation<User>> constraintViolations = validator.validate(user);
 
-        kafkaSender.sendCustomMessage(userDTO, Constants.TOPIC_CREATE_USER_ACCOUNT_MAIL);
+        if (CollectionUtils.isEmpty(constraintViolations)) {
+            userRepository.save(user);
+            applicationEventPublisher.publishEvent(new UserCreatedEvent(user));
+        } else {
+            oktaService.removeAccount(userDTO.getId());
+            throw new BadRequestAlertException("User invalid", "UserValidator", Constants.USER_VALIDATOR_ERR);
+        }
 
         return userDTO;
     }
@@ -135,11 +143,20 @@ public class AccountService {
         }
         user.setAuthorities(new HashSet<>(authorities));
 
-        userRepository.save(user);
+        Validator validator = buildValidator();
+        Set<ConstraintViolation<User>> constraintViolations = validator.validate(user);
 
+        if (CollectionUtils.isEmpty(constraintViolations)) {
+            userRepository.save(user);
+        }
         this.clearUserCaches(user);
 
         return userDTO;
+    }
+
+    private Validator buildValidator() {
+        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
+        return validatorFactory.getValidator();
     }
 
     @Transactional

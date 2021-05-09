@@ -3,14 +3,24 @@ package com.vts.clientcenter.service;
 import com.okta.sdk.authc.credentials.TokenClientCredentials;
 import com.okta.sdk.client.Client;
 import com.okta.sdk.client.Clients;
+import com.okta.sdk.resource.group.Group;
+import com.okta.sdk.resource.group.GroupBuilder;
+import com.okta.sdk.resource.group.GroupList;
+import com.okta.sdk.resource.group.GroupProfile;
 import com.okta.sdk.resource.user.User;
 import com.okta.sdk.resource.user.UserBuilder;
+import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.config.OktaConfig;
 import com.vts.clientcenter.service.dto.UserDTO;
+import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
+import java.util.Set;
+import java.util.prefs.BackingStoreException;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -32,14 +42,35 @@ public class OktaService {
 
     public User createOktaAccount(UserDTO userDTO, String tempPassword) throws Exception {
 
-        return UserBuilder.instance()
+        GroupList groups = client.listGroups();
+
+        List<GroupProfile> groupProfiles = groups.stream().map(Group::getProfile).collect(Collectors.toList());
+
+        List<String> oktaRoles = groupProfiles.stream().map(GroupProfile::getName).collect(Collectors.toList());
+
+        boolean allMatch = oktaRoles.containsAll(userDTO.getAuthorities());
+
+        if (!allMatch) {
+            throw new BadRequestAlertException("Roles not match.", "Users", Constants.ROLE_NOT_MATCH);
+        }
+
+        Set<String> groupIds = groups.stream()
+            .filter( group -> userDTO.getAuthorities().contains(group.getProfile().getName()))
+            .map(Group::getId).collect(Collectors.toSet());
+
+        User user = UserBuilder.instance()
             .setEmail(userDTO.getEmail())
-            .setFirstName("Joe")
-            .setLastName("Coder")
+            .setFirstName(userDTO.getFirstName())
+            .setLastName(userDTO.getLastName())
             .setPassword(tempPassword.toCharArray())
-            .setGroups(userDTO.getAuthorities())
             .setActive(false)
             .buildAndCreate(client);
+
+        for (String groupId : groupIds) {
+            user.addToGroup(groupId);
+        }
+
+        return user;
     }
 
     public User updateAccount(UserDTO userDTO) throws Exception {
@@ -55,7 +86,15 @@ public class OktaService {
     public User activateAccount(UserDTO userDTO) throws Exception {
         User user = client.getUser(userDTO.getId());
         user.activate(true);
+
+
         return user;
+    }
+
+    public void removeAccount(String userId){
+        User user = client.getUser(userId);
+        user.deactivate();
+        user.delete();
     }
 
 }

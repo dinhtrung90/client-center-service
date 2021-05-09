@@ -1,6 +1,7 @@
 package com.vts.clientcenter.web.rest;
 
 import com.vts.clientcenter.config.Constants;
+import com.vts.clientcenter.security.AuthoritiesConstants;
 import com.vts.clientcenter.service.AccountService;
 import com.vts.clientcenter.service.dto.ActivatedPayload;
 import com.vts.clientcenter.service.dto.EmployerBrandDTO;
@@ -10,9 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 /**
  * REST controller for managing users.
@@ -54,7 +57,7 @@ public class AccountResource {
     }
 
     @RequestMapping(value = "/account/create", method = RequestMethod.POST)
-    @PreAuthorize(Constants.ROLE_ADMIN)
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     public ResponseEntity<UserDTO> createAccount(@Valid @RequestBody UserDTO dto) throws Exception {
         log.debug("REST request to create account : {}", dto);
         UserDTO userAccount = accountService.createUserAccount(dto);
@@ -62,7 +65,6 @@ public class AccountResource {
     }
 
     @RequestMapping(value = "/account/update", method = RequestMethod.PUT)
-    @PreAuthorize(Constants.ROLE_ADMIN)
     public ResponseEntity<UserDTO> updateAccount(@Valid @RequestBody UserDTO dto) throws Exception {
         log.debug("REST request to create account : {}", dto);
         UserDTO userAccount = accountService.updateAccount(dto);
@@ -70,18 +72,17 @@ public class AccountResource {
     }
 
     @RequestMapping(value = "/account/activate", method = RequestMethod.PUT)
-    @PreAuthorize(Constants.ROLE_ADMIN)
     public ResponseEntity<ActivatedPayload> activeAccount(@Valid @RequestBody UserDTO dto) throws Exception {
         log.debug("REST request to activate account : {}", dto);
         ActivatedPayload payload = accountService.activateAccount(dto);
         return ResponseEntity.ok(payload);
     }
 
-    @RequestMapping(value = "/account/activate", method = RequestMethod.GET)
-    @PreAuthorize(Constants.ROLE_ADMIN)
+    @RequestMapping(value = "/account", method = RequestMethod.GET)
     public ResponseEntity<UserDTO> getAccount(@RequestParam(name = "userId") String userId) {
         log.debug("REST request to get account : {}", userId);
         UserDTO payload = accountService.getAccount(userId);
         return ResponseEntity.ok(payload);
     }
+
 }

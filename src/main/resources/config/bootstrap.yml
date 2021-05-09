@@ -11,7 +11,7 @@ app:
   registry-url: vps-5785f290.vps.ovh.ca
   redis-url: redis.fingmeup.com
   redis-password: Pa55w0rd
-  kafka-url: vps-5785f290.vps.ovh.ca
+  kafka-url: 127.0.0.1
   mysql-url: vps-5785f290.vps.ovh.ca
 
 spring:
