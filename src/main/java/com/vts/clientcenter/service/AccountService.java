@@ -10,7 +10,18 @@ import com.vts.clientcenter.repository.UserRepository;
 import com.vts.clientcenter.security.SecurityUtils;
 import com.vts.clientcenter.service.dto.ActivatedPayload;
 import com.vts.clientcenter.service.dto.UserDTO;
+import com.vts.clientcenter.web.rest.AccountResource;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
+import io.github.jhipster.security.RandomUtil;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.ApplicationEventPublisher;
@@ -18,17 +29,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
-
 @Service
 @Transactional
 public class AccountService {
+    private final Logger log = LoggerFactory.getLogger(AccountService.class);
 
     @Autowired
     private OktaService oktaService;
@@ -47,7 +51,6 @@ public class AccountService {
 
     @Transactional
     public UserDTO createUserAccount(UserDTO userDTO) throws Exception {
-
         Optional<User> existingUser = userRepository.findOneByEmailIgnoreCase(userDTO.getEmail());
 
         if (existingUser.isPresent()) {
@@ -72,6 +75,7 @@ public class AccountService {
         user.setLastModifiedDate(Instant.now());
         user.setCreatedBy(login);
         user.setPhone(userDTO.getPhone());
+        user.setActivationKey(RandomUtil.generateResetKey());
 
         Collection<String> dbAuthorities = getAuthorities();
         List<Authority> authorities = new ArrayList<>();
@@ -160,32 +164,33 @@ public class AccountService {
     }
 
     @Transactional
-    public ActivatedPayload activateAccount(UserDTO userDTO) throws Exception {
+    public ActivatedPayload activateAccount(String key) throws Exception {
         String login = SecurityUtils.getCurrentUserLogin().orElse("System");
-        if (Objects.isNull(userDTO.getId())) {
+        if (Objects.isNull(key)) {
             throw new BadRequestAlertException("User Not Found", "USER", Constants.ID_NOT_NULL);
         }
-        com.okta.sdk.resource.user.User account = oktaService.activateAccount(userDTO);
 
-        Optional<User> existingUser = userRepository.findOneByLogin(userDTO.getLogin());
+        Optional<User> existingUser = userRepository.findOneByActivationKey(key);
 
-        User user = existingUser.orElseThrow( () -> new BadRequestAlertException("User not found", "User", Constants.USER_NOT_FOUND));
+        User user = existingUser.orElseThrow(() -> new BadRequestAlertException("User not found", "User", Constants.USER_NOT_FOUND));
+
+        this.clearUserCaches(user);
+
+        log.debug("Activated user: {}", user);
+
+        com.okta.sdk.resource.user.User account = oktaService.activateAccount(user.getId());
 
         user.setLastModifiedBy(login);
         user.setLastModifiedDate(Instant.now());
-        user.setActivated(account.getActivated() != null);
+        user.setActivationKey(null);
+        user.setActivated(true);
         userRepository.save(user);
         this.clearUserCaches(user);
 
-        return ActivatedPayload.builder()
-            .success(account.getActivated() != null)
-            .userId(account.getId())
-            .build();
-
+        return ActivatedPayload.builder().success(account.getActivated() != null).userId(account.getId()).build();
     }
 
     public UserDTO getAccount(String userId) {
-
         if (Objects.isNull(userId)) {
             throw new BadRequestAlertException("UserId can not be null.", "USER", Constants.ID_NOT_NULL);
         }
@@ -211,7 +216,7 @@ public class AccountService {
         userDTO.setLastModifiedBy(user.getLastModifiedBy());
         userDTO.setLastModifiedDate(user.getLastModifiedDate());
         userDTO.setCreatedDate(user.getCreatedDate());
-        return  userDTO;
+        return userDTO;
     }
 
     @Transactional(readOnly = true)

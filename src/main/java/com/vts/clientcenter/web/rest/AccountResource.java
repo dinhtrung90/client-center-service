@@ -6,6 +6,9 @@ import com.vts.clientcenter.service.AccountService;
 import com.vts.clientcenter.service.dto.ActivatedPayload;
 import com.vts.clientcenter.service.dto.EmployerBrandDTO;
 import com.vts.clientcenter.service.dto.UserDTO;
+import java.security.Principal;
+import java.util.Optional;
+import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,9 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.security.Principal;
 
 /**
  * REST controller for managing users.
@@ -49,7 +49,6 @@ public class AccountResource {
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
 
-
     private final AccountService accountService;
 
     public AccountResource(AccountService accountService) {
@@ -71,10 +70,10 @@ public class AccountResource {
         return ResponseEntity.ok(userAccount);
     }
 
-    @RequestMapping(value = "/account/activate", method = RequestMethod.PUT)
-    public ResponseEntity<ActivatedPayload> activeAccount(@Valid @RequestBody UserDTO dto) throws Exception {
-        log.debug("REST request to activate account : {}", dto);
-        ActivatedPayload payload = accountService.activateAccount(dto);
+    @RequestMapping(value = "/account/activate", method = RequestMethod.GET)
+    public ResponseEntity<ActivatedPayload> activeAccount(@RequestParam(value = "key") String key) throws Exception {
+        log.debug("REST request to activate account : {}", key);
+        ActivatedPayload payload = accountService.activateAccount(key);
         return ResponseEntity.ok(payload);
     }
 
@@ -84,5 +83,4 @@ public class AccountResource {
         UserDTO payload = accountService.getAccount(userId);
         return ResponseEntity.ok(payload);
     }
-
 }

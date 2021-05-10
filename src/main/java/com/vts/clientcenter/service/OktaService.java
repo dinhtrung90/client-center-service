@@ -13,35 +13,33 @@ import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.config.OktaConfig;
 import com.vts.clientcenter.service.dto.UserDTO;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Set;
 import java.util.prefs.BackingStoreException;
 import java.util.stream.Collectors;
-
+import javax.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class OktaService {
-
     @Autowired
     private OktaConfig oktaConfig;
 
     private Client client;
 
     @PostConstruct
-    void init(){
-        client = Clients.builder()
-            .setClientId(oktaConfig.getClientId())
-            .setOrgUrl(oktaConfig.getDomain())
-            .setClientCredentials(new TokenClientCredentials(oktaConfig.getApiToken()))
-            .build();
+    void init() {
+        client =
+            Clients
+                .builder()
+                .setClientId(oktaConfig.getClientId())
+                .setOrgUrl(oktaConfig.getDomain())
+                .setClientCredentials(new TokenClientCredentials(oktaConfig.getApiToken()))
+                .build();
     }
 
     public User createOktaAccount(UserDTO userDTO, String tempPassword) throws Exception {
-
         GroupList groups = client.listGroups();
 
         List<GroupProfile> groupProfiles = groups.stream().map(Group::getProfile).collect(Collectors.toList());
@@ -54,11 +52,14 @@ public class OktaService {
             throw new BadRequestAlertException("Roles not match.", "Users", Constants.ROLE_NOT_MATCH);
         }
 
-        Set<String> groupIds = groups.stream()
-            .filter( group -> userDTO.getAuthorities().contains(group.getProfile().getName()))
-            .map(Group::getId).collect(Collectors.toSet());
+        Set<String> groupIds = groups
+            .stream()
+            .filter(group -> userDTO.getAuthorities().contains(group.getProfile().getName()))
+            .map(Group::getId)
+            .collect(Collectors.toSet());
 
-        User user = UserBuilder.instance()
+        User user = UserBuilder
+            .instance()
             .setEmail(userDTO.getEmail())
             .setFirstName(userDTO.getFirstName())
             .setLastName(userDTO.getLastName())
@@ -82,19 +83,15 @@ public class OktaService {
         return user;
     }
 
-
-    public User activateAccount(UserDTO userDTO) throws Exception {
-        User user = client.getUser(userDTO.getId());
-        user.activate(true);
-
-
-        return user;
+    public User activateAccount(String userId) throws Exception {
+        User userDb = client.getUser(userId);
+        userDb.activate(true);
+        return userDb;
     }
 
-    public void removeAccount(String userId){
+    public void removeAccount(String userId) {
         User user = client.getUser(userId);
         user.deactivate();
         user.delete();
     }
-
 }

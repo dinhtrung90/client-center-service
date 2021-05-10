@@ -28,4 +28,6 @@ public interface UserRepository extends JpaRepository<User, String> {
     Page<User> findAllByLoginNot(Pageable pageable, String login);
 
     Optional<User> findOneByEmailIgnoreCase(String email);
+
+    Optional<User> findOneByActivationKey(String key);
 }
