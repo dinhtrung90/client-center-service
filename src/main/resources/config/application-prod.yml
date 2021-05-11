@@ -72,6 +72,10 @@ spring:
     locator:
       discovery:
         enabled: true
+  profiles:
+    include:
+      - no-liquibase
+    active: prod
 
 # ===================================================================
 # To enable TLS in production, generate a certificate using:

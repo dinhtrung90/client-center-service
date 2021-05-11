@@ -3,9 +3,7 @@
 # In prod profile, properties will be overwritten by the ones defined in bootstrap-prod.yml
 # ===================================================================
 
-CLOUDKARAFKA_BROKERS: dory-01.srvs.cloudkafka.com:9094,dory-02.srvs.cloudkafka.com:9094,dory-03.srvs.cloudkafka.com:9094
-CLOUDKARAFKA_USERNAME: ztm7e2w2
-CLOUDKARAFKA_PASSWORD: FKYR1fJmXoCrJ6dY4vyCwNRdLU65Z4cD
+#CLOUDKARAFKA_BROKERS: dory-01.srvs.cloudkafka.com:9094,dory-02.srvs.cloudkafka.com:9094,dory-03.srvs.cloudkafka.com:9094
 
 jhipster:
   registry:
@@ -15,7 +13,8 @@ app:
   registry-url: vps-5785f290.vps.ovh.ca
   redis-url: redis.fingmeup.com
   redis-password: Pa55w0rd
-  kafka-url: 127.0.0.1
+  kafka-brokers: fingmeup.com:9092
+  Kafka-prefix: elend
   mysql-url: vps-5785f290.vps.ovh.ca
 
 spring:

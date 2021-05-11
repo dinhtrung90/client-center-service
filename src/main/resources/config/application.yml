@@ -106,26 +106,26 @@ management:
 
 spring:
   kafka:
-    bootstrap-servers: ${CLOUDKARAFKA_BROKERS}
+    bootstrap-servers: ${app.kafka-brokers}
     consumer:
       auto-offset-reset: latest
-      group-id: ${CLOUDKARAFKA_USERNAME}-consumers
+      group-id: ${app.kafka-prefix}-consumers
       properties:
         spring:
           json:
             trusted:
               packages: com.vts.clientcenter
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
     producer:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-    properties:
-      sasl:
-        jaas:
-          config: org.apache.kafka.common.security.scram.ScramLoginModule
-            required username="${CLOUDKARAFKA_USERNAME}" password="${CLOUDKARAFKA_PASSWORD}";
-        mechanism: SCRAM-SHA-256
-      security:
-        protocol: SASL_SSL
+  #    properties:
+  #      sasl:
+  #        jaas:
+  #          config: org.apache.kafka.common.security.scram.ScramLoginModule
+  #            required username="${CLOUDKARAFKA_USERNAME}" password="${CLOUDKARAFKA_PASSWORD}";
+  #        mechanism: SCRAM-SHA-256
+  #      security:
+  #        protocol: SASL_SSL
 
   autoconfigure:
     exclude: org.springframework.boot.actuate.autoconfigure.metrics.jdbc.DataSourcePoolMetricsAutoConfiguration
@@ -261,5 +261,5 @@ jhipster:
 
 # application
 cloudkarafka:
-  topic: ${CLOUDKARAFKA_USERNAME}-default
-  email-invitation: ${CLOUDKARAFKA_USERNAME}-email-invitations-topic
+  topic: ${app.kafka-prefix}-default
+  email-invitation: ${app.kafka-prefix}-email-invitations-topic
