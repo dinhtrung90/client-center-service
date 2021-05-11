@@ -7,6 +7,7 @@ import com.vts.clientcenter.security.SecurityUtils;
 import com.vts.clientcenter.service.EmployerExtensionService;
 import com.vts.clientcenter.service.dto.EmployerDTO;
 import com.vts.clientcenter.service.mapper.EmployerMapper;
+import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,6 +30,8 @@ public class EmployerExtensionServiceImpl implements EmployerExtensionService {
 
     private final EmployerMapper employerMapper;
 
+    private final String ENTITY_NAME = "Employer";
+
     public EmployerExtensionServiceImpl(EmployerRepository employerRepository, EmployerMapper employerMapper) {
         this.employerRepository = employerRepository;
         this.employerMapper = employerMapper;
@@ -43,6 +46,12 @@ public class EmployerExtensionServiceImpl implements EmployerExtensionService {
     @Override
     public EmployerDTO save(EmployerDTO employerDTO) {
         log.debug("Request to save Employer : {}", employerDTO);
+
+        Optional<Employer> employerOptional = employerRepository.getByName(employerDTO.getName());
+
+        if (employerOptional.isPresent()) {
+            throw new BadRequestAlertException("Name employer has existed.", ENTITY_NAME, Constants.NAME_EMPLOYER_EXISTED);
+        }
 
         Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
         employerDTO.setEmployerKey(UUID.randomUUID().toString());

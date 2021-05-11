@@ -228,6 +228,7 @@ CREATE TABLE `jhi_user` (
                             `first_name` varchar(50) DEFAULT NULL,
                             `last_name` varchar(50) DEFAULT NULL,
                             `email` varchar(191) DEFAULT NULL,
+                            `phone` varchar(191) DEFAULT NULL,
                             `image_url` varchar(256) DEFAULT NULL,
                             `activated` bit(1) NOT NULL,
                             `lang_key` varchar(10) DEFAULT NULL,
@@ -301,5 +302,3 @@ FROM
     ) AS tmp
 WHERE
     NOT EXISTS (SELECT * FROM BATCH_JOB_SEQ);
-
-
