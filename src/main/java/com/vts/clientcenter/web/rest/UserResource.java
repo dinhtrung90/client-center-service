@@ -4,10 +4,9 @@ import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.security.AuthoritiesConstants;
 import com.vts.clientcenter.service.UserService;
 import com.vts.clientcenter.service.dto.UserDTO;
-import io.github.jhipster.web.util.HeaderUtil;
+import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import io.github.jhipster.web.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
-import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,8 +16,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.security.Principal;
+import java.util.List;
 
 /**
  * REST controller for managing users.
@@ -91,5 +94,15 @@ public class UserResource {
     public ResponseEntity<UserDTO> getUser(@PathVariable String login) {
         log.debug("REST request to get User : {}", login);
         return ResponseUtil.wrapOrNotFound(userService.getUserWithAuthoritiesByLogin(login).map(UserDTO::new));
+    }
+
+    // API sync account from Okta into db
+    @PostMapping("/users/sync")
+    public UserDTO getAccount(Principal principal) {
+        if (principal instanceof AbstractAuthenticationToken) {
+            return userService.getUserFromAuthentication((AbstractAuthenticationToken) principal);
+        } else {
+            throw new BadRequestAlertException("User is not able to sync.", "Users", Constants.USER_NOT_FOUND);
+        }
     }
 }

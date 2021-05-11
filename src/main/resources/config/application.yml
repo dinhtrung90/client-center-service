@@ -105,6 +105,28 @@ management:
             enabled: true
 
 spring:
+  kafka:
+    bootstrap-servers: ${app.kafka-brokers}
+    consumer:
+      auto-offset-reset: latest
+      group-id: ${app.kafka-prefix}-consumers
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: com.vts.clientcenter
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  #    properties:
+  #      sasl:
+  #        jaas:
+  #          config: org.apache.kafka.common.security.scram.ScramLoginModule
+  #            required username="${CLOUDKARAFKA_USERNAME}" password="${CLOUDKARAFKA_PASSWORD}";
+  #        mechanism: SCRAM-SHA-256
+  #      security:
+  #        protocol: SASL_SSL
+
   autoconfigure:
     exclude: org.springframework.boot.actuate.autoconfigure.metrics.jdbc.DataSourcePoolMetricsAutoConfiguration
   application:
@@ -217,16 +239,17 @@ jhipster:
         - account
         - api://default
         - 0oalhgrpkTSLs0spA5d6
-kafka:
-  bootstrap-servers: ${app.kafka-url}:9092
-  consumer:
-    key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    value.deserializer: org.springframework.kafka.support.serializer.JsonSerializer
-    group.id: tvsales-message-groups
-    auto.offset.reset: earliest
-  producer:
-    key.serializer: org.apache.kafka.common.serialization.StringSerializer
-    value.serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#kafka:
+#  bootstrap-servers: ${app.kafka-url}:9092
+#  consumer:
+#    key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#    value.deserializer: org.springframework.kafka.support.serializer.JsonSerializer
+#    group.id: tvsales-message-groups
+#    auto.offset.reset: earliest
+#  producer:
+#    key.serializer: org.apache.kafka.common.serialization.StringSerializer
+#    value.serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
 # ===================================================================
 # Application specific properties
 # Add your own application properties here, see the ApplicationProperties class
@@ -236,4 +259,7 @@ kafka:
 # https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
-# application:
+# application
+cloudkarafka:
+  topic: ${app.kafka-prefix}-default
+  email-invitation: ${app.kafka-prefix}-email-invitations-topic

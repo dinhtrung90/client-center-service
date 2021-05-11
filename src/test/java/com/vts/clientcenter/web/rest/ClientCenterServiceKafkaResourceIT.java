@@ -55,10 +55,9 @@ class ClientCenterServiceKafkaResourceIT {
         Map<String, String> consumerProps = getConsumerProps("default-group");
         consumerProps.put("client.id", "default-client");
         kafkaProperties.setConsumer(consumerProps);
+        //        ClientCenterServiceKafkaResource kafkaResource = new ClientCenterServiceKafkaResource(kafkaProperties);
 
-        ClientCenterServiceKafkaResource kafkaResource = new ClientCenterServiceKafkaResource(kafkaProperties);
-
-        restMockMvc = MockMvcBuilders.standaloneSetup(kafkaResource).build();
+        //        restMockMvc = MockMvcBuilders.standaloneSetup(kafkaResource).build();
     }
 
     @Test

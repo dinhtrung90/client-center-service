@@ -29,6 +29,9 @@ public class UserDTO {
     @Size(min = 5, max = 254)
     private String email;
 
+    @Size(max = 50)
+    private String phone;
+
     @Size(max = 256)
     private String imageUrl;
 
@@ -65,6 +68,7 @@ public class UserDTO {
         this.lastModifiedBy = user.getLastModifiedBy();
         this.lastModifiedDate = user.getLastModifiedDate();
         this.authorities = user.getAuthorities().stream().map(Authority::getName).collect(Collectors.toSet());
+        this.phone = user.getPhone();
     }
 
     public String getId() {
@@ -171,6 +175,14 @@ public class UserDTO {
         this.authorities = authorities;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
     // prettier-ignore
     @Override
     public String toString() {
@@ -187,6 +199,7 @@ public class UserDTO {
             ", lastModifiedBy='" + lastModifiedBy + '\'' +
             ", lastModifiedDate=" + lastModifiedDate +
             ", authorities=" + authorities +
+            ", phone=" + phone +
             "}";
     }
 }

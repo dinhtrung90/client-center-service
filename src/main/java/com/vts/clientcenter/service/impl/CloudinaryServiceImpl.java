@@ -2,11 +2,12 @@ package com.vts.clientcenter.service.impl;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.vts.clientcenter.helpers.JsonHelper;
 import com.vts.clientcenter.service.CloudinaryService;
 import com.vts.clientcenter.service.dto.UploadFileResponse;
-import com.vts.clientcenter.web.rest.ClientCenterServiceKafkaResource;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
+import java.io.File;
+import java.util.Map;
+import javax.annotation.PostConstruct;
 import org.apache.commons.io.FileUtils;
 import org.cloudinary.json.JSONObject;
 import org.slf4j.Logger;
@@ -14,17 +15,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.cloudfoundry.com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.annotation.PostConstruct;
-import java.io.File;
-import java.util.Map;
 
 @Component
 public class CloudinaryServiceImpl implements CloudinaryService {
-
     private final Logger log = LoggerFactory.getLogger(CloudinaryServiceImpl.class);
-
 
     private Cloudinary cloudinary;
 
@@ -39,14 +33,10 @@ public class CloudinaryServiceImpl implements CloudinaryService {
 
     private ObjectMapper objectMapper;
 
-
     @PostConstruct
     public void initialize() {
         log.info("initialize cloudinary");
-        Map options = ObjectUtils.asMap(
-            "cloud_name", cloudName,
-            "api_key", apiKey,
-            "api_secret", apiSecret);
+        Map options = ObjectUtils.asMap("cloud_name", cloudName, "api_key", apiKey, "api_secret", apiSecret);
 
         this.cloudinary = new Cloudinary(options);
     }
@@ -61,13 +51,12 @@ public class CloudinaryServiceImpl implements CloudinaryService {
             } catch (Exception e) {
                 log.error("Invalid JSON: {}", jsonObject);
                 FileUtils.deleteQuietly(file);
-                throw  new BadRequestAlertException( e.getMessage(), "JSON", "ERROR_PARSE_JSON");
+                throw new BadRequestAlertException(e.getMessage(), "JSON", "ERROR_PARSE_JSON");
             }
         } catch (Exception e) {
             log.error("upload file with error: {}", e.getMessage());
             FileUtils.deleteQuietly(file);
-            throw  new BadRequestAlertException( e.getMessage(), "CLOUDINARY_UPLOADS", "ERROR_UPLOAD_FILE");
+            throw new BadRequestAlertException(e.getMessage(), "CLOUDINARY_UPLOADS", "ERROR_UPLOAD_FILE");
         }
-
     }
 }
