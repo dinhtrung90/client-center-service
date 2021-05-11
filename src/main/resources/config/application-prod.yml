@@ -146,3 +146,26 @@ jhipster:
 # ===================================================================
 
 # application:
+server-uploads:
+  cloudinary:
+    cloudinary_url: cloudinary://868559836586836:x7ha43lE_-vTt2AHxNmt8yphHmw@tvsales
+    cloud_name: tvsales
+    api_key: 868559836586836
+    api_secret: x7ha43lE_-vTt2AHxNmt8yphHmw
+  firebase:
+    bucket-name: tvsales-fa493.appspot.com
+    bucket-url: tvsales-fa493.appspot.com
+    image-url: https://storage.googleapis.com
+    project-id: tvsales-fa493
+    config-file: tvsales-config-admin.json
+keycloak:
+  server-url: https://auth.fingmeup.com
+  client-id: web_app
+  realm: jhipster
+  username: admin
+  password: Pa55w0rd
+
+okta:
+  client-id: 0oalhgrpkTSLs0spA5d6
+  domain: https://dev-50654898.okta.com
+  api-token: 007EPnMkRqf9Bj90T8eN0kyHuza7aNebCK-4Iv4wou
