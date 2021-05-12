@@ -91,6 +91,9 @@ public class CacheConfiguration {
             createCache(cm, com.vts.clientcenter.domain.EmployerBrand.class.getName(), jcacheConfiguration);
             createCache(cm, com.vts.clientcenter.domain.Employer.class.getName() + ".employees", jcacheConfiguration);
             createCache(cm, com.vts.clientcenter.domain.Employer.class.getName() + ".employerBrands", jcacheConfiguration);
+            createCache(cm, com.vts.clientcenter.domain.Permission.class.getName(), jcacheConfiguration);
+            createCache(cm, com.vts.clientcenter.domain.RolePermission.class.getName(), jcacheConfiguration);
+            createCache(cm, com.vts.clientcenter.domain.Authority.class.getName() + ".permissions", jcacheConfiguration);
             // jhipster-needle-redis-add-entry
         };
     }

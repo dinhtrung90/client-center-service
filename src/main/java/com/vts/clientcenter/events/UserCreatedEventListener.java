@@ -1,7 +1,9 @@
 package com.vts.clientcenter.events;
 
-import com.vts.clientcenter.kafka.Producer;
+import com.vts.clientcenter.domain.User;
+import com.vts.clientcenter.kafka.KafkaSender;
 import com.vts.clientcenter.service.OktaService;
+import com.vts.clientcenter.service.dto.UserDTO;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +18,7 @@ public class UserCreatedEventListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserCreatedEventListener.class);
 
     @Autowired
-    private Producer kafkaSender;
+    private KafkaSender<User> kafkaSender;
 
     @Autowired
     private OktaService oktaService;
@@ -28,7 +30,7 @@ public class UserCreatedEventListener {
     public void processUserCreatedEvent(UserCreatedEvent event) {
         LOGGER.info("Event received: " + event);
         if (Objects.nonNull(event.getUser())) {
-            kafkaSender.sendMessage(event.getUser(), emailTopic);
+            kafkaSender.sendMessageWithCallback(event.getUser(), emailTopic);
         }
     }
 

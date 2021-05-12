@@ -1,7 +1,6 @@
 package com.vts.clientcenter;
 
 import com.vts.clientcenter.config.ApplicationProperties;
-import com.vts.clientcenter.kafka.Producer;
 import io.github.jhipster.config.DefaultProfileUtil;
 import io.github.jhipster.config.JHipsterConstants;
 import java.net.InetAddress;
@@ -31,9 +30,6 @@ public class ClientCenterServiceApp {
     private static final Logger log = LoggerFactory.getLogger(ClientCenterServiceApp.class);
 
     private final Environment env;
-
-    @Autowired
-    private static Producer producer;
 
     public ClientCenterServiceApp(Environment env) {
         this.env = env;
