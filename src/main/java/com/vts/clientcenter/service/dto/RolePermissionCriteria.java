@@ -28,15 +28,7 @@ public class RolePermissionCriteria implements Serializable, Criteria {
 
     private StringFilter roleName;
 
-    private StringFilter permission_id;
-
-    private BooleanFilter enableCreate;
-
-    private BooleanFilter enableUpdate;
-
-    private BooleanFilter enableRead;
-
-    private BooleanFilter enableDelete;
+    private LongFilter permissionId;
 
     private InstantFilter createdDate;
 
@@ -51,11 +43,7 @@ public class RolePermissionCriteria implements Serializable, Criteria {
     public RolePermissionCriteria(RolePermissionCriteria other) {
         this.id = other.id == null ? null : other.id.copy();
         this.roleName = other.roleName == null ? null : other.roleName.copy();
-        this.permission_id = other.permission_id == null ? null : other.permission_id.copy();
-        this.enableCreate = other.enableCreate == null ? null : other.enableCreate.copy();
-        this.enableUpdate = other.enableUpdate == null ? null : other.enableUpdate.copy();
-        this.enableRead = other.enableRead == null ? null : other.enableRead.copy();
-        this.enableDelete = other.enableDelete == null ? null : other.enableDelete.copy();
+        this.permissionId = other.permissionId == null ? null : other.permissionId.copy();
         this.createdDate = other.createdDate == null ? null : other.createdDate.copy();
         this.lastModifiedDate = other.lastModifiedDate == null ? null : other.lastModifiedDate.copy();
         this.createdBy = other.createdBy == null ? null : other.createdBy.copy();
@@ -83,44 +71,12 @@ public class RolePermissionCriteria implements Serializable, Criteria {
         this.roleName = roleName;
     }
 
-    public StringFilter getPermission_id() {
-        return permission_id;
+    public LongFilter getPermissionId() {
+        return permissionId;
     }
 
-    public void setPermission_id(StringFilter permission_id) {
-        this.permission_id = permission_id;
-    }
-
-    public BooleanFilter getEnableCreate() {
-        return enableCreate;
-    }
-
-    public void setEnableCreate(BooleanFilter enableCreate) {
-        this.enableCreate = enableCreate;
-    }
-
-    public BooleanFilter getEnableUpdate() {
-        return enableUpdate;
-    }
-
-    public void setEnableUpdate(BooleanFilter enableUpdate) {
-        this.enableUpdate = enableUpdate;
-    }
-
-    public BooleanFilter getEnableRead() {
-        return enableRead;
-    }
-
-    public void setEnableRead(BooleanFilter enableRead) {
-        this.enableRead = enableRead;
-    }
-
-    public BooleanFilter getEnableDelete() {
-        return enableDelete;
-    }
-
-    public void setEnableDelete(BooleanFilter enableDelete) {
-        this.enableDelete = enableDelete;
+    public void setPermissionId(LongFilter permissionId) {
+        this.permissionId = permissionId;
     }
 
     public InstantFilter getCreatedDate() {
@@ -167,11 +123,7 @@ public class RolePermissionCriteria implements Serializable, Criteria {
         return (
             Objects.equals(id, that.id) &&
             Objects.equals(roleName, that.roleName) &&
-            Objects.equals(permission_id, that.permission_id) &&
-            Objects.equals(enableCreate, that.enableCreate) &&
-            Objects.equals(enableUpdate, that.enableUpdate) &&
-            Objects.equals(enableRead, that.enableRead) &&
-            Objects.equals(enableDelete, that.enableDelete) &&
+            Objects.equals(permissionId, that.permissionId) &&
             Objects.equals(createdDate, that.createdDate) &&
             Objects.equals(lastModifiedDate, that.lastModifiedDate) &&
             Objects.equals(createdBy, that.createdBy) &&
@@ -181,19 +133,7 @@ public class RolePermissionCriteria implements Serializable, Criteria {
 
     @Override
     public int hashCode() {
-        return Objects.hash(
-            id,
-            roleName,
-            permission_id,
-            enableCreate,
-            enableUpdate,
-            enableRead,
-            enableDelete,
-            createdDate,
-            lastModifiedDate,
-            createdBy,
-            lastModifiedBy
-        );
+        return Objects.hash(id, roleName, permissionId, createdDate, lastModifiedDate, createdBy, lastModifiedBy);
     }
 
     // prettier-ignore
@@ -202,11 +142,7 @@ public class RolePermissionCriteria implements Serializable, Criteria {
         return "RolePermissionCriteria{" +
                 (id != null ? "id=" + id + ", " : "") +
                 (roleName != null ? "roleName=" + roleName + ", " : "") +
-                (permission_id != null ? "permission_id=" + permission_id + ", " : "") +
-                (enableCreate != null ? "enableCreate=" + enableCreate + ", " : "") +
-                (enableUpdate != null ? "enableUpdate=" + enableUpdate + ", " : "") +
-                (enableRead != null ? "enableRead=" + enableRead + ", " : "") +
-                (enableDelete != null ? "enableDelete=" + enableDelete + ", " : "") +
+                (permissionId != null ? "permissionId=" + permissionId + ", " : "") +
                 (createdDate != null ? "createdDate=" + createdDate + ", " : "") +
                 (lastModifiedDate != null ? "lastModifiedDate=" + lastModifiedDate + ", " : "") +
                 (createdBy != null ? "createdBy=" + createdBy + ", " : "") +

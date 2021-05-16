@@ -20,10 +20,6 @@ import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.info.GitProperties;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.KeyGenerator;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.client.serviceregistry.Registration;
-import org.springframework.context.annotation.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -94,6 +90,9 @@ public class CacheConfiguration {
             createCache(cm, com.vts.clientcenter.domain.Permission.class.getName(), jcacheConfiguration);
             createCache(cm, com.vts.clientcenter.domain.RolePermission.class.getName(), jcacheConfiguration);
             createCache(cm, com.vts.clientcenter.domain.Authority.class.getName() + ".permissions", jcacheConfiguration);
+            createCache(cm, com.vts.clientcenter.domain.RolePermission.class.getName() + ".permissionActions", jcacheConfiguration);
+            createCache(cm, com.vts.clientcenter.domain.ModuleOperation.class.getName(), jcacheConfiguration);
+            createCache(cm, com.vts.clientcenter.domain.PermissionOperation.class.getName(), jcacheConfiguration);
             // jhipster-needle-redis-add-entry
         };
     }

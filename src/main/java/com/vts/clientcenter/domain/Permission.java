@@ -2,7 +2,6 @@ package com.vts.clientcenter.domain;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.Set;
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import org.hibernate.annotations.Cache;
@@ -12,7 +11,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  * A Permission.
  */
 @Entity
-@Table(name = "tv_permission")
+@Table(name = "permission")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Permission implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -36,9 +35,6 @@ public class Permission implements Serializable {
 
     @Column(name = "last_modified_by")
     private String lastModifiedBy;
-
-    @ManyToMany(mappedBy = "permissions")
-    private Set<Authority> authorities;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
@@ -115,14 +111,6 @@ public class Permission implements Serializable {
     }
 
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
-
-    public Set<Authority> getAuthorities() {
-        return authorities;
-    }
-
-    public void setAuthorities(Set<Authority> authorities) {
-        this.authorities = authorities;
-    }
 
     @Override
     public boolean equals(Object o) {

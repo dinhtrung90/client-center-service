@@ -88,20 +88,8 @@ public class RolePermissionQueryService extends QueryService<RolePermission> {
             if (criteria.getRoleName() != null) {
                 specification = specification.and(buildStringSpecification(criteria.getRoleName(), RolePermission_.roleName));
             }
-            if (criteria.getPermission_id() != null) {
-                specification = specification.and(buildStringSpecification(criteria.getPermission_id(), RolePermission_.permission_id));
-            }
-            if (criteria.getEnableCreate() != null) {
-                specification = specification.and(buildSpecification(criteria.getEnableCreate(), RolePermission_.enableCreate));
-            }
-            if (criteria.getEnableUpdate() != null) {
-                specification = specification.and(buildSpecification(criteria.getEnableUpdate(), RolePermission_.enableUpdate));
-            }
-            if (criteria.getEnableRead() != null) {
-                specification = specification.and(buildSpecification(criteria.getEnableRead(), RolePermission_.enableRead));
-            }
-            if (criteria.getEnableDelete() != null) {
-                specification = specification.and(buildSpecification(criteria.getEnableDelete(), RolePermission_.enableDelete));
+            if (criteria.getPermissionId() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getPermissionId(), RolePermission_.permissionId));
             }
             if (criteria.getCreatedDate() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getCreatedDate(), RolePermission_.createdDate));

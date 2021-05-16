@@ -24,11 +24,15 @@
     <include file="config/liquibase/changelog/20210512130131_added_entity_Permission.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210512130448_added_entity_RolePermission.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210512133838_added_entity_Authority.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20210513073710_added_entity_PermissionAction.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20210513141942_added_entity_ModuleOperation.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20210513145117_added_entity_PermissionOperation.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <include file="config/liquibase/changelog/20210419071900_added_entity_constraints_EmployerDepartment.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210111071536_added_entity_constraints_Employee.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210419073848_added_entity_constraints_EmployerBrand.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210512133838_added_entity_constraints_Authority.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20210513073710_added_entity_constraints_PermissionAction.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
     <!-- jhipster-needle-liquibase-add-incremental-changelog - JHipster will add incremental liquibase changelogs here -->
 </databaseChangeLog>

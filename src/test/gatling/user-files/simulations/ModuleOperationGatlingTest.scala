@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory
 import scala.concurrent.duration._
 
 /**
- * Performance test for the RolePermission entity.
+ * Performance test for the ModuleOperation entity.
  */
-class RolePermissionGatlingTest extends Simulation {
+class ModuleOperationGatlingTest extends Simulation {
 
     val context: LoggerContext = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
     // Log all HTTP requests
@@ -45,7 +45,7 @@ class RolePermissionGatlingTest extends Simulation {
         "Upgrade-Insecure-Requests" -> "1"
     )
 
-    val scn = scenario("Test the RolePermission entity")
+    val scn = scenario("Test the ModuleOperation entity")
         .exec(http("First unauthenticated request")
         .get("/api/account")
         .headers(headers_http)
@@ -91,34 +91,29 @@ class RolePermissionGatlingTest extends Simulation {
         .check(status.is(200)))
         .pause(10)
         .repeat(2) {
-            exec(http("Get all rolePermissions")
-            .get("/services/clientcenterservice/api/role-permissions")
+            exec(http("Get all moduleOperations")
+            .get("/services/clientcenterservice/api/module-operations")
             .headers(headers_http_authenticated)
             .check(status.is(200)))
             .pause(10 seconds, 20 seconds)
-            .exec(http("Create new rolePermission")
-            .post("/services/clientcenterservice/api/role-permissions")
+            .exec(http("Create new moduleOperation")
+            .post("/services/clientcenterservice/api/module-operations")
             .headers(headers_http_authenticated)
             .body(StringBody("""{
                 "id":null
-                , "roleName":"SAMPLE_TEXT"
-                , "permissionId":null
-                , "createdDate":"2020-01-01T00:00:00.000Z"
-                , "lastModifiedDate":"2020-01-01T00:00:00.000Z"
-                , "createdBy":"SAMPLE_TEXT"
-                , "lastModifiedBy":"SAMPLE_TEXT"
+                , "name":"CREATE"
                 }""")).asJson
             .check(status.is(201))
-            .check(headerRegex("Location", "(.*)").saveAs("new_rolePermission_url"))).exitHereIfFailed
+            .check(headerRegex("Location", "(.*)").saveAs("new_moduleOperation_url"))).exitHereIfFailed
             .pause(10)
             .repeat(5) {
-                exec(http("Get created rolePermission")
-                .get("/services/clientcenterservice${new_rolePermission_url}")
+                exec(http("Get created moduleOperation")
+                .get("/services/clientcenterservice${new_moduleOperation_url}")
                 .headers(headers_http_authenticated))
                 .pause(10)
             }
-            .exec(http("Delete created rolePermission")
-            .delete("/services/clientcenterservice${new_rolePermission_url}")
+            .exec(http("Delete created moduleOperation")
+            .delete("/services/clientcenterservice${new_moduleOperation_url}")
             .headers(headers_http_authenticated))
             .pause(10)
         }

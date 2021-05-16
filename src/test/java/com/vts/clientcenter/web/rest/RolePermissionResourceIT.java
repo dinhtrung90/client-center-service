@@ -44,20 +44,9 @@ public class RolePermissionResourceIT {
     private static final String DEFAULT_ROLE_NAME = "AAAAAAAAAA";
     private static final String UPDATED_ROLE_NAME = "BBBBBBBBBB";
 
-    private static final String DEFAULT_PERMISSION_ID = "AAAAAAAAAA";
-    private static final String UPDATED_PERMISSION_ID = "BBBBBBBBBB";
-
-    private static final Boolean DEFAULT_ENABLE_CREATE = false;
-    private static final Boolean UPDATED_ENABLE_CREATE = true;
-
-    private static final Boolean DEFAULT_ENABLE_UPDATE = false;
-    private static final Boolean UPDATED_ENABLE_UPDATE = true;
-
-    private static final Boolean DEFAULT_ENABLE_READ = false;
-    private static final Boolean UPDATED_ENABLE_READ = true;
-
-    private static final Boolean DEFAULT_ENABLE_DELETE = false;
-    private static final Boolean UPDATED_ENABLE_DELETE = true;
+    private static final Long DEFAULT_PERMISSION_ID = 1L;
+    private static final Long UPDATED_PERMISSION_ID = 2L;
+    private static final Long SMALLER_PERMISSION_ID = 1L - 1L;
 
     private static final Instant DEFAULT_CREATED_DATE = Instant.ofEpochMilli(0L);
     private static final Instant UPDATED_CREATED_DATE = Instant.now().truncatedTo(ChronoUnit.MILLIS);
@@ -100,11 +89,7 @@ public class RolePermissionResourceIT {
     public static RolePermission createEntity(EntityManager em) {
         RolePermission rolePermission = new RolePermission()
             .roleName(DEFAULT_ROLE_NAME)
-            .permission_id(DEFAULT_PERMISSION_ID)
-            .enableCreate(DEFAULT_ENABLE_CREATE)
-            .enableUpdate(DEFAULT_ENABLE_UPDATE)
-            .enableRead(DEFAULT_ENABLE_READ)
-            .enableDelete(DEFAULT_ENABLE_DELETE)
+            .permissionId(DEFAULT_PERMISSION_ID)
             .createdDate(DEFAULT_CREATED_DATE)
             .lastModifiedDate(DEFAULT_LAST_MODIFIED_DATE)
             .createdBy(DEFAULT_CREATED_BY)
@@ -121,11 +106,7 @@ public class RolePermissionResourceIT {
     public static RolePermission createUpdatedEntity(EntityManager em) {
         RolePermission rolePermission = new RolePermission()
             .roleName(UPDATED_ROLE_NAME)
-            .permission_id(UPDATED_PERMISSION_ID)
-            .enableCreate(UPDATED_ENABLE_CREATE)
-            .enableUpdate(UPDATED_ENABLE_UPDATE)
-            .enableRead(UPDATED_ENABLE_READ)
-            .enableDelete(UPDATED_ENABLE_DELETE)
+            .permissionId(UPDATED_PERMISSION_ID)
             .createdDate(UPDATED_CREATED_DATE)
             .lastModifiedDate(UPDATED_LAST_MODIFIED_DATE)
             .createdBy(UPDATED_CREATED_BY)
@@ -151,11 +132,7 @@ public class RolePermissionResourceIT {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(rolePermission.getId().intValue())))
             .andExpect(jsonPath("$.[*].roleName").value(hasItem(DEFAULT_ROLE_NAME)))
-            .andExpect(jsonPath("$.[*].permission_id").value(hasItem(DEFAULT_PERMISSION_ID)))
-            .andExpect(jsonPath("$.[*].enableCreate").value(hasItem(DEFAULT_ENABLE_CREATE.booleanValue())))
-            .andExpect(jsonPath("$.[*].enableUpdate").value(hasItem(DEFAULT_ENABLE_UPDATE.booleanValue())))
-            .andExpect(jsonPath("$.[*].enableRead").value(hasItem(DEFAULT_ENABLE_READ.booleanValue())))
-            .andExpect(jsonPath("$.[*].enableDelete").value(hasItem(DEFAULT_ENABLE_DELETE.booleanValue())))
+            .andExpect(jsonPath("$.[*].permissionId").value(hasItem(DEFAULT_PERMISSION_ID.intValue())))
             .andExpect(jsonPath("$.[*].createdDate").value(hasItem(DEFAULT_CREATED_DATE.toString())))
             .andExpect(jsonPath("$.[*].lastModifiedDate").value(hasItem(DEFAULT_LAST_MODIFIED_DATE.toString())))
             .andExpect(jsonPath("$.[*].createdBy").value(hasItem(DEFAULT_CREATED_BY)))
@@ -175,11 +152,7 @@ public class RolePermissionResourceIT {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.id").value(rolePermission.getId().intValue()))
             .andExpect(jsonPath("$.roleName").value(DEFAULT_ROLE_NAME))
-            .andExpect(jsonPath("$.permission_id").value(DEFAULT_PERMISSION_ID))
-            .andExpect(jsonPath("$.enableCreate").value(DEFAULT_ENABLE_CREATE.booleanValue()))
-            .andExpect(jsonPath("$.enableUpdate").value(DEFAULT_ENABLE_UPDATE.booleanValue()))
-            .andExpect(jsonPath("$.enableRead").value(DEFAULT_ENABLE_READ.booleanValue()))
-            .andExpect(jsonPath("$.enableDelete").value(DEFAULT_ENABLE_DELETE.booleanValue()))
+            .andExpect(jsonPath("$.permissionId").value(DEFAULT_PERMISSION_ID.intValue()))
             .andExpect(jsonPath("$.createdDate").value(DEFAULT_CREATED_DATE.toString()))
             .andExpect(jsonPath("$.lastModifiedDate").value(DEFAULT_LAST_MODIFIED_DATE.toString()))
             .andExpect(jsonPath("$.createdBy").value(DEFAULT_CREATED_BY))
@@ -284,288 +257,106 @@ public class RolePermissionResourceIT {
 
     @Test
     @Transactional
-    public void getAllRolePermissionsByPermission_idIsEqualToSomething() throws Exception {
+    public void getAllRolePermissionsByPermissionIdIsEqualToSomething() throws Exception {
         // Initialize the database
         rolePermissionRepository.saveAndFlush(rolePermission);
 
-        // Get all the rolePermissionList where permission_id equals to DEFAULT_PERMISSION_ID
-        defaultRolePermissionShouldBeFound("permission_id.equals=" + DEFAULT_PERMISSION_ID);
+        // Get all the rolePermissionList where permissionId equals to DEFAULT_PERMISSION_ID
+        defaultRolePermissionShouldBeFound("permissionId.equals=" + DEFAULT_PERMISSION_ID);
 
-        // Get all the rolePermissionList where permission_id equals to UPDATED_PERMISSION_ID
-        defaultRolePermissionShouldNotBeFound("permission_id.equals=" + UPDATED_PERMISSION_ID);
+        // Get all the rolePermissionList where permissionId equals to UPDATED_PERMISSION_ID
+        defaultRolePermissionShouldNotBeFound("permissionId.equals=" + UPDATED_PERMISSION_ID);
     }
 
     @Test
     @Transactional
-    public void getAllRolePermissionsByPermission_idIsNotEqualToSomething() throws Exception {
+    public void getAllRolePermissionsByPermissionIdIsNotEqualToSomething() throws Exception {
         // Initialize the database
         rolePermissionRepository.saveAndFlush(rolePermission);
 
-        // Get all the rolePermissionList where permission_id not equals to DEFAULT_PERMISSION_ID
-        defaultRolePermissionShouldNotBeFound("permission_id.notEquals=" + DEFAULT_PERMISSION_ID);
+        // Get all the rolePermissionList where permissionId not equals to DEFAULT_PERMISSION_ID
+        defaultRolePermissionShouldNotBeFound("permissionId.notEquals=" + DEFAULT_PERMISSION_ID);
 
-        // Get all the rolePermissionList where permission_id not equals to UPDATED_PERMISSION_ID
-        defaultRolePermissionShouldBeFound("permission_id.notEquals=" + UPDATED_PERMISSION_ID);
+        // Get all the rolePermissionList where permissionId not equals to UPDATED_PERMISSION_ID
+        defaultRolePermissionShouldBeFound("permissionId.notEquals=" + UPDATED_PERMISSION_ID);
     }
 
     @Test
     @Transactional
-    public void getAllRolePermissionsByPermission_idIsInShouldWork() throws Exception {
+    public void getAllRolePermissionsByPermissionIdIsInShouldWork() throws Exception {
         // Initialize the database
         rolePermissionRepository.saveAndFlush(rolePermission);
 
-        // Get all the rolePermissionList where permission_id in DEFAULT_PERMISSION_ID or UPDATED_PERMISSION_ID
-        defaultRolePermissionShouldBeFound("permission_id.in=" + DEFAULT_PERMISSION_ID + "," + UPDATED_PERMISSION_ID);
+        // Get all the rolePermissionList where permissionId in DEFAULT_PERMISSION_ID or UPDATED_PERMISSION_ID
+        defaultRolePermissionShouldBeFound("permissionId.in=" + DEFAULT_PERMISSION_ID + "," + UPDATED_PERMISSION_ID);
 
-        // Get all the rolePermissionList where permission_id equals to UPDATED_PERMISSION_ID
-        defaultRolePermissionShouldNotBeFound("permission_id.in=" + UPDATED_PERMISSION_ID);
+        // Get all the rolePermissionList where permissionId equals to UPDATED_PERMISSION_ID
+        defaultRolePermissionShouldNotBeFound("permissionId.in=" + UPDATED_PERMISSION_ID);
     }
 
     @Test
     @Transactional
-    public void getAllRolePermissionsByPermission_idIsNullOrNotNull() throws Exception {
+    public void getAllRolePermissionsByPermissionIdIsNullOrNotNull() throws Exception {
         // Initialize the database
         rolePermissionRepository.saveAndFlush(rolePermission);
 
-        // Get all the rolePermissionList where permission_id is not null
-        defaultRolePermissionShouldBeFound("permission_id.specified=true");
+        // Get all the rolePermissionList where permissionId is not null
+        defaultRolePermissionShouldBeFound("permissionId.specified=true");
 
-        // Get all the rolePermissionList where permission_id is null
-        defaultRolePermissionShouldNotBeFound("permission_id.specified=false");
+        // Get all the rolePermissionList where permissionId is null
+        defaultRolePermissionShouldNotBeFound("permissionId.specified=false");
     }
 
     @Test
     @Transactional
-    public void getAllRolePermissionsByPermission_idContainsSomething() throws Exception {
+    public void getAllRolePermissionsByPermissionIdIsGreaterThanOrEqualToSomething() throws Exception {
         // Initialize the database
         rolePermissionRepository.saveAndFlush(rolePermission);
 
-        // Get all the rolePermissionList where permission_id contains DEFAULT_PERMISSION_ID
-        defaultRolePermissionShouldBeFound("permission_id.contains=" + DEFAULT_PERMISSION_ID);
+        // Get all the rolePermissionList where permissionId is greater than or equal to DEFAULT_PERMISSION_ID
+        defaultRolePermissionShouldBeFound("permissionId.greaterThanOrEqual=" + DEFAULT_PERMISSION_ID);
 
-        // Get all the rolePermissionList where permission_id contains UPDATED_PERMISSION_ID
-        defaultRolePermissionShouldNotBeFound("permission_id.contains=" + UPDATED_PERMISSION_ID);
+        // Get all the rolePermissionList where permissionId is greater than or equal to UPDATED_PERMISSION_ID
+        defaultRolePermissionShouldNotBeFound("permissionId.greaterThanOrEqual=" + UPDATED_PERMISSION_ID);
     }
 
     @Test
     @Transactional
-    public void getAllRolePermissionsByPermission_idNotContainsSomething() throws Exception {
+    public void getAllRolePermissionsByPermissionIdIsLessThanOrEqualToSomething() throws Exception {
         // Initialize the database
         rolePermissionRepository.saveAndFlush(rolePermission);
 
-        // Get all the rolePermissionList where permission_id does not contain DEFAULT_PERMISSION_ID
-        defaultRolePermissionShouldNotBeFound("permission_id.doesNotContain=" + DEFAULT_PERMISSION_ID);
+        // Get all the rolePermissionList where permissionId is less than or equal to DEFAULT_PERMISSION_ID
+        defaultRolePermissionShouldBeFound("permissionId.lessThanOrEqual=" + DEFAULT_PERMISSION_ID);
 
-        // Get all the rolePermissionList where permission_id does not contain UPDATED_PERMISSION_ID
-        defaultRolePermissionShouldBeFound("permission_id.doesNotContain=" + UPDATED_PERMISSION_ID);
+        // Get all the rolePermissionList where permissionId is less than or equal to SMALLER_PERMISSION_ID
+        defaultRolePermissionShouldNotBeFound("permissionId.lessThanOrEqual=" + SMALLER_PERMISSION_ID);
     }
 
     @Test
     @Transactional
-    public void getAllRolePermissionsByEnableCreateIsEqualToSomething() throws Exception {
+    public void getAllRolePermissionsByPermissionIdIsLessThanSomething() throws Exception {
         // Initialize the database
         rolePermissionRepository.saveAndFlush(rolePermission);
 
-        // Get all the rolePermissionList where enableCreate equals to DEFAULT_ENABLE_CREATE
-        defaultRolePermissionShouldBeFound("enableCreate.equals=" + DEFAULT_ENABLE_CREATE);
+        // Get all the rolePermissionList where permissionId is less than DEFAULT_PERMISSION_ID
+        defaultRolePermissionShouldNotBeFound("permissionId.lessThan=" + DEFAULT_PERMISSION_ID);
 
-        // Get all the rolePermissionList where enableCreate equals to UPDATED_ENABLE_CREATE
-        defaultRolePermissionShouldNotBeFound("enableCreate.equals=" + UPDATED_ENABLE_CREATE);
+        // Get all the rolePermissionList where permissionId is less than UPDATED_PERMISSION_ID
+        defaultRolePermissionShouldBeFound("permissionId.lessThan=" + UPDATED_PERMISSION_ID);
     }
 
     @Test
     @Transactional
-    public void getAllRolePermissionsByEnableCreateIsNotEqualToSomething() throws Exception {
+    public void getAllRolePermissionsByPermissionIdIsGreaterThanSomething() throws Exception {
         // Initialize the database
         rolePermissionRepository.saveAndFlush(rolePermission);
 
-        // Get all the rolePermissionList where enableCreate not equals to DEFAULT_ENABLE_CREATE
-        defaultRolePermissionShouldNotBeFound("enableCreate.notEquals=" + DEFAULT_ENABLE_CREATE);
+        // Get all the rolePermissionList where permissionId is greater than DEFAULT_PERMISSION_ID
+        defaultRolePermissionShouldNotBeFound("permissionId.greaterThan=" + DEFAULT_PERMISSION_ID);
 
-        // Get all the rolePermissionList where enableCreate not equals to UPDATED_ENABLE_CREATE
-        defaultRolePermissionShouldBeFound("enableCreate.notEquals=" + UPDATED_ENABLE_CREATE);
-    }
-
-    @Test
-    @Transactional
-    public void getAllRolePermissionsByEnableCreateIsInShouldWork() throws Exception {
-        // Initialize the database
-        rolePermissionRepository.saveAndFlush(rolePermission);
-
-        // Get all the rolePermissionList where enableCreate in DEFAULT_ENABLE_CREATE or UPDATED_ENABLE_CREATE
-        defaultRolePermissionShouldBeFound("enableCreate.in=" + DEFAULT_ENABLE_CREATE + "," + UPDATED_ENABLE_CREATE);
-
-        // Get all the rolePermissionList where enableCreate equals to UPDATED_ENABLE_CREATE
-        defaultRolePermissionShouldNotBeFound("enableCreate.in=" + UPDATED_ENABLE_CREATE);
-    }
-
-    @Test
-    @Transactional
-    public void getAllRolePermissionsByEnableCreateIsNullOrNotNull() throws Exception {
-        // Initialize the database
-        rolePermissionRepository.saveAndFlush(rolePermission);
-
-        // Get all the rolePermissionList where enableCreate is not null
-        defaultRolePermissionShouldBeFound("enableCreate.specified=true");
-
-        // Get all the rolePermissionList where enableCreate is null
-        defaultRolePermissionShouldNotBeFound("enableCreate.specified=false");
-    }
-
-    @Test
-    @Transactional
-    public void getAllRolePermissionsByEnableUpdateIsEqualToSomething() throws Exception {
-        // Initialize the database
-        rolePermissionRepository.saveAndFlush(rolePermission);
-
-        // Get all the rolePermissionList where enableUpdate equals to DEFAULT_ENABLE_UPDATE
-        defaultRolePermissionShouldBeFound("enableUpdate.equals=" + DEFAULT_ENABLE_UPDATE);
-
-        // Get all the rolePermissionList where enableUpdate equals to UPDATED_ENABLE_UPDATE
-        defaultRolePermissionShouldNotBeFound("enableUpdate.equals=" + UPDATED_ENABLE_UPDATE);
-    }
-
-    @Test
-    @Transactional
-    public void getAllRolePermissionsByEnableUpdateIsNotEqualToSomething() throws Exception {
-        // Initialize the database
-        rolePermissionRepository.saveAndFlush(rolePermission);
-
-        // Get all the rolePermissionList where enableUpdate not equals to DEFAULT_ENABLE_UPDATE
-        defaultRolePermissionShouldNotBeFound("enableUpdate.notEquals=" + DEFAULT_ENABLE_UPDATE);
-
-        // Get all the rolePermissionList where enableUpdate not equals to UPDATED_ENABLE_UPDATE
-        defaultRolePermissionShouldBeFound("enableUpdate.notEquals=" + UPDATED_ENABLE_UPDATE);
-    }
-
-    @Test
-    @Transactional
-    public void getAllRolePermissionsByEnableUpdateIsInShouldWork() throws Exception {
-        // Initialize the database
-        rolePermissionRepository.saveAndFlush(rolePermission);
-
-        // Get all the rolePermissionList where enableUpdate in DEFAULT_ENABLE_UPDATE or UPDATED_ENABLE_UPDATE
-        defaultRolePermissionShouldBeFound("enableUpdate.in=" + DEFAULT_ENABLE_UPDATE + "," + UPDATED_ENABLE_UPDATE);
-
-        // Get all the rolePermissionList where enableUpdate equals to UPDATED_ENABLE_UPDATE
-        defaultRolePermissionShouldNotBeFound("enableUpdate.in=" + UPDATED_ENABLE_UPDATE);
-    }
-
-    @Test
-    @Transactional
-    public void getAllRolePermissionsByEnableUpdateIsNullOrNotNull() throws Exception {
-        // Initialize the database
-        rolePermissionRepository.saveAndFlush(rolePermission);
-
-        // Get all the rolePermissionList where enableUpdate is not null
-        defaultRolePermissionShouldBeFound("enableUpdate.specified=true");
-
-        // Get all the rolePermissionList where enableUpdate is null
-        defaultRolePermissionShouldNotBeFound("enableUpdate.specified=false");
-    }
-
-    @Test
-    @Transactional
-    public void getAllRolePermissionsByEnableReadIsEqualToSomething() throws Exception {
-        // Initialize the database
-        rolePermissionRepository.saveAndFlush(rolePermission);
-
-        // Get all the rolePermissionList where enableRead equals to DEFAULT_ENABLE_READ
-        defaultRolePermissionShouldBeFound("enableRead.equals=" + DEFAULT_ENABLE_READ);
-
-        // Get all the rolePermissionList where enableRead equals to UPDATED_ENABLE_READ
-        defaultRolePermissionShouldNotBeFound("enableRead.equals=" + UPDATED_ENABLE_READ);
-    }
-
-    @Test
-    @Transactional
-    public void getAllRolePermissionsByEnableReadIsNotEqualToSomething() throws Exception {
-        // Initialize the database
-        rolePermissionRepository.saveAndFlush(rolePermission);
-
-        // Get all the rolePermissionList where enableRead not equals to DEFAULT_ENABLE_READ
-        defaultRolePermissionShouldNotBeFound("enableRead.notEquals=" + DEFAULT_ENABLE_READ);
-
-        // Get all the rolePermissionList where enableRead not equals to UPDATED_ENABLE_READ
-        defaultRolePermissionShouldBeFound("enableRead.notEquals=" + UPDATED_ENABLE_READ);
-    }
-
-    @Test
-    @Transactional
-    public void getAllRolePermissionsByEnableReadIsInShouldWork() throws Exception {
-        // Initialize the database
-        rolePermissionRepository.saveAndFlush(rolePermission);
-
-        // Get all the rolePermissionList where enableRead in DEFAULT_ENABLE_READ or UPDATED_ENABLE_READ
-        defaultRolePermissionShouldBeFound("enableRead.in=" + DEFAULT_ENABLE_READ + "," + UPDATED_ENABLE_READ);
-
-        // Get all the rolePermissionList where enableRead equals to UPDATED_ENABLE_READ
-        defaultRolePermissionShouldNotBeFound("enableRead.in=" + UPDATED_ENABLE_READ);
-    }
-
-    @Test
-    @Transactional
-    public void getAllRolePermissionsByEnableReadIsNullOrNotNull() throws Exception {
-        // Initialize the database
-        rolePermissionRepository.saveAndFlush(rolePermission);
-
-        // Get all the rolePermissionList where enableRead is not null
-        defaultRolePermissionShouldBeFound("enableRead.specified=true");
-
-        // Get all the rolePermissionList where enableRead is null
-        defaultRolePermissionShouldNotBeFound("enableRead.specified=false");
-    }
-
-    @Test
-    @Transactional
-    public void getAllRolePermissionsByEnableDeleteIsEqualToSomething() throws Exception {
-        // Initialize the database
-        rolePermissionRepository.saveAndFlush(rolePermission);
-
-        // Get all the rolePermissionList where enableDelete equals to DEFAULT_ENABLE_DELETE
-        defaultRolePermissionShouldBeFound("enableDelete.equals=" + DEFAULT_ENABLE_DELETE);
-
-        // Get all the rolePermissionList where enableDelete equals to UPDATED_ENABLE_DELETE
-        defaultRolePermissionShouldNotBeFound("enableDelete.equals=" + UPDATED_ENABLE_DELETE);
-    }
-
-    @Test
-    @Transactional
-    public void getAllRolePermissionsByEnableDeleteIsNotEqualToSomething() throws Exception {
-        // Initialize the database
-        rolePermissionRepository.saveAndFlush(rolePermission);
-
-        // Get all the rolePermissionList where enableDelete not equals to DEFAULT_ENABLE_DELETE
-        defaultRolePermissionShouldNotBeFound("enableDelete.notEquals=" + DEFAULT_ENABLE_DELETE);
-
-        // Get all the rolePermissionList where enableDelete not equals to UPDATED_ENABLE_DELETE
-        defaultRolePermissionShouldBeFound("enableDelete.notEquals=" + UPDATED_ENABLE_DELETE);
-    }
-
-    @Test
-    @Transactional
-    public void getAllRolePermissionsByEnableDeleteIsInShouldWork() throws Exception {
-        // Initialize the database
-        rolePermissionRepository.saveAndFlush(rolePermission);
-
-        // Get all the rolePermissionList where enableDelete in DEFAULT_ENABLE_DELETE or UPDATED_ENABLE_DELETE
-        defaultRolePermissionShouldBeFound("enableDelete.in=" + DEFAULT_ENABLE_DELETE + "," + UPDATED_ENABLE_DELETE);
-
-        // Get all the rolePermissionList where enableDelete equals to UPDATED_ENABLE_DELETE
-        defaultRolePermissionShouldNotBeFound("enableDelete.in=" + UPDATED_ENABLE_DELETE);
-    }
-
-    @Test
-    @Transactional
-    public void getAllRolePermissionsByEnableDeleteIsNullOrNotNull() throws Exception {
-        // Initialize the database
-        rolePermissionRepository.saveAndFlush(rolePermission);
-
-        // Get all the rolePermissionList where enableDelete is not null
-        defaultRolePermissionShouldBeFound("enableDelete.specified=true");
-
-        // Get all the rolePermissionList where enableDelete is null
-        defaultRolePermissionShouldNotBeFound("enableDelete.specified=false");
+        // Get all the rolePermissionList where permissionId is greater than SMALLER_PERMISSION_ID
+        defaultRolePermissionShouldBeFound("permissionId.greaterThan=" + SMALLER_PERMISSION_ID);
     }
 
     @Test
@@ -838,11 +629,7 @@ public class RolePermissionResourceIT {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(rolePermission.getId().intValue())))
             .andExpect(jsonPath("$.[*].roleName").value(hasItem(DEFAULT_ROLE_NAME)))
-            .andExpect(jsonPath("$.[*].permission_id").value(hasItem(DEFAULT_PERMISSION_ID)))
-            .andExpect(jsonPath("$.[*].enableCreate").value(hasItem(DEFAULT_ENABLE_CREATE.booleanValue())))
-            .andExpect(jsonPath("$.[*].enableUpdate").value(hasItem(DEFAULT_ENABLE_UPDATE.booleanValue())))
-            .andExpect(jsonPath("$.[*].enableRead").value(hasItem(DEFAULT_ENABLE_READ.booleanValue())))
-            .andExpect(jsonPath("$.[*].enableDelete").value(hasItem(DEFAULT_ENABLE_DELETE.booleanValue())))
+            .andExpect(jsonPath("$.[*].permissionId").value(hasItem(DEFAULT_PERMISSION_ID.intValue())))
             .andExpect(jsonPath("$.[*].createdDate").value(hasItem(DEFAULT_CREATED_DATE.toString())))
             .andExpect(jsonPath("$.[*].lastModifiedDate").value(hasItem(DEFAULT_LAST_MODIFIED_DATE.toString())))
             .andExpect(jsonPath("$.[*].createdBy").value(hasItem(DEFAULT_CREATED_BY)))

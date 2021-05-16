@@ -4,37 +4,21 @@
   "relationships": [],
   "fields": [
     {
-      "fieldName": "roleName",
-      "fieldType": "String",
-      "fieldValidateRules": ["required"]
-    },
-    {
-      "fieldName": "permissionId",
+      "fieldName": "rolePermissionId",
       "fieldType": "Long",
       "fieldValidateRules": ["required"]
     },
     {
-      "fieldName": "createdDate",
-      "fieldType": "Instant"
-    },
-    {
-      "fieldName": "lastModifiedDate",
-      "fieldType": "Instant"
-    },
-    {
-      "fieldName": "createdBy",
-      "fieldType": "String"
-    },
-    {
-      "fieldName": "lastModifiedBy",
-      "fieldType": "String"
+      "fieldName": "operationId",
+      "fieldType": "Long",
+      "fieldValidateRules": ["required"]
     }
   ],
-  "changelogDate": "20210512130448",
+  "changelogDate": "20210513145117",
   "dto": "mapstruct",
   "searchEngine": false,
   "service": "serviceImpl",
-  "entityTableName": "role_permission",
+  "entityTableName": "permission_operation",
   "databaseType": "sql",
   "readOnly": true,
   "jpaMetamodelFiltering": true,

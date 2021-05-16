@@ -15,7 +15,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Entity
 @Table(name = "jhi_authority")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-public class Authority implements Serializable {
+public class Authority extends AbstractAuditingEntity {
     private static final long serialVersionUID = 1L;
 
     @NotNull
@@ -24,11 +24,14 @@ public class Authority implements Serializable {
     @Column(length = 50)
     private String name;
 
+    @Column(name = "description")
+    private String description;
+
     public String getName() {
         return name;
     }
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "tv_role_permission",
         joinColumns = @JoinColumn(name = "role_name"),
@@ -46,6 +49,14 @@ public class Authority implements Serializable {
 
     public void setPermissions(Set<Permission> permissions) {
         this.permissions = permissions;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override

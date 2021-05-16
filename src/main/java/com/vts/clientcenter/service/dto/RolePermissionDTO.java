@@ -14,15 +14,7 @@ public class RolePermissionDTO implements Serializable {
     private String roleName;
 
     @NotNull
-    private String permission_id;
-
-    private Boolean enableCreate;
-
-    private Boolean enableUpdate;
-
-    private Boolean enableRead;
-
-    private Boolean enableDelete;
+    private Long permissionId;
 
     private Instant createdDate;
 
@@ -48,44 +40,12 @@ public class RolePermissionDTO implements Serializable {
         this.roleName = roleName;
     }
 
-    public String getPermission_id() {
-        return permission_id;
+    public Long getPermissionId() {
+        return permissionId;
     }
 
-    public void setPermission_id(String permission_id) {
-        this.permission_id = permission_id;
-    }
-
-    public Boolean isEnableCreate() {
-        return enableCreate;
-    }
-
-    public void setEnableCreate(Boolean enableCreate) {
-        this.enableCreate = enableCreate;
-    }
-
-    public Boolean isEnableUpdate() {
-        return enableUpdate;
-    }
-
-    public void setEnableUpdate(Boolean enableUpdate) {
-        this.enableUpdate = enableUpdate;
-    }
-
-    public Boolean isEnableRead() {
-        return enableRead;
-    }
-
-    public void setEnableRead(Boolean enableRead) {
-        this.enableRead = enableRead;
-    }
-
-    public Boolean isEnableDelete() {
-        return enableDelete;
-    }
-
-    public void setEnableDelete(Boolean enableDelete) {
-        this.enableDelete = enableDelete;
+    public void setPermissionId(Long permissionId) {
+        this.permissionId = permissionId;
     }
 
     public Instant getCreatedDate() {
@@ -143,11 +103,7 @@ public class RolePermissionDTO implements Serializable {
         return "RolePermissionDTO{" +
             "id=" + getId() +
             ", roleName='" + getRoleName() + "'" +
-            ", permission_id='" + getPermission_id() + "'" +
-            ", enableCreate='" + isEnableCreate() + "'" +
-            ", enableUpdate='" + isEnableUpdate() + "'" +
-            ", enableRead='" + isEnableRead() + "'" +
-            ", enableDelete='" + isEnableDelete() + "'" +
+            ", permissionId=" + getPermissionId() +
             ", createdDate='" + getCreatedDate() + "'" +
             ", lastModifiedDate='" + getLastModifiedDate() + "'" +
             ", createdBy='" + getCreatedBy() + "'" +

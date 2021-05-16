@@ -37,7 +37,7 @@
     "skipClient": true,
     "skipUserManagement": true,
     "prettierJava": true,
-    "lastLiquibaseTimestamp": 1620826718000
+    "lastLiquibaseTimestamp": 1620917477000
   },
   "git-provider": "GitHub",
   "git-company": "dinhtrung90",

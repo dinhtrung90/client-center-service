@@ -26,19 +26,7 @@ public class RolePermission implements Serializable {
 
     @NotNull
     @Column(name = "permission_id", nullable = false)
-    private String permission_id;
-
-    @Column(name = "enable_create")
-    private Boolean enableCreate;
-
-    @Column(name = "enable_update")
-    private Boolean enableUpdate;
-
-    @Column(name = "enable_read")
-    private Boolean enableRead;
-
-    @Column(name = "enable_delete")
-    private Boolean enableDelete;
+    private Long permissionId;
 
     @Column(name = "created_date")
     private Instant createdDate;
@@ -74,69 +62,17 @@ public class RolePermission implements Serializable {
         this.roleName = roleName;
     }
 
-    public String getPermission_id() {
-        return permission_id;
+    public Long getPermissionId() {
+        return permissionId;
     }
 
-    public RolePermission permission_id(String permission_id) {
-        this.permission_id = permission_id;
+    public RolePermission permissionId(Long permissionId) {
+        this.permissionId = permissionId;
         return this;
     }
 
-    public void setPermission_id(String permission_id) {
-        this.permission_id = permission_id;
-    }
-
-    public Boolean isEnableCreate() {
-        return enableCreate;
-    }
-
-    public RolePermission enableCreate(Boolean enableCreate) {
-        this.enableCreate = enableCreate;
-        return this;
-    }
-
-    public void setEnableCreate(Boolean enableCreate) {
-        this.enableCreate = enableCreate;
-    }
-
-    public Boolean isEnableUpdate() {
-        return enableUpdate;
-    }
-
-    public RolePermission enableUpdate(Boolean enableUpdate) {
-        this.enableUpdate = enableUpdate;
-        return this;
-    }
-
-    public void setEnableUpdate(Boolean enableUpdate) {
-        this.enableUpdate = enableUpdate;
-    }
-
-    public Boolean isEnableRead() {
-        return enableRead;
-    }
-
-    public RolePermission enableRead(Boolean enableRead) {
-        this.enableRead = enableRead;
-        return this;
-    }
-
-    public void setEnableRead(Boolean enableRead) {
-        this.enableRead = enableRead;
-    }
-
-    public Boolean isEnableDelete() {
-        return enableDelete;
-    }
-
-    public RolePermission enableDelete(Boolean enableDelete) {
-        this.enableDelete = enableDelete;
-        return this;
-    }
-
-    public void setEnableDelete(Boolean enableDelete) {
-        this.enableDelete = enableDelete;
+    public void setPermissionId(Long permissionId) {
+        this.permissionId = permissionId;
     }
 
     public Instant getCreatedDate() {
@@ -215,11 +151,7 @@ public class RolePermission implements Serializable {
         return "RolePermission{" +
             "id=" + getId() +
             ", roleName='" + getRoleName() + "'" +
-            ", permission_id='" + getPermission_id() + "'" +
-            ", enableCreate='" + isEnableCreate() + "'" +
-            ", enableUpdate='" + isEnableUpdate() + "'" +
-            ", enableRead='" + isEnableRead() + "'" +
-            ", enableDelete='" + isEnableDelete() + "'" +
+            ", permissionId=" + getPermissionId() +
             ", createdDate='" + getCreatedDate() + "'" +
             ", lastModifiedDate='" + getLastModifiedDate() + "'" +
             ", createdBy='" + getCreatedBy() + "'" +
