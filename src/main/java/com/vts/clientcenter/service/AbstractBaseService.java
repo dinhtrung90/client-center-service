@@ -96,4 +96,13 @@ public class AbstractBaseService {
         Permission permissionObj = permissionRepository.getOne(r.getPermissionId());
         return permissionObj.getName().equalsIgnoreCase(permission);
     }
+
+    public String getUserLogin() {
+
+        Optional<String> currentUserLoginOptional = SecurityUtils.getCurrentUserLogin();
+        if (currentUserLoginOptional.isPresent()) {
+            throw new UnAuthorizedRequestAlertException("User not authorized.", "Users", Constants.USER_UNAUTHORIZED);
+        }
+        return currentUserLoginOptional.get();
+    }
 }

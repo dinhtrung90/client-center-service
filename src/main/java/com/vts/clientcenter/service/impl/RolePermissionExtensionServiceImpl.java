@@ -25,6 +25,8 @@ import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import com.vts.clientcenter.web.rest.errors.UnAuthorizedRequestAlertException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -67,7 +69,8 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
 
     @Override
     public RolePermissionDTO save(RolePermissionDTO rolePermissionDTO) {
-        String userLogin = SecurityUtils.getCurrentUserLogin().get();
+
+        String userLogin = getUserLogin();
 
         if (Objects.isNull(rolePermissionDTO.getId())) {
             rolePermissionDTO.setCreatedDate(Instant.now());
@@ -84,7 +87,8 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
 
     @Override
     public EditPermissionResponseDto saveDetail(EditPermissionRequestDto dto) {
-        String userLogin = SecurityUtils.getCurrentUserLogin().get();
+
+        String userLogin = getUserLogin();
 
         if (Objects.isNull(dto.getRoleName())) {
             throw new BadRequestAlertException("Role not existed.", "UserRole", Constants.USER_ROLE_NOT_FOUND);
@@ -170,7 +174,8 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
 
     @Override
     public EditPermissionResponseDto getDetailRole(String roleName) {
-        String userLogin = SecurityUtils.getCurrentUserLogin().get();
+
+        String userLogin = getUserLogin();
 
         Optional<Authority> authorityOptional = authorityRepository.findById(roleName);
 
@@ -212,4 +217,6 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
             .modifiedBy(userLogin)
             .build();
     }
+
+
 }

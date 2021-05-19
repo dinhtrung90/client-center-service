@@ -11,7 +11,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  * A Permission.
  */
 @Entity
-@Table(name = "permission")
+@Table(name = "tv_permission")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Permission implements Serializable {
     private static final long serialVersionUID = 1L;
