@@ -24,6 +24,8 @@ public final class Constants {
     public static final String ROLE_NOT_MATCH = "ROLE_NOT_MATCH";
     public static final String USER_CAN_NOT_CREATED = "USER_CAN_NOT_CREATED";
     public static final String USER_VALIDATOR_ERR = "USER_VALIDATOR_ERR";
+    public static final String USER_UNAUTHORIZED = "USER_UNAUTHORIZED";
+    public static final String PERMISSION_NOT_SUPPORTED = "PERMISSION_NOT_SUPPORTED";
 
     private Constants() {}
 }

@@ -146,7 +146,6 @@ jhipster:
 # ===================================================================
 
 # application:
-
 server-uploads:
   cloudinary:
     cloudinary_url: cloudinary://868559836586836:x7ha43lE_-vTt2AHxNmt8yphHmw@tvsales
