@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -47,6 +48,7 @@ public class MemberAuthorityResource {
     }
 
     @PostMapping("/member-roles/create-roles")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     public ResponseEntity<AuthorityDto> createRoles(@Valid @RequestBody AuthorityDto dto) throws URISyntaxException {
         log.debug("request create role: {}", dto);
         AuthorityDto result = authorityService.save(dto);
@@ -68,6 +70,7 @@ public class MemberAuthorityResource {
     }
 
     @PostMapping("/member-roles/edit")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     public ResponseEntity<EditPermissionResponseDto> setPermission(@Valid @RequestBody EditPermissionRequestDto dto) {
         log.debug("REST request to edit roles");
 
