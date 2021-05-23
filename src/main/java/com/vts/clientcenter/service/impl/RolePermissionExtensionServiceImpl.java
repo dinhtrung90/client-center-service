@@ -18,6 +18,7 @@ import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.swing.text.html.Option;
+import javax.validation.constraints.NotNull;
 
 @Service
 @Transactional
@@ -108,56 +110,75 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
 
         List<PermissionDetailDto> permissionDetails = dto.getPermissionDetails();
 
-        List<RolePermission> rolePermissionList = rolePermissionRepository.findByRoleName(authority.getName());
+        Set<RolePermission> rolePermissionList =  authority.getRolePermissions();
 
-        List<RolePermission> updatePermissionObjects = rolePermissionList
+        List<Long> updatingIds = rolePermissionList
             .stream()
             .filter(d -> permissionDetails.stream().map(PermissionDetailDto::getId).collect(Collectors.toSet()).contains(d))
+            .map(RolePermission::getId)
             .collect(Collectors.toList());
-
-        List<Long> updatingIds = updatePermissionObjects.stream().map(RolePermission::getId).collect(Collectors.toList());
 
         rolePermissionRepository.deleteByIdNotIn(updatingIds);
 
-        permissionOperationRepository.deleteByRolePermissionIdIn(updatingIds);
-
         List<ModuleOperation> moduleOperations = moduleOperationRepository.findAll();
 
-        List<PermissionOperation> operations = new ArrayList<>();
+        Set<RolePermission> savingRolePermissions = new HashSet<>();
 
         for (int i = 0; i < permissionDetails.size(); i++) {
+
             PermissionDetailDto u = permissionDetails.get(i);
+
+            Optional<Permission> permissionOptional = permissionRepository.findById(u.getPermissionId());
+
+            if (!permissionOptional.isPresent()) {
+                continue;
+            }
+
+            Permission permission = permissionOptional.get();
+
+            List<OperationEnum> operationEnumList = u.getOperations();
+
+            Set<ModuleOperation> mappingOperations = moduleOperations.stream()
+                .filter(mo -> operationEnumList.contains(mo.getName())).collect(Collectors.toSet());
 
             RolePermission rolePermission;
             if (isNull(u.getId())) {
-                rolePermission =
-                    new RolePermission()
-                        .permissionId(u.getPermissionId())
-                        .roleName(dto.getRoleName())
-                        .createdBy(userLogin)
-                        .lastModifiedBy(userLogin)
-                        .createdDate(Instant.now())
-                        .lastModifiedDate(Instant.now());
+                rolePermission = RolePermission.builder()
+                    .permission(permission)
+                    .permissionId(permission.getId())
+                    .role(authority)
+                    .roleName(authority.getName())
+                    .operations(mappingOperations)
+                    .build();
             } else {
-                rolePermission = rolePermissionRepository.getOne(u.getId());
+                Optional<RolePermission> rolePermissionOptional = rolePermissionList.stream().filter(rp -> u.getId().equals(rp.getId())).findFirst();
+                if (!rolePermissionOptional.isPresent()) {
+                    continue;
+                }
+                rolePermission = rolePermissionOptional.get();
                 rolePermission.setLastModifiedDate(Instant.now());
                 rolePermission.setLastModifiedBy(userLogin);
+                rolePermission.setPermission(permission);
+                rolePermission.setPermissionId(permission.getId());
+                rolePermission.setRoleName(authority.getName());
+                rolePermission.setRole(authority);
+                rolePermission.setOperations(mappingOperations);
             }
 
-            rolePermission = rolePermissionRepository.save(rolePermission);
+            savingRolePermissions.add(rolePermission);
 
-            u.setId(rolePermission.getId());
-
-            for (OperationEnum operation : u.getOperations()) {
-                PermissionOperation permissionOperation = new PermissionOperation();
-                permissionOperation.setRolePermissionId(rolePermission.getId());
-                permissionOperation.setOperationId(
-                    moduleOperations.stream().filter(a -> a.getName().equals(operation)).findFirst().get().getId()
-                );
-                operations.add(permissionOperation);
-            }
         }
-        permissionOperationRepository.saveAll(operations);
+
+        authority.setRolePermissions(savingRolePermissions);
+
+        List<RolePermission> rolePermissions = rolePermissionRepository.saveAll(savingRolePermissions);
+
+        for (PermissionDetailDto permissionDetail : dto.getPermissionDetails()) {
+            rolePermissions.stream()
+                .filter(rolePermission -> rolePermission.getPermissionId().equals(permissionDetail.getPermissionId()))
+                .forEach(rolePermission -> permissionDetail.setId(rolePermission.getId()));
+        }
+
 
         return EditPermissionResponseDto
             .builder()
@@ -185,32 +206,31 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
 
         List<PermissionDetailDto> permissionDetails = new ArrayList<>();
 
-        List<RolePermission> rolePermissionList = rolePermissionRepository.findByRoleName(authority.getName());
+        Set<RolePermission> rolePermissionList = authority.getRolePermissions();
+
+        List<@NotNull Long> permissionIds = rolePermissionList.stream().map(RolePermission::getPermissionId).collect(Collectors.toList());
+
+        List<Permission> permissions = permissionRepository.findAllById(permissionIds);
 
         for (RolePermission rolePermission : rolePermissionList) {
-            List<PermissionOperation> permissionOperations = permissionOperationRepository.findByRolePermissionId(rolePermission.getId());
 
-            Set<Long> operationIds = permissionOperations.stream().map(PermissionOperation::getOperationId).collect(Collectors.toSet());
+            Optional<Permission> optionalPermission = permissions.stream()
+                .filter(p -> p.getId().equals(rolePermission.getPermissionId())).findFirst();
 
-            List<ModuleOperation> operationList = operationRepository.findAllById(operationIds);
-
-            Long permissionId = rolePermission.getPermissionId();
-
-            Optional<Permission> oneOptional = permissionRepository.findById(permissionId);
-
-            if (!oneOptional.isPresent()) {
+            if (!optionalPermission.isPresent()) {
                 continue;
             }
+
+            Permission permission = optionalPermission.get();
 
             PermissionDetailDto detailDto = PermissionDetailDto
                 .builder()
                 .id(rolePermission.getId())
                 .permissionId(rolePermission.getPermissionId())
-                .permissionName(oneOptional.get().getName())
-                .permissionDesc(oneOptional.get().getDescription())
-                .operations(operationList.stream().map(ModuleOperation::getName).collect(Collectors.toList()))
+                .permissionName(permission.getName())
+                .permissionDesc(permission.getDescription())
+                .operations(rolePermission.getOperations().stream().map(ModuleOperation::getName).collect(Collectors.toList()))
                 .build();
-
             permissionDetails.add(detailDto);
         }
 

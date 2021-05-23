@@ -87,13 +87,14 @@ public class RolePermissionResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static RolePermission createEntity(EntityManager em) {
-        RolePermission rolePermission = new RolePermission()
+        RolePermission rolePermission =RolePermission.builder()
             .roleName(DEFAULT_ROLE_NAME)
             .permissionId(DEFAULT_PERMISSION_ID)
-            .createdDate(DEFAULT_CREATED_DATE)
-            .lastModifiedDate(DEFAULT_LAST_MODIFIED_DATE)
-            .createdBy(DEFAULT_CREATED_BY)
-            .lastModifiedBy(DEFAULT_LAST_MODIFIED_BY);
+//            .createdDate(DEFAULT_CREATED_DATE)
+//            .lastModifiedDate(DEFAULT_LAST_MODIFIED_DATE)
+//            .createdBy(DEFAULT_CREATED_BY)
+//            .lastModifiedBy(DEFAULT_LAST_MODIFIED_BY)
+            .build();
         return rolePermission;
     }
 
@@ -104,13 +105,14 @@ public class RolePermissionResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static RolePermission createUpdatedEntity(EntityManager em) {
-        RolePermission rolePermission = new RolePermission()
+        RolePermission rolePermission = RolePermission.builder()
             .roleName(UPDATED_ROLE_NAME)
             .permissionId(UPDATED_PERMISSION_ID)
-            .createdDate(UPDATED_CREATED_DATE)
-            .lastModifiedDate(UPDATED_LAST_MODIFIED_DATE)
-            .createdBy(UPDATED_CREATED_BY)
-            .lastModifiedBy(UPDATED_LAST_MODIFIED_BY);
+//            .createdDate(UPDATED_CREATED_DATE)
+//            .lastModifiedDate(UPDATED_LAST_MODIFIED_DATE)
+//            .createdBy(UPDATED_CREATED_BY)
+//            .lastModifiedBy(UPDATED_LAST_MODIFIED_BY);
+        .build();
         return rolePermission;
     }
 

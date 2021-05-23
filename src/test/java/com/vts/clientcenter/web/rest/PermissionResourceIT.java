@@ -83,12 +83,13 @@ public class PermissionResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Permission createEntity(EntityManager em) {
-        Permission permission = new Permission()
+        Permission permission = Permission.builder()
             .name(DEFAULT_NAME)
-            .createdDate(DEFAULT_CREATED_DATE)
-            .lastModifiedDate(DEFAULT_LAST_MODIFIED_DATE)
-            .createdBy(DEFAULT_CREATED_BY)
-            .lastModifiedBy(DEFAULT_LAST_MODIFIED_BY);
+            .build();
+//            .createdDate(DEFAULT_CREATED_DATE)
+//            .lastModifiedDate(DEFAULT_LAST_MODIFIED_DATE)
+//            .createdBy(DEFAULT_CREATED_BY)
+//            .lastModifiedBy(DEFAULT_LAST_MODIFIED_BY);
         return permission;
     }
 
@@ -99,12 +100,9 @@ public class PermissionResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Permission createUpdatedEntity(EntityManager em) {
-        Permission permission = new Permission()
-            .name(UPDATED_NAME)
-            .createdDate(UPDATED_CREATED_DATE)
-            .lastModifiedDate(UPDATED_LAST_MODIFIED_DATE)
-            .createdBy(UPDATED_CREATED_BY)
-            .lastModifiedBy(UPDATED_LAST_MODIFIED_BY);
+        Permission permission = Permission.builder()
+            .name(DEFAULT_NAME)
+            .build();
         return permission;
     }
 

@@ -70,7 +70,7 @@ public class ModuleOperationResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static ModuleOperation createEntity(EntityManager em) {
-        ModuleOperation moduleOperation = new ModuleOperation().name(DEFAULT_NAME);
+        ModuleOperation moduleOperation = ModuleOperation.builder().name(DEFAULT_NAME).build();
         return moduleOperation;
     }
 
@@ -81,7 +81,7 @@ public class ModuleOperationResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static ModuleOperation createUpdatedEntity(EntityManager em) {
-        ModuleOperation moduleOperation = new ModuleOperation().name(UPDATED_NAME);
+        ModuleOperation moduleOperation = ModuleOperation.builder().name(DEFAULT_NAME).build();
         return moduleOperation;
     }
 
