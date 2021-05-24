@@ -38,6 +38,8 @@ public class MemberAuthorityResource {
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
 
+    private test;
+
     private final RolePermissionExtensionService rolePermissionExtensionService;
 
     public MemberAuthorityResource(AuthorityService authorityService, AuthorityQueryService authorityQueryService, RolePermissionExtensionService rolePermissionExtensionService) {
