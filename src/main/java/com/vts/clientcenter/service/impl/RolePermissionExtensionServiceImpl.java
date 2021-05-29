@@ -1,15 +1,16 @@
 package com.vts.clientcenter.service.impl;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
+import com.okta.sdk.resource.group.Group;
 import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.domain.*;
 import com.vts.clientcenter.domain.enumeration.OperationEnum;
+import com.vts.clientcenter.events.GroupCreationEvent;
 import com.vts.clientcenter.repository.*;
-import com.vts.clientcenter.service.AbstractBaseService;
-import com.vts.clientcenter.service.PermissionDetailDto;
-import com.vts.clientcenter.service.RolePermissionExtensionService;
-import com.vts.clientcenter.service.UserService;
+import com.vts.clientcenter.security.AuthoritiesConstants;
+import com.vts.clientcenter.service.*;
 import com.vts.clientcenter.service.dto.EditPermissionRequestDto;
 import com.vts.clientcenter.service.dto.EditPermissionResponseDto;
 import com.vts.clientcenter.service.dto.RolePermissionDTO;
@@ -18,14 +19,13 @@ import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.text.html.Option;
 import javax.validation.constraints.NotNull;
 
 @Service
@@ -47,6 +47,10 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
 
     private final PermissionRepository permissionRepository;
 
+    private final OktaService oktaService;
+
+    private final ApplicationEventPublisher applicationEventPublisher;
+
     public RolePermissionExtensionServiceImpl(
         UserService userService,
         RolePermissionRepository rolePermissionRepository,
@@ -55,7 +59,7 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
         ModuleOperationRepository moduleOperationRepository,
         PermissionOperationRepository permissionOperationRepository,
         ModuleOperationRepository operationRepository,
-        PermissionRepository permissionRepository) {
+        PermissionRepository permissionRepository, OktaService oktaService, ApplicationEventPublisher applicationEventPublisher) {
         super(userService);
         this.rolePermissionRepository = rolePermissionRepository;
         this.rolePermissionMapper = rolePermissionMapper;
@@ -64,6 +68,8 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
         this.permissionOperationRepository = permissionOperationRepository;
         this.operationRepository = operationRepository;
         this.permissionRepository = permissionRepository;
+        this.oktaService = oktaService;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
@@ -245,4 +251,125 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
     }
 
 
+    @Override
+    public EditPermissionResponseDto createRole(EditPermissionRequestDto dto) {
+
+        //api create role
+        String userLogin = getUserLogin();
+
+        if (Objects.isNull(dto.getRoleName())) {
+            throw new BadRequestAlertException("Role not existed.", "UserRole", Constants.USER_ROLE_NOT_FOUND);
+        }
+
+        Optional<Authority> authorityOptional = authorityRepository.findById(dto.getRoleName());
+
+        if (authorityOptional.isPresent()) {
+            throw new BadRequestAlertException("Authority have existed", "UserRole", Constants.USER_ROLE_NOT_FOUND);
+        }
+
+        // create on okta service
+        Group group = oktaService.createGroup(dto.getRoleName(), dto.getDescription());
+
+        applicationEventPublisher.publishEvent(GroupCreationEvent.builder().group(group).build());
+
+        Authority authority = new Authority();
+        authority.setName(dto.getRoleName());
+        authority.setDescription(dto.getDescription());
+        authority.setCreatedBy(userLogin);
+        authority.setLastModifiedBy(userLogin);
+        authority.setLastModifiedDate(Instant.now());
+        authority.setCreatedDate(Instant.now());
+        authorityRepository.save(authority);
+
+        List<PermissionDetailDto> permissionDetails = dto.getPermissionDetails();
+
+        List<ModuleOperation> moduleOperations = moduleOperationRepository.findAll();
+
+        Set<RolePermission> savingRolePermissions = new HashSet<>();
+
+        for (int i = 0; i < permissionDetails.size(); i++) {
+
+
+            PermissionDetailDto u = permissionDetails.get(i);
+
+            if (nonNull(u.getId())) {
+               throw new BadRequestAlertException("Create Roles can not have ID value.", "Roles", Constants.ID_IS_NULL);
+            }
+
+            Optional<Permission> permissionOptional = permissionRepository.findById(u.getPermissionId());
+
+            if (!permissionOptional.isPresent()) {
+                throw new BadRequestAlertException("Permission Not Existed.", "Permission", Constants.PERMISSION_IS_NULL);
+            }
+
+            Permission permission = permissionOptional.get();
+
+            List<OperationEnum> operationEnumList = u.getOperations();
+
+            Set<ModuleOperation> mappingOperations = moduleOperations.stream()
+                .filter(mo -> operationEnumList.contains(mo.getName())).collect(Collectors.toSet());
+
+            RolePermission rolePermission;
+
+            rolePermission = RolePermission.builder()
+                .permission(permission)
+                .permissionId(permission.getId())
+                .role(authority)
+                .roleName(authority.getName())
+                .operations(mappingOperations)
+                .build();
+            savingRolePermissions.add(rolePermission);
+
+        }
+
+        authority.setRolePermissions(savingRolePermissions);
+
+        List<RolePermission> rolePermissions = rolePermissionRepository.saveAll(savingRolePermissions);
+
+        for (PermissionDetailDto permissionDetail : dto.getPermissionDetails()) {
+            rolePermissions.stream()
+                .filter(rolePermission -> rolePermission.getPermissionId().equals(permissionDetail.getPermissionId()))
+                .forEach(rolePermission -> permissionDetail.setId(rolePermission.getId()));
+        }
+
+
+        return EditPermissionResponseDto
+            .builder()
+            .lastModifiedDate(Instant.now())
+            .roleName(dto.getRoleName())
+            .description(dto.getDescription())
+            .permissionDetails(dto.getPermissionDetails())
+            .modifiedBy(userLogin)
+            .build();
+
+    }
+
+
+    @Override
+    public void removeDetailRole(String roleName) {
+
+        //api create role
+        String userLogin = getUserLogin();
+
+        if (Objects.isNull(roleName)) {
+            throw new BadRequestAlertException("Role not existed.", "UserRole", Constants.USER_ROLE_NOT_FOUND);
+        }
+
+        if (roleName.equalsIgnoreCase(AuthoritiesConstants.USER) ||
+            roleName.equalsIgnoreCase(AuthoritiesConstants.ADMIN) ||
+            roleName.equalsIgnoreCase(AuthoritiesConstants.SUPER_ADMIN) ||
+                roleName.equalsIgnoreCase(AuthoritiesConstants.SUPERVISOR)) {
+            throw new BadRequestAlertException("Role can not remove", "UserRole", Constants.ROLE_NOT_DELETE);
+        }
+
+        Optional<Authority> authorityOptional = authorityRepository.findById(roleName);
+
+        if (authorityOptional.isPresent()) {
+            throw new BadRequestAlertException("Authority have existed", "UserRole", Constants.USER_ROLE_NOT_FOUND);
+        }
+
+        Authority authority = authorityOptional.get();
+
+        authorityRepository.delete(authority);
+    }
 }

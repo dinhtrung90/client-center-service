@@ -10,4 +10,9 @@ public interface RolePermissionExtensionService {
     EditPermissionResponseDto saveDetail(EditPermissionRequestDto dto);
 
     EditPermissionResponseDto getDetailRole(String roleName);
+
+    EditPermissionResponseDto createRole(EditPermissionRequestDto dto);
+
+    void removeDetailRole(String roleName);
+
 }

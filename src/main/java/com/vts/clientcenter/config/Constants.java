@@ -26,6 +26,9 @@ public final class Constants {
     public static final String USER_VALIDATOR_ERR = "USER_VALIDATOR_ERR";
     public static final String USER_UNAUTHORIZED = "USER_UNAUTHORIZED";
     public static final String PERMISSION_NOT_SUPPORTED = "PERMISSION_NOT_SUPPORTED";
+    public static final String PERMISSION_IS_NULL = "PERMISSION_IS_NULL";
+    public static final String ID_IS_NULL = "ID_IS_NULL";
+    public static final String ROLE_NOT_DELETE = "ROLE_NOT_DELETE";
 
     private Constants() {}
 }

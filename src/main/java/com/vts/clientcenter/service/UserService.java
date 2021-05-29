@@ -119,6 +119,18 @@ public class UserService {
                 log.debug("Updating user '{}' in local database", user.getLogin());
                 updateUser(user.getFirstName(), user.getLastName(), user.getEmail(), user.getLangKey(), user.getImageUrl());
             }
+
+            //sync authority
+            User existedUser = existingUser.get();
+            boolean isMatch = existedUser.getAuthorities()
+                .stream()
+                .allMatch(p -> userAuthorities.contains(p.getName()));
+
+            if (!isMatch) {
+                userRepository.save(user);
+                this.clearUserCaches(user);
+            }
+
         } else {
             log.debug("Saving user '{}' in local database", user.getLogin());
             userRepository.save(user);

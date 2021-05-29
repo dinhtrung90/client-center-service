@@ -94,4 +94,16 @@ public class OktaService {
         user.deactivate();
         user.delete();
     }
+
+
+    public Group createGroup(String groupName, String description) {
+        return GroupBuilder.instance()
+            .setName(groupName)
+            .setDescription(description)
+            .buildAndCreate(client);
+    }
+
+    public void removeGroup(Group group) {
+        group.delete();
+    }
 }

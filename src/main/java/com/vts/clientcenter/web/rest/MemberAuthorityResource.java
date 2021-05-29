@@ -49,13 +49,11 @@ public class MemberAuthorityResource {
 
     @PostMapping("/member-roles/create-roles")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
-    public ResponseEntity<AuthorityDto> createRoles(@Valid @RequestBody AuthorityDto dto) throws URISyntaxException {
+    public ResponseEntity<EditPermissionResponseDto> createRoles(@Valid @RequestBody EditPermissionRequestDto dto) throws URISyntaxException {
         log.debug("request create role: {}", dto);
-        AuthorityDto result = authorityService.save(dto);
+        EditPermissionResponseDto result = rolePermissionExtensionService.createRole(dto);
         return ResponseEntity
-            .created(new URI("/api/permissions/" + result.getRoleName()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getRoleName()))
-            .body(result);
+            .ok(result);
     }
 
     @GetMapping("/member-roles/get-roles")
@@ -86,5 +84,14 @@ public class MemberAuthorityResource {
         EditPermissionResponseDto responseDto = rolePermissionExtensionService.getDetailRole(roleName);
 
         return ResponseEntity.ok().body(responseDto);
+    }
+
+    @DeleteMapping("/member-roles/{roleName}")
+    public ResponseEntity<EditPermissionResponseDto> removeDetailRole(@PathVariable String roleName) {
+        log.debug("REST request to get detail role: {}", roleName);
+
+        rolePermissionExtensionService.removeDetailRole(roleName);
+
+        return ResponseEntity.noContent().build();
     }
 }

@@ -46,7 +46,7 @@ public class RolePermission extends AbstractAuditingEntity {
     @JoinColumn(name = "permission_id", insertable = false, updatable = false)
     private Permission permission;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(
         name = "tv_permission_operation",
         joinColumns = @JoinColumn(name = "role_permission_id"),

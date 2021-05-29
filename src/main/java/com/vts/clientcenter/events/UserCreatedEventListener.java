@@ -1,5 +1,6 @@
 package com.vts.clientcenter.events;
 
+import com.okta.sdk.resource.group.Group;
 import com.vts.clientcenter.domain.User;
 import com.vts.clientcenter.kafka.KafkaSender;
 import com.vts.clientcenter.service.OktaService;
@@ -41,4 +42,13 @@ public class UserCreatedEventListener {
             oktaService.removeAccount(event.getUser().getId());
         }
     }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_ROLLBACK)
+    public void processGroupCreatedEventAfterRollBack(GroupCreationEvent event) {
+        LOGGER.info("Event received: " + event);
+        if (Objects.nonNull(event.getGroup())) {
+            oktaService.removeGroup(event.getGroup());
+        }
+    }
+
 }
