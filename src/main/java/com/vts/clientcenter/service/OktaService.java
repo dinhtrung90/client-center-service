@@ -103,7 +103,10 @@ public class OktaService {
             .buildAndCreate(client);
     }
 
-    public void removeGroup(Group group) {
-        group.delete();
+    public void removeGroup(String groupName) {
+        client.listGroups()
+            .stream()
+            .filter(group -> group.getProfile().getName().equalsIgnoreCase(groupName))
+            .forEach(group -> group.delete());
     }
 }

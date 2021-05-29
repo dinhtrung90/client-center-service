@@ -74,7 +74,7 @@ public class User extends AbstractAuditingEntity implements Serializable {
     private String resetKey;
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "jhi_user_authority",
         joinColumns = { @JoinColumn(name = "user_id", referencedColumnName = "id") },

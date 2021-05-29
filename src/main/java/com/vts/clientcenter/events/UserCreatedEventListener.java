@@ -47,7 +47,7 @@ public class UserCreatedEventListener {
     public void processGroupCreatedEventAfterRollBack(GroupCreationEvent event) {
         LOGGER.info("Event received: " + event);
         if (Objects.nonNull(event.getGroup())) {
-            oktaService.removeGroup(event.getGroup());
+//            oktaService.removeGroup(event.getGroup());
         }
     }
 

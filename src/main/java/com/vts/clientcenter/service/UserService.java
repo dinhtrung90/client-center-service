@@ -122,9 +122,7 @@ public class UserService {
 
             //sync authority
             User existedUser = existingUser.get();
-            boolean isMatch = existedUser.getAuthorities()
-                .stream()
-                .allMatch(p -> userAuthorities.contains(p.getName()));
+            boolean isMatch = existedUser.getAuthorities().stream().map(Authority::getName).collect(Collectors.toList()).containsAll(userAuthorities);
 
             if (!isMatch) {
                 userRepository.save(user);

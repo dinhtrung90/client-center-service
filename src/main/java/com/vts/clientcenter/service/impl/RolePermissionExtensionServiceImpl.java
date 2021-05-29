@@ -362,14 +362,23 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
             throw new BadRequestAlertException("Role can not remove", "UserRole", Constants.ROLE_NOT_DELETE);
         }
 
-        Optional<Authority> authorityOptional = authorityRepository.findById(roleName);
+        Optional<Authority> authorityOptional = authorityRepository.findByName(roleName);
 
-        if (authorityOptional.isPresent()) {
+        if (!authorityOptional.isPresent()) {
             throw new BadRequestAlertException("Authority have existed", "UserRole", Constants.USER_ROLE_NOT_FOUND);
         }
 
+        oktaService.removeGroup(roleName);
+
         Authority authority = authorityOptional.get();
 
+        for (RolePermission rolePermission : authority.getRolePermissions()) {
+            authority.removeRolePermission(rolePermission);
+        }
+
+        for (User user : authority.getUsers()) {
+            authority.removeUser(user);
+        }
         authorityRepository.delete(authority);
     }
 }

@@ -15,7 +15,7 @@ import java.util.Optional;
  */
 public interface AuthorityRepository extends JpaRepository<Authority, String>, JpaSpecificationExecutor<Authority> {
 
-        @Query("select au, rp from Authority au  join au.rolePermissions rp where au.name = :roleName")
-        Optional<Authority> getAllByRoleName(@Param("roleName") String roleName);
+//        @Query("select au from Authority au  left join fetch au.rolePermissions rp where au.name = :roleName")
+        Optional<Authority> findByName(String roleName);
 
 }
