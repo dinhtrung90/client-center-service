@@ -42,10 +42,10 @@ public class Authority extends AbstractAuditingEntity {
         return name;
     }
 
-    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
     private Set<RolePermission> rolePermissions;
 
-    @ManyToMany(mappedBy = "authorities", cascade = CascadeType.REMOVE)
+    @ManyToMany(mappedBy = "authorities")
     private Set<User> users;
 
     public void addUser(User user) {

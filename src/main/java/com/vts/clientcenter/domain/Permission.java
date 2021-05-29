@@ -38,7 +38,7 @@ public class Permission extends AbstractAuditingEntity {
     @Column(name = "description")
     private String description;
 
-    @OneToMany(mappedBy = "permission", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "permission", fetch = FetchType.LAZY)
     private Set<RolePermission> rolePermissions;
 
 
