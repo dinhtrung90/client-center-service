@@ -21,9 +21,11 @@ jhipster:
   registry:
     password: admin
 
+
 app:
   registry-url: vps-5785f290.vps.ovh.ca
-  redis-url: vps-5785f290.vps.ovh.ca
-  redis-password: Pa55w0rd
-  kafka-url: vps-5785f290.vps.ovh.ca
+  redis-url: redis.fingmeup.com
+  redis-password: 8yJTD47c9KkGG7Rx3SaL
+  kafka-brokers: fingmeup.com:9092
+  Kafka-prefix: elend
   mysql-url: vps-5785f290.vps.ovh.ca
