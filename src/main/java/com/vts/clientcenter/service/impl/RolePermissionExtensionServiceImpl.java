@@ -5,6 +5,7 @@ import static java.util.Objects.nonNull;
 
 import com.okta.sdk.resource.group.Group;
 import com.vts.clientcenter.config.Constants;
+import com.vts.clientcenter.dao.UserDao;
 import com.vts.clientcenter.domain.*;
 import com.vts.clientcenter.domain.enumeration.OperationEnum;
 import com.vts.clientcenter.events.GroupCreationEvent;
@@ -14,7 +15,9 @@ import com.vts.clientcenter.service.*;
 import com.vts.clientcenter.service.dto.EditPermissionRequestDto;
 import com.vts.clientcenter.service.dto.EditPermissionResponseDto;
 import com.vts.clientcenter.service.dto.RolePermissionDTO;
+import com.vts.clientcenter.service.dto.UserDTO;
 import com.vts.clientcenter.service.mapper.RolePermissionMapper;
+import com.vts.clientcenter.service.mapper.UserMapper;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import java.time.Instant;
 import java.util.*;
@@ -22,6 +25,7 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +55,12 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
+    private final CacheManager cacheManager;
+
+    private final UserDao userDao;
+
+    private final UserMapper userMapper;
+
     public RolePermissionExtensionServiceImpl(
         UserService userService,
         RolePermissionRepository rolePermissionRepository,
@@ -59,7 +69,7 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
         ModuleOperationRepository moduleOperationRepository,
         PermissionOperationRepository permissionOperationRepository,
         ModuleOperationRepository operationRepository,
-        PermissionRepository permissionRepository, OktaService oktaService, ApplicationEventPublisher applicationEventPublisher) {
+        PermissionRepository permissionRepository, OktaService oktaService, ApplicationEventPublisher applicationEventPublisher, CacheManager cacheManager, UserDao userDao, UserMapper userMapper) {
         super(userService);
         this.rolePermissionRepository = rolePermissionRepository;
         this.rolePermissionMapper = rolePermissionMapper;
@@ -70,6 +80,9 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
         this.permissionRepository = permissionRepository;
         this.oktaService = oktaService;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.cacheManager = cacheManager;
+        this.userDao = userDao;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -362,23 +375,78 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
             throw new BadRequestAlertException("Role can not remove", "UserRole", Constants.ROLE_NOT_DELETE);
         }
 
-        Optional<Authority> authorityOptional = authorityRepository.findByName(roleName);
-
-        if (!authorityOptional.isPresent()) {
-            throw new BadRequestAlertException("Authority have existed", "UserRole", Constants.USER_ROLE_NOT_FOUND);
-        }
-
         oktaService.removeGroup(roleName);
 
-        Authority authority = authorityOptional.get();
+        userDao.handleRemoveFromRole(roleName);
+    }
 
-        for (RolePermission rolePermission : authority.getRolePermissions()) {
-            authority.removeRolePermission(rolePermission);
+    @Override
+    public UserDTO assignRoleForUser(String roleName, String userId) {
+
+        //api create role
+        String userLogin = getUserLogin();
+
+        if (Objects.isNull(roleName)) {
+            throw new BadRequestAlertException("Role not existed.", "UserRole", Constants.USER_ROLE_NOT_FOUND);
         }
 
-        for (User user : authority.getUsers()) {
-            authority.removeUser(user);
+        if (Objects.isNull(userId)) {
+            throw new BadRequestAlertException("User not existed.", "UserRole", Constants.USER_NOT_FOUND);
         }
-        authorityRepository.delete(authority);
+
+        User user = getUserRepository().getOne(userId);
+
+        Authority authority = authorityRepository.getOne(roleName);
+
+        user.addAuthority(authority);
+
+        authority.addUser(user);
+
+        authorityRepository.save(authority);
+
+        getUserRepository().save(user);
+
+        return userMapper.userToUserDTO(user);
+    }
+
+    @Override
+    public List<UserDTO> assignRoleForUsers(String roleName, List<String> userIds) {
+
+        //api create role
+        String userLogin = getUserLogin();
+
+        if (Objects.isNull(roleName)) {
+            throw new BadRequestAlertException("Role not existed.", "UserRole", Constants.USER_ROLE_NOT_FOUND);
+        }
+
+        Authority authority = authorityRepository.getOne(roleName);
+
+        List<User> users = getUserRepository().findAllById(userIds);
+
+        for (User user : users) {
+
+            user.addAuthority(authority);
+            user.setLastModifiedBy(userLogin);
+            user.setLastModifiedDate(Instant.now());
+
+            clearUserCaches(user);
+
+            authority.addUser(user);
+        }
+
+        getUserRepository().saveAll(users);
+
+        authority.setLastModifiedBy(userLogin);
+        authority.setLastModifiedDate(Instant.now());
+        authorityRepository.save(authority);
+
+        return userMapper.usersToUserDTOs(users);
+    }
+
+    private void clearUserCaches(User user) {
+        Objects.requireNonNull(cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE)).evict(user.getLogin());
+        if (user.getEmail() != null) {
+            Objects.requireNonNull(cacheManager.getCache(UserRepository.USERS_BY_EMAIL_CACHE)).evict(user.getEmail());
+        }
     }
 }

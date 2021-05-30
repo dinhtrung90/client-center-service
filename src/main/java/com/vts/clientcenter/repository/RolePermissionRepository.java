@@ -15,4 +15,6 @@ public interface RolePermissionRepository extends JpaRepository<RolePermission, 
     List<RolePermission> findByRoleName(String roleName);
     List<RolePermission> findByIdIn(List<Long> ids);
     void deleteByIdNotIn(List<Long> ids);
+
+    void deleteByRoleName(String roleName);
 }

@@ -94,4 +94,24 @@ public class MemberAuthorityResource {
 
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/member-roles/assignRole/{roleName}/for/{userId}}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
+    public ResponseEntity<UserDTO> setRoleForUser(@PathVariable String roleName, @PathVariable String userId) {
+        log.debug("REST request to edit roles");
+
+        UserDTO responseDto = rolePermissionExtensionService.assignRoleForUser(roleName, userId);
+
+        return ResponseEntity.ok().body(responseDto);
+    }
+
+    @PostMapping("/member-roles/assignRole/{roleName}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
+    public ResponseEntity<List<UserDTO>> setRoleForUser(@PathVariable String roleName, @RequestBody List<String> userIds) {
+        log.debug("REST request to edit roles");
+
+        List<UserDTO> responseDto = rolePermissionExtensionService.assignRoleForUsers(roleName, userIds);
+
+        return ResponseEntity.ok().body(responseDto);
+    }
 }
