@@ -400,10 +400,6 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
 
         user.addAuthority(authority);
 
-        authority.addUser(user);
-
-        authorityRepository.save(authority);
-
         getUserRepository().save(user);
 
         return userMapper.userToUserDTO(user);
@@ -424,21 +420,17 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
         List<User> users = getUserRepository().findAllById(userIds);
 
         for (User user : users) {
-
+            boolean contains = user.getAuthorities().stream().map(Authority::getName).collect(Collectors.toSet()).contains(roleName);
+            if (contains) {
+                throw new BadRequestAlertException(String.format("Role existed for userId = %s", user.getId()), "UserRole", Constants.USER_ROLE_NOT_FOUND);
+            }
             user.addAuthority(authority);
             user.setLastModifiedBy(userLogin);
             user.setLastModifiedDate(Instant.now());
-
             clearUserCaches(user);
-
-            authority.addUser(user);
         }
 
         getUserRepository().saveAll(users);
-
-        authority.setLastModifiedBy(userLogin);
-        authority.setLastModifiedDate(Instant.now());
-        authorityRepository.save(authority);
 
         return userMapper.usersToUserDTOs(users);
     }
