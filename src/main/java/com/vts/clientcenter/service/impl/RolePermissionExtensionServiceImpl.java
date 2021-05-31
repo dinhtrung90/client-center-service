@@ -362,8 +362,6 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
     public void removeDetailRole(String roleName) {
 
         //api create role
-        String userLogin = getUserLogin();
-
         if (Objects.isNull(roleName)) {
             throw new BadRequestAlertException("Role not existed.", "UserRole", Constants.USER_ROLE_NOT_FOUND);
         }
@@ -373,6 +371,12 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
             roleName.equalsIgnoreCase(AuthoritiesConstants.SUPER_ADMIN) ||
                 roleName.equalsIgnoreCase(AuthoritiesConstants.SUPERVISOR)) {
             throw new BadRequestAlertException("Role can not remove", "UserRole", Constants.ROLE_NOT_DELETE);
+        }
+
+        Optional<Authority> authorityOptional = authorityRepository.findByName(roleName);
+
+        if (!authorityOptional.isPresent()) {
+            throw new BadRequestAlertException("Role not existed.", "UserRole", Constants.USER_ROLE_NOT_FOUND);
         }
 
         oktaService.removeGroup(roleName);

@@ -26,8 +26,9 @@ public class UserDaoImpl implements UserDao {
         List<Integer> userIds = (List<Integer>)q.getResultList();
 
 
-        q = entityManager.createNativeQuery("delete from jhi_user_authority where jhi_user_authority.user_id in (:ides)");
+        q = entityManager.createNativeQuery("delete from jhi_user_authority where jhi_user_authority.user_id in (:ides) and jhi_user_authority.authority_name = (:roleName)");
         q.setParameter("ides", userIds);
+        q.setParameter("roleName", authority.getName());
         q.executeUpdate();
 
         // user in another roles not delete
