@@ -34,6 +34,6 @@ public class ModuleOperation implements Serializable {
     @Column(name = "operation")
     private OperationEnum name;
 
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "operations")
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "operations", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<RolePermission> rolePermissions;
 }

@@ -339,6 +339,7 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
 
         List<RolePermission> rolePermissions = rolePermissionRepository.saveAll(savingRolePermissions);
 
+
         for (PermissionDetailDto permissionDetail : dto.getPermissionDetails()) {
             rolePermissions.stream()
                 .filter(rolePermission -> rolePermission.getPermissionId().equals(permissionDetail.getPermissionId()))
