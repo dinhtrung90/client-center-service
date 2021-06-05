@@ -17,6 +17,22 @@ app:
   Kafka-prefix: elend
   mysql-url: vps-5785f290.vps.ovh.ca
 
+  kafka:
+    retryPeriod: 5
+    maxAttempts: 3
+    autoReset: latest
+    currency: 5
+    group:
+      consumers: "${app.Kafka-prefix}-consumers"
+    topic:
+      email-invitation: ${app.kafka-prefix}-email-invitations-topic
+      dlqName: ${app.kafka-prefix}-topic-dlq
+      notification:
+        internal:
+          client-center: ${app.kafka-prefix}-cc-internal-topic
+
+
+
 spring:
   application:
     name: ClientCenterService

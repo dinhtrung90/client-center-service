@@ -37,11 +37,13 @@ public class UserService {
 
     private final CacheManager cacheManager;
 
+    private final OktaService oktaService;
 
-    public UserService(UserRepository userRepository, AuthorityRepository authorityRepository, CacheManager cacheManager) {
+    public UserService(UserRepository userRepository, AuthorityRepository authorityRepository, CacheManager cacheManager, OktaService oktaService) {
         this.userRepository = userRepository;
         this.authorityRepository = authorityRepository;
         this.cacheManager = cacheManager;
+        this.oktaService = oktaService;
     }
 
     /**
@@ -51,9 +53,8 @@ public class UserService {
      * @param lastName  last name of user.
      * @param email     email id of user.
      * @param langKey   language key.
-     * @param imageUrl  image URL of user.
      */
-    public void updateUser(String firstName, String lastName, String email, String langKey, String imageUrl) {
+    public void updateUser(String firstName, String lastName, String email, String langKey) {
         SecurityUtils
             .getCurrentUserLogin()
             .flatMap(userRepository::findOneByLogin)
@@ -65,7 +66,6 @@ public class UserService {
                         user.setEmail(email.toLowerCase());
                     }
                     user.setLangKey(langKey);
-                    user.setImageUrl(imageUrl);
                     this.clearUserCaches(user);
                     log.debug("Changed Information for User: {}", user);
                 }
@@ -112,25 +112,18 @@ public class UserService {
                 Instant idpModifiedDate = (Instant) details.get("updated_at");
                 if (idpModifiedDate.isAfter(dbModifiedDate)) {
                     log.debug("Updating user '{}' in local database", user.getLogin());
-                    updateUser(user.getFirstName(), user.getLastName(), user.getEmail(), user.getLangKey(), user.getImageUrl());
+                    updateUser(user.getFirstName(), user.getLastName(), user.getEmail(), user.getLangKey());
                 }
                 // no last updated info, blindly update
             } else {
                 log.debug("Updating user '{}' in local database", user.getLogin());
-                updateUser(user.getFirstName(), user.getLastName(), user.getEmail(), user.getLangKey(), user.getImageUrl());
+                updateUser(user.getFirstName(), user.getLastName(), user.getEmail(), user.getLangKey());
             }
-
-            //sync authority
-            User existedUser = existingUser.get();
-            boolean isMatch = existedUser.getAuthorities().stream().map(Authority::getName).collect(Collectors.toList()).containsAll(userAuthorities);
-
-            if (!isMatch) {
-                userRepository.save(user);
-                this.clearUserCaches(user);
-            }
-
         } else {
             log.debug("Saving user '{}' in local database", user.getLogin());
+            com.okta.sdk.resource.user.User oktaUser = oktaService.getUser(user.getId());
+            user.setStatus(oktaUser.getStatus());
+
             userRepository.save(user);
             this.clearUserCaches(user);
         }
@@ -215,9 +208,9 @@ public class UserService {
             // set langKey to default if not specified by IdP
             user.setLangKey(Constants.DEFAULT_LANGUAGE);
         }
-        if (details.get("picture") != null) {
-            user.setImageUrl((String) details.get("picture"));
-        }
+//        if (details.get("picture") != null) {
+//            user.setImageUrl((String) details.get("picture"));
+//        }
         user.setActivated(true);
         return user;
     }

@@ -1,9 +1,13 @@
 package com.vts.clientcenter.service.dto;
 
+import com.okta.sdk.resource.user.UserStatus;
 import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.domain.Authority;
 import com.vts.clientcenter.domain.User;
+import com.vts.clientcenter.domain.UserAddress;
+
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.validation.constraints.*;
@@ -19,6 +23,10 @@ public class UserDTO {
     @Size(min = 1, max = 50)
     private String login;
 
+    @Size(max = 20)
+    @NotNull
+    private String phone;
+
     @Size(max = 50)
     private String firstName;
 
@@ -28,12 +36,6 @@ public class UserDTO {
     @Email
     @Size(min = 5, max = 254)
     private String email;
-
-    @Size(max = 50)
-    private String phone;
-
-    @Size(max = 256)
-    private String imageUrl;
 
     private boolean activated = false;
 
@@ -50,6 +52,12 @@ public class UserDTO {
 
     private Set<String> authorities;
 
+    private UserProfileDTO userProfileDto;
+
+    private List<UserAddressDTO> userAddressList;
+
+    private UserStatus status;
+
     public UserDTO() {
         // Empty constructor needed for Jackson.
     }
@@ -61,14 +69,13 @@ public class UserDTO {
         this.lastName = user.getLastName();
         this.email = user.getEmail();
         this.activated = user.getActivated();
-        this.imageUrl = user.getImageUrl();
         this.langKey = user.getLangKey();
         this.createdBy = user.getCreatedBy();
         this.createdDate = user.getCreatedDate();
         this.lastModifiedBy = user.getLastModifiedBy();
         this.lastModifiedDate = user.getLastModifiedDate();
         this.authorities = user.getAuthorities().stream().map(Authority::getName).collect(Collectors.toSet());
-        this.phone = user.getPhone();
+        this.status = user.getStatus();
     }
 
     public String getId() {
@@ -109,14 +116,6 @@ public class UserDTO {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
     }
 
     public boolean isActivated() {
@@ -175,12 +174,36 @@ public class UserDTO {
         this.authorities = authorities;
     }
 
+    public UserProfileDTO getUserProfileDto() {
+        return userProfileDto;
+    }
+
+    public void setUserProfileDto(UserProfileDTO userProfileDto) {
+        this.userProfileDto = userProfileDto;
+    }
+
+    public List<UserAddressDTO> getUserAddressList() {
+        return userAddressList;
+    }
+
+    public void setUserAddressList(List<UserAddressDTO> userAddressList) {
+        this.userAddressList = userAddressList;
+    }
+
     public String getPhone() {
         return phone;
     }
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
     }
 
     // prettier-ignore
@@ -191,7 +214,6 @@ public class UserDTO {
             ", firstName='" + firstName + '\'' +
             ", lastName='" + lastName + '\'' +
             ", email='" + email + '\'' +
-            ", imageUrl='" + imageUrl + '\'' +
             ", activated=" + activated +
             ", langKey='" + langKey + '\'' +
             ", createdBy=" + createdBy +
@@ -199,7 +221,6 @@ public class UserDTO {
             ", lastModifiedBy='" + lastModifiedBy + '\'' +
             ", lastModifiedDate=" + lastModifiedDate +
             ", authorities=" + authorities +
-            ", phone=" + phone +
             "}";
     }
 }

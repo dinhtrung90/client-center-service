@@ -1,6 +1,7 @@
 package com.vts.clientcenter.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.okta.sdk.resource.user.UserStatus;
 import com.vts.clientcenter.config.Constants;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -11,6 +12,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
@@ -47,10 +49,6 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @Column(length = 254, unique = true)
     private String email;
 
-    @Size(min = 5, max = 254)
-    @Column(length = 254, unique = true)
-    private String phone;
-
     @NotNull
     @Column(nullable = false)
     private boolean activated = false;
@@ -58,10 +56,6 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @Size(min = 2, max = 10)
     @Column(name = "lang_key", length = 10)
     private String langKey;
-
-    @Size(max = 256)
-    @Column(name = "image_url", length = 256)
-    private String imageUrl;
 
     @Size(max = 20)
     @Column(name = "activation_key", length = 20)
@@ -73,6 +67,10 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @JsonIgnore
     private String resetKey;
 
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
+
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
@@ -83,6 +81,12 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @BatchSize(size = 20)
     private Set<Authority> authorities = new HashSet<>();
+
+    @Column(name = "activation_url", length = 2000)
+    private String activationUrl;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserAddress> userAddresses= new HashSet<>();
 
     public String getId() {
         return id;
@@ -124,15 +128,6 @@ public class User extends AbstractAuditingEntity implements Serializable {
     public void setEmail(String email) {
         this.email = email;
     }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
     public boolean getActivated() {
         return activated;
     }
@@ -155,14 +150,6 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     public void setAuthorities(Set<Authority> authorities) {
         this.authorities = authorities;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
     }
 
     public String getResetKey() {
@@ -195,6 +182,40 @@ public class User extends AbstractAuditingEntity implements Serializable {
         authority.getUsers().remove(this);
     }
 
+    public String getActivationUrl() {
+        return activationUrl;
+    }
+
+    public void setActivationUrl(String activationUrl) {
+        this.activationUrl = activationUrl;
+    }
+
+    public Set<UserAddress> getUserAddresses() {
+        return userAddresses;
+    }
+
+    public void setUserAddresses(Set<UserAddress> userAddresses) {
+        this.userAddresses = userAddresses;
+    }
+
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
+    }
+
+    public void addUserAddress(UserAddress userAddresses) {
+        this.userAddresses.add(userAddresses);
+        userAddresses.setUser(this);
+    }
+
+    public User removeUserAddress(UserAddress userAddresses) {
+        this.userAddresses.remove(userAddresses);
+        userAddresses.setUser(null);
+        return this;
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -219,7 +240,6 @@ public class User extends AbstractAuditingEntity implements Serializable {
             ", firstName='" + firstName + '\'' +
             ", lastName='" + lastName + '\'' +
             ", email='" + email + '\'' +
-            ", imageUrl='" + imageUrl + '\'' +
             ", activated='" + activated + '\'' +
             ", langKey='" + langKey + '\'' +
             "}";

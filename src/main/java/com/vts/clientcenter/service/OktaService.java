@@ -8,6 +8,7 @@ import com.okta.sdk.resource.group.GroupBuilder;
 import com.okta.sdk.resource.group.GroupList;
 import com.okta.sdk.resource.group.GroupProfile;
 import com.okta.sdk.resource.user.User;
+import com.okta.sdk.resource.user.UserActivationToken;
 import com.okta.sdk.resource.user.UserBuilder;
 import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.config.OktaConfig;
@@ -40,6 +41,7 @@ public class OktaService {
     }
 
     public User createOktaAccount(UserDTO userDTO, String tempPassword) throws Exception {
+
         GroupList groups = client.listGroups();
 
         List<GroupProfile> groupProfiles = groups.stream().map(Group::getProfile).collect(Collectors.toList());
@@ -108,5 +110,9 @@ public class OktaService {
             .stream()
             .filter(group -> group.getProfile().getName().equalsIgnoreCase(groupName))
             .forEach(group -> group.delete());
+    }
+
+    public User getUser(String userId) {
+        return client.getUser(userId);
     }
 }

@@ -1,18 +1,29 @@
 package com.vts.clientcenter.service;
 
+import com.okta.sdk.resource.user.UserActivationToken;
 import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.domain.Authority;
 import com.vts.clientcenter.domain.User;
+import com.vts.clientcenter.domain.UserAddress;
+import com.vts.clientcenter.domain.UserProfile;
 import com.vts.clientcenter.events.UserCreatedEvent;
 import com.vts.clientcenter.helpers.PasswordGenerator;
 import com.vts.clientcenter.repository.AuthorityRepository;
+import com.vts.clientcenter.repository.UserAddressRepository;
+import com.vts.clientcenter.repository.UserProfileRepository;
 import com.vts.clientcenter.repository.UserRepository;
+import com.vts.clientcenter.security.AuthoritiesConstants;
 import com.vts.clientcenter.security.SecurityUtils;
 import com.vts.clientcenter.service.dto.ActivatedPayload;
+import com.vts.clientcenter.service.dto.UserAddressDTO;
 import com.vts.clientcenter.service.dto.UserDTO;
+import com.vts.clientcenter.service.dto.UserProfileDTO;
+import com.vts.clientcenter.service.mapper.UserAddressMapper;
+import com.vts.clientcenter.service.mapper.UserProfileMapper;
 import com.vts.clientcenter.web.rest.AccountResource;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import io.github.jhipster.security.RandomUtil;
+
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,6 +31,8 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+
+import org.checkerframework.checker.units.qual.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +62,22 @@ public class AccountService {
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
+    @Autowired
+    private UserProfileRepository userProfileRepository;
+
+    @Autowired
+    private UserAddressMapper userAddressMapper;
+
+    @Autowired
+    private UserAddressRepository userAddressRepository;
+
+    @Autowired
+    private UserProfileMapper userProfileMapper;
+
+
     @Transactional
     public UserDTO createUserAccount(UserDTO userDTO) throws Exception {
+
         Optional<User> existingUser = userRepository.findOneByEmailIgnoreCase(userDTO.getEmail());
 
         if (existingUser.isPresent()) {
@@ -58,9 +85,14 @@ public class AccountService {
         }
 
         String password = PasswordGenerator.generateRandomPassword(8);
+
         com.okta.sdk.resource.user.User oktaUser = oktaService.createOktaAccount(userDTO, password);
 
-        String login = SecurityUtils.getCurrentUserLogin().orElse("System");
+        // send email to users
+        UserActivationToken activate = oktaUser.activate(true);
+
+
+        String loginUser = SecurityUtils.getCurrentUserLogin().orElse(Constants.SYSTEM_ACCOUNT);
 
         User user = new User();
         user.setLangKey(userDTO.getLangKey() != null ? userDTO.getLangKey() : Constants.DEFAULT_LANGUAGE);
@@ -69,15 +101,32 @@ public class AccountService {
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
         user.setEmail(userDTO.getEmail());
-        user.setImageUrl(userDTO.getImageUrl());
         user.setCreatedDate(Instant.now());
-        user.setLastModifiedBy(login);
+        user.setLastModifiedBy(loginUser);
         user.setLastModifiedDate(Instant.now());
-        user.setCreatedBy(login);
-        user.setPhone(userDTO.getPhone());
-        user.setActivationKey(RandomUtil.generateResetKey());
+        user.setCreatedBy(loginUser);
+        user.setActivationKey(activate.getActivationToken());
+        user.setActivationUrl(activate.getActivationUrl());
+        user.setStatus(oktaUser.getStatus());
 
+        //add role for users
         Collection<String> dbAuthorities = getAuthorities();
+
+        if (CollectionUtils.isEmpty(userDTO.getAuthorities())) {
+
+            userDTO.getAuthorities().add(AuthoritiesConstants.USER);
+
+        } else {
+
+            Optional<String> userRoleOptional = userDTO.getAuthorities().stream()
+                .filter(p -> p.equalsIgnoreCase(AuthoritiesConstants.USER))
+                .findFirst();
+
+            if (!userRoleOptional.isPresent()) {
+                userDTO.getAuthorities().add(AuthoritiesConstants.USER);
+            }
+        }
+
         List<Authority> authorities = new ArrayList<>();
         for (String authority : userDTO.getAuthorities()) {
             if (dbAuthorities.contains(authority)) {
@@ -89,15 +138,76 @@ public class AccountService {
         user.setAuthorities(new HashSet<>(authorities));
 
         userDTO.setId(oktaUser.getId());
+
         user.setId(oktaUser.getId());
+
+        //TODO publish user to notification
+        applicationEventPublisher.publishEvent(new UserCreatedEvent(user));
+
+        //add profile user
+        UserProfile userProfile;
+        if (Objects.nonNull(userDTO.getUserProfileDto())) {
+
+            UserProfileDTO userProfileDto = userDTO.getUserProfileDto();
+
+            userProfile = new UserProfile()
+                .birthDate(userProfileDto.getBirthDate())
+                .createdBy(loginUser)
+                .lastModifiedBy(loginUser)
+                .lastModifiedDate(Instant.now())
+                .createdDate(Instant.now())
+                .user(user)
+                .gender(userProfileDto.getGender())
+                .phone(userDTO.getPhone());
+
+        } else {
+            userProfile = new UserProfile()
+                .createdBy(loginUser)
+                .lastModifiedBy(loginUser)
+                .lastModifiedDate(Instant.now())
+                .user(user)
+                .phone(userDTO.getPhone())
+                .createdDate(Instant.now());
+        }
+
+        // add address
+        if (!CollectionUtils.isEmpty(userDTO.getUserAddressList())) {
+
+            List<UserAddressDTO> userAddressList = userDTO.getUserAddressList();
+            for (UserAddressDTO a : userAddressList) {
+                a.setCreatedBy(loginUser);
+                a.setLastModifiedBy(loginUser);
+                a.setCreatedDate(Instant.now());
+                a.setLastModifiedDate(Instant.now());
+            }
+
+            List<UserAddress> userAddresses = userAddressMapper.toEntity(userAddressList);
+
+            for (UserAddress userAddress : userAddresses) {
+                user.addUserAddress(userAddress);
+            }
+
+        } else {
+
+            user.setUserAddresses(new HashSet<>(new ArrayList<>()));
+        }
 
         Validator validator = buildValidator();
         Set<ConstraintViolation<User>> constraintViolations = validator.validate(user);
 
         if (CollectionUtils.isEmpty(constraintViolations)) {
-            userRepository.save(user);
-            applicationEventPublisher.publishEvent(new UserCreatedEvent(user));
+
+            User savingUser = userRepository.save(user);
+            userProfile.setUser(savingUser);
+            userProfileRepository.save(userProfile);
+
+            UserProfileDTO userProfileDTO = userProfileMapper.toDto(userProfile);
+            userDTO.setUserProfileDto(userProfileDTO);
+
+            userDTO.setUserAddressList(userAddressMapper.toDto(new ArrayList<>(savingUser.getUserAddresses())));
+
         } else {
+
             oktaService.removeAccount(userDTO.getId());
             throw new BadRequestAlertException("User invalid", "UserValidator", Constants.USER_VALIDATOR_ERR);
         }
@@ -131,10 +241,8 @@ public class AccountService {
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
         user.setEmail(userDTO.getEmail());
-        user.setImageUrl(userDTO.getImageUrl());
         user.setLastModifiedBy(login);
         user.setLastModifiedDate(Instant.now());
-        user.setPhone(userDTO.getPhone());
 
         Collection<String> dbAuthorities = getAuthorities();
         List<Authority> authorities = new ArrayList<>();
@@ -211,7 +319,6 @@ public class AccountService {
         userDTO.setLogin(user.getLogin());
         userDTO.setFirstName(user.getFirstName());
         userDTO.setLastName(user.getLastName());
-        userDTO.setImageUrl(user.getImageUrl());
         userDTO.setLangKey(user.getLangKey());
         userDTO.setLastModifiedBy(user.getLastModifiedBy());
         userDTO.setLastModifiedDate(user.getLastModifiedDate());
