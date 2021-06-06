@@ -49,7 +49,7 @@ public class AuthorityQueryService extends QueryService<Authority> {
         ).collect(Collectors.toList()));
 
         response.setTotalPage(authorityList.getTotalPages());
-        response.setSize(pageable.getPageNumber());
+        response.setSize(pageable.getPageSize());
 
         return response;
     }

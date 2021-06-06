@@ -1,9 +1,6 @@
 package com.vts.clientcenter.service;
 
-import com.vts.clientcenter.service.dto.EditPermissionRequestDto;
-import com.vts.clientcenter.service.dto.EditPermissionResponseDto;
-import com.vts.clientcenter.service.dto.RolePermissionDTO;
-import com.vts.clientcenter.service.dto.UserDTO;
+import com.vts.clientcenter.service.dto.*;
 
 import java.util.List;
 
@@ -21,4 +18,6 @@ public interface RolePermissionExtensionService {
     UserDTO assignRoleForUser(String roleName, String userId);
 
     List<UserDTO> assignRoleForUsers(String roleName, List<String> userIds);
+
+    UserRolePermissionResponse getRoleWithPermissions(String roleName);
 }

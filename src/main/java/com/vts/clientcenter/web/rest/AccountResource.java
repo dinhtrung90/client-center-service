@@ -3,19 +3,25 @@ package com.vts.clientcenter.web.rest;
 import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.security.AuthoritiesConstants;
 import com.vts.clientcenter.service.AccountService;
-import com.vts.clientcenter.service.dto.ActivatedPayload;
-import com.vts.clientcenter.service.dto.EmployerBrandDTO;
-import com.vts.clientcenter.service.dto.UserDTO;
+import com.vts.clientcenter.service.dto.*;
+
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
+
+import io.github.jhipster.web.util.PaginationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 /**
  * REST controller for managing users.
@@ -82,5 +88,12 @@ public class AccountResource {
         log.debug("REST request to get account : {}", userId);
         UserDTO payload = accountService.getAccount(userId);
         return ResponseEntity.ok(payload);
+    }
+
+    @GetMapping("/account/list")
+    public ResponseEntity<PagingResponse<UserDTO>> getAllAccounts(UserCriteria criteria, Pageable pageable) {
+        log.debug("REST request to get accounts by criteria: {}", criteria);
+        PagingResponse<UserDTO> response = accountService.getAccounts(criteria, pageable);
+        return ResponseEntity.ok(response);
     }
 }

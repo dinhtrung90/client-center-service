@@ -2,6 +2,7 @@ package com.vts.clientcenter.dao;
 
 import com.vts.clientcenter.domain.Authority;
 import com.vts.clientcenter.domain.User;
+import com.vts.clientcenter.service.dto.UserAuthorizedResponseDto;
 import com.vts.clientcenter.service.dto.UserDTO;
 import org.springframework.stereotype.Repository;
 
@@ -43,4 +44,5 @@ public class UserDaoImpl implements UserDao {
 
         entityManager.remove(authority);
     }
+
 }

@@ -12,10 +12,7 @@ import com.vts.clientcenter.events.GroupCreationEvent;
 import com.vts.clientcenter.repository.*;
 import com.vts.clientcenter.security.AuthoritiesConstants;
 import com.vts.clientcenter.service.*;
-import com.vts.clientcenter.service.dto.EditPermissionRequestDto;
-import com.vts.clientcenter.service.dto.EditPermissionResponseDto;
-import com.vts.clientcenter.service.dto.RolePermissionDTO;
-import com.vts.clientcenter.service.dto.UserDTO;
+import com.vts.clientcenter.service.dto.*;
 import com.vts.clientcenter.service.mapper.RolePermissionMapper;
 import com.vts.clientcenter.service.mapper.UserMapper;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
@@ -383,6 +380,10 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
         oktaService.removeGroup(roleName);
 
         userDao.handleRemoveFromRole(roleName);
+
+        User user = getUserByLogin();
+
+        this.clearUserCaches(user);
     }
 
     @Override
@@ -406,6 +407,8 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
         user.addAuthority(authority);
 
         getUserRepository().save(user);
+
+        this.clearUserCaches(user);
 
         return userMapper.userToUserDTO(user);
     }
@@ -445,5 +448,43 @@ public class RolePermissionExtensionServiceImpl extends AbstractBaseService impl
         if (user.getEmail() != null) {
             Objects.requireNonNull(cacheManager.getCache(UserRepository.USERS_BY_EMAIL_CACHE)).evict(user.getEmail());
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserRolePermissionResponse getRoleWithPermissions(String roleName) {
+
+        //api create role
+        List<RolePermission> rolePermissionList = rolePermissionRepository.findAllByRoleName(roleName);
+
+        List<PermissionDetailDto> permissionDetails = new ArrayList<>();
+
+        Optional<RolePermission> rolePermissionOptional = rolePermissionList.stream()
+            .findFirst();
+
+        if (!rolePermissionOptional.isPresent()) {
+            return null;
+        }
+
+        for (RolePermission rolePermission : rolePermissionList) {
+
+            Permission permission = rolePermission.getPermission();
+
+            PermissionDetailDto detailDto = PermissionDetailDto
+                .builder()
+                .id(rolePermission.getId())
+                .permissionId(rolePermission.getPermissionId())
+                .permissionName(permission.getName())
+                .permissionDesc(permission.getDescription())
+                .operations(rolePermission.getOperations().stream().map(ModuleOperation::getName).collect(Collectors.toList()))
+                .build();
+            permissionDetails.add(detailDto);
+        }
+
+        return UserRolePermissionResponse
+            .builder()
+            .roleName(roleName)
+            .permissionDetails(permissionDetails)
+            .build();
     }
 }

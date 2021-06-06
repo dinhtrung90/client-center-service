@@ -46,7 +46,7 @@ public class AbstractBaseService {
         this.userService = userService;
     }
 
-    private User getUserByLogin() {
+    public User getUserByLogin() {
         Optional<String> currentUserLoginOptional = SecurityUtils.getCurrentUserLogin();
         String userLogin = currentUserLoginOptional.get();
         Optional<User> userOptional = userService.getUserWithAuthoritiesByLogin(userLogin);

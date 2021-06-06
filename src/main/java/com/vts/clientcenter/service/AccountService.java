@@ -14,10 +14,7 @@ import com.vts.clientcenter.repository.UserProfileRepository;
 import com.vts.clientcenter.repository.UserRepository;
 import com.vts.clientcenter.security.AuthoritiesConstants;
 import com.vts.clientcenter.security.SecurityUtils;
-import com.vts.clientcenter.service.dto.ActivatedPayload;
-import com.vts.clientcenter.service.dto.UserAddressDTO;
-import com.vts.clientcenter.service.dto.UserDTO;
-import com.vts.clientcenter.service.dto.UserProfileDTO;
+import com.vts.clientcenter.service.dto.*;
 import com.vts.clientcenter.service.mapper.UserAddressMapper;
 import com.vts.clientcenter.service.mapper.UserProfileMapper;
 import com.vts.clientcenter.web.rest.AccountResource;
@@ -38,6 +35,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -74,6 +73,8 @@ public class AccountService {
     @Autowired
     private UserProfileMapper userProfileMapper;
 
+    @Autowired
+    private UserQueryService userQueryService;
 
     @Transactional
     public UserDTO createUserAccount(UserDTO userDTO) throws Exception {
@@ -331,10 +332,23 @@ public class AccountService {
         return authorityRepository.findAll().stream().map(Authority::getName).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public PagingResponse<UserDTO> getAccounts(UserCriteria criteria, Pageable pageable) {
+        PagingResponse<UserDTO> response = new PagingResponse<>();
+        Page<UserDTO> userPages = userQueryService.findByCriteria(criteria, pageable);
+        response.setTotalPage(userPages.getTotalPages());
+        response.setSize(userPages.getSize());
+        response.setItems(userPages.getContent());
+        return response;
+
+    }
+
     private void clearUserCaches(User user) {
         Objects.requireNonNull(cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE)).evict(user.getLogin());
         if (user.getEmail() != null) {
             Objects.requireNonNull(cacheManager.getCache(UserRepository.USERS_BY_EMAIL_CACHE)).evict(user.getEmail());
         }
     }
+
+
 }

@@ -4,6 +4,7 @@ import com.vts.clientcenter.domain.RolePermission;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -17,4 +18,7 @@ public interface RolePermissionRepository extends JpaRepository<RolePermission, 
     void deleteByIdNotIn(List<Long> ids);
 
     void deleteByRoleName(String roleName);
+
+
+    List<RolePermission> findAllByRoleName(String roleName);
 }

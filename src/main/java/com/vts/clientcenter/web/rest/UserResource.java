@@ -2,8 +2,12 @@ package com.vts.clientcenter.web.rest;
 
 import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.security.AuthoritiesConstants;
+import com.vts.clientcenter.service.RolePermissionExtensionService;
 import com.vts.clientcenter.service.UserService;
+import com.vts.clientcenter.service.dto.EditPermissionResponseDto;
+import com.vts.clientcenter.service.dto.UserAuthorizedResponseDto;
 import com.vts.clientcenter.service.dto.UserDTO;
+import com.vts.clientcenter.service.dto.UserRolePermissionResponse;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import io.github.jhipster.web.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
@@ -21,7 +25,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * REST controller for managing users.
@@ -57,8 +63,11 @@ public class UserResource {
 
     private final UserService userService;
 
-    public UserResource(UserService userService) {
+    private final RolePermissionExtensionService rolePermissionExtensionService;
+
+    public UserResource(UserService userService, RolePermissionExtensionService rolePermissionExtensionService) {
         this.userService = userService;
+        this.rolePermissionExtensionService = rolePermissionExtensionService;
     }
 
     /**
@@ -98,9 +107,25 @@ public class UserResource {
 
     // API sync account from Okta into db
     @PostMapping("/users/sync")
-    public UserDTO getAccount(Principal principal) {
+    public UserAuthorizedResponseDto getAccount(Principal principal) {
         if (principal instanceof AbstractAuthenticationToken) {
-            return userService.getUserFromAuthentication((AbstractAuthenticationToken) principal);
+
+            UserDTO userFromAuthentication = userService.getUserFromAuthentication((AbstractAuthenticationToken) principal);
+
+            List<UserRolePermissionResponse> permissionList = new ArrayList<>();
+
+            for (String authority : userFromAuthentication.getAuthorities()) {
+                UserRolePermissionResponse responseDto = rolePermissionExtensionService.getRoleWithPermissions(authority);
+                if (Objects.nonNull(responseDto)) {
+                    permissionList.add(responseDto);
+                }
+            }
+
+            return UserAuthorizedResponseDto.builder()
+                .rolePermissions(permissionList)
+                .userDto(userFromAuthentication)
+                .build();
+
         } else {
             throw new BadRequestAlertException("User is not able to sync.", "Users", Constants.USER_NOT_FOUND);
         }
