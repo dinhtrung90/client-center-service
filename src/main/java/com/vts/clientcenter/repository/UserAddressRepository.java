@@ -1,7 +1,7 @@
 package com.vts.clientcenter.repository;
 
 import com.vts.clientcenter.domain.UserAddress;
-
+import java.util.List;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 
@@ -11,4 +11,7 @@ import org.springframework.stereotype.Repository;
 @SuppressWarnings("unused")
 @Repository
 public interface UserAddressRepository extends JpaRepository<UserAddress, Long>, JpaSpecificationExecutor<UserAddress> {
+    List<UserAddress> findAllByUserId(String userId);
+
+    void deleteAllByIdNotIn(List<Long> ides);
 }

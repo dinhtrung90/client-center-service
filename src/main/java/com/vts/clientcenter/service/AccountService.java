@@ -20,15 +20,15 @@ import com.vts.clientcenter.service.mapper.UserProfileMapper;
 import com.vts.clientcenter.web.rest.AccountResource;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import io.github.jhipster.security.RandomUtil;
-
+import io.swagger.models.auth.In;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
-
 import org.checkerframework.checker.units.qual.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +78,6 @@ public class AccountService {
 
     @Transactional
     public UserDTO createUserAccount(UserDTO userDTO) throws Exception {
-
         Optional<User> existingUser = userRepository.findOneByEmailIgnoreCase(userDTO.getEmail());
 
         if (existingUser.isPresent()) {
@@ -91,7 +90,6 @@ public class AccountService {
 
         // send email to users
         UserActivationToken activate = oktaUser.activate(true);
-
 
         String loginUser = SecurityUtils.getCurrentUserLogin().orElse(Constants.SYSTEM_ACCOUNT);
 
@@ -114,12 +112,11 @@ public class AccountService {
         Collection<String> dbAuthorities = getAuthorities();
 
         if (CollectionUtils.isEmpty(userDTO.getAuthorities())) {
-
             userDTO.getAuthorities().add(AuthoritiesConstants.USER);
-
         } else {
-
-            Optional<String> userRoleOptional = userDTO.getAuthorities().stream()
+            Optional<String> userRoleOptional = userDTO
+                .getAuthorities()
+                .stream()
                 .filter(p -> p.equalsIgnoreCase(AuthoritiesConstants.USER))
                 .findFirst();
 
@@ -148,32 +145,31 @@ public class AccountService {
         //add profile user
         UserProfile userProfile;
         if (Objects.nonNull(userDTO.getUserProfileDto())) {
-
             UserProfileDTO userProfileDto = userDTO.getUserProfileDto();
 
-            userProfile = new UserProfile()
-                .birthDate(userProfileDto.getBirthDate())
-                .createdBy(loginUser)
-                .lastModifiedBy(loginUser)
-                .lastModifiedDate(Instant.now())
-                .createdDate(Instant.now())
-                .user(user)
-                .gender(userProfileDto.getGender())
-                .phone(userDTO.getPhone());
-
+            userProfile =
+                new UserProfile()
+                    .birthDate(userProfileDto.getBirthDate())
+                    .createdBy(loginUser)
+                    .lastModifiedBy(loginUser)
+                    .lastModifiedDate(Instant.now())
+                    .createdDate(Instant.now())
+                    .user(user)
+                    .gender(userProfileDto.getGender())
+                    .phone(userDTO.getPhone());
         } else {
-            userProfile = new UserProfile()
-                .createdBy(loginUser)
-                .lastModifiedBy(loginUser)
-                .lastModifiedDate(Instant.now())
-                .user(user)
-                .phone(userDTO.getPhone())
-                .createdDate(Instant.now());
+            userProfile =
+                new UserProfile()
+                    .createdBy(loginUser)
+                    .lastModifiedBy(loginUser)
+                    .lastModifiedDate(Instant.now())
+                    .user(user)
+                    .phone(userDTO.getPhone())
+                    .createdDate(Instant.now());
         }
 
         // add address
         if (!CollectionUtils.isEmpty(userDTO.getUserAddressList())) {
-
             List<UserAddressDTO> userAddressList = userDTO.getUserAddressList();
             for (UserAddressDTO a : userAddressList) {
                 a.setCreatedBy(loginUser);
@@ -187,9 +183,7 @@ public class AccountService {
             for (UserAddress userAddress : userAddresses) {
                 user.addUserAddress(userAddress);
             }
-
         } else {
-
             user.setUserAddresses(new HashSet<>(new ArrayList<>()));
         }
 
@@ -197,7 +191,6 @@ public class AccountService {
         Set<ConstraintViolation<User>> constraintViolations = validator.validate(user);
 
         if (CollectionUtils.isEmpty(constraintViolations)) {
-
             User savingUser = userRepository.save(user);
             userProfile.setUser(savingUser);
             userProfileRepository.save(userProfile);
@@ -206,9 +199,7 @@ public class AccountService {
             userDTO.setUserProfileDto(userProfileDTO);
 
             userDTO.setUserAddressList(userAddressMapper.toDto(new ArrayList<>(savingUser.getUserAddresses())));
-
         } else {
-
             oktaService.removeAccount(userDTO.getId());
             throw new BadRequestAlertException("User invalid", "UserValidator", Constants.USER_VALIDATOR_ERR);
         }
@@ -218,7 +209,8 @@ public class AccountService {
 
     @Transactional
     public UserDTO updateAccount(UserDTO userDTO) throws Exception {
-        String login = SecurityUtils.getCurrentUserLogin().orElse("System");
+        String userLogin = SecurityUtils.getCurrentUserLogin().orElse(Constants.SYSTEM_ACCOUNT);
+
         if (Objects.isNull(userDTO.getId())) {
             throw new BadRequestAlertException("User Not Found", "USER", Constants.ID_NOT_NULL);
         }
@@ -242,19 +234,27 @@ public class AccountService {
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
         user.setEmail(userDTO.getEmail());
-        user.setLastModifiedBy(login);
+        user.setLastModifiedBy(userLogin);
         user.setLastModifiedDate(Instant.now());
 
-        Collection<String> dbAuthorities = getAuthorities();
-        List<Authority> authorities = new ArrayList<>();
-        for (String authority : userDTO.getAuthorities()) {
-            if (dbAuthorities.contains(authority)) {
-                Authority authorityToSave = new Authority();
-                authorityToSave.setName(authority);
-                authorities.add(authorityToSave);
-            }
+        Set<String> dbUserAuthorities = userDTO.getAuthorities();
+
+        Optional<String> roleUserOptional = dbUserAuthorities
+            .stream()
+            .filter(roleName -> roleName.equalsIgnoreCase(AuthoritiesConstants.USER))
+            .findFirst();
+
+        if (!roleUserOptional.isPresent()) {
+            throw new BadRequestAlertException("Role User can not remove.", "RoleUser", Constants.ROLE_NOT_DELETE);
         }
-        user.setAuthorities(new HashSet<>(authorities));
+
+        for (Authority authority : user.getAuthorities()) {
+            user.removeAuthority(authority);
+        }
+
+        Set<Authority> authorities = authorityRepository.findAllByNameIn(new ArrayList<>(userDTO.getAuthorities()));
+
+        user.setAuthorities(authorities);
 
         Validator validator = buildValidator();
         Set<ConstraintViolation<User>> constraintViolations = validator.validate(user);
@@ -262,6 +262,93 @@ public class AccountService {
         if (CollectionUtils.isEmpty(constraintViolations)) {
             userRepository.save(user);
         }
+
+        // saving profile
+        if (Objects.nonNull(userDTO.getUserProfileDto())) {
+            UserProfileDTO userProfileDto = userDTO.getUserProfileDto();
+
+            Optional<UserProfile> userProfileOptional = userProfileRepository.findById(user.getId());
+
+            userProfileOptional.ifPresent(
+                userProfile -> {
+                    userProfile.setBirthDate(userProfileDto.getBirthDate());
+                    userProfile.setGender(userProfileDto.getGender());
+                    userProfile.setLastModifiedBy(userLogin);
+                    userProfile.setLastModifiedDate(Instant.now());
+                    userProfile.setPhone(userProfileDto.getPhone());
+                    userProfile.setHomePhone(userProfileDto.getHomePhone());
+                    userProfile.setAvatarUrl(userProfileDto.getAvatarUrl());
+                    userProfileRepository.save(userProfile);
+                }
+            );
+        }
+
+        //saving address
+        if (!CollectionUtils.isEmpty(userDTO.getUserAddressList())) {
+            List<UserAddress> dbAddresses = userAddressRepository.findAllByUserId(user.getId());
+
+            Set<UserAddress> updateAddresses = dbAddresses
+                .stream()
+                .filter(
+                    address ->
+                        userDTO
+                            .getUserAddressList()
+                            .stream()
+                            .filter(add -> Objects.nonNull(add.getId()))
+                            .map(UserAddressDTO::getId)
+                            .collect(Collectors.toSet())
+                            .contains(address.getId())
+                )
+                .collect(Collectors.toSet());
+
+            userAddressRepository.deleteAllByIdNotIn(updateAddresses.stream().map(UserAddress::getId).collect(Collectors.toList()));
+
+            List<UserAddress> updateObjects = updateAddresses
+                .stream()
+                .flatMap(
+                    address -> {
+                        userDTO
+                            .getUserAddressList()
+                            .stream()
+                            .filter(userAddressDTO -> userAddressDTO.getId().equals(address.getId()))
+                            .peek(
+                                dto -> {
+                                    address.setAddressLine1(dto.getAddressLine1());
+                                    address.setAddressLine2(dto.getAddressLine2());
+                                    address.setCity(dto.getCity());
+                                    address.setCountry(dto.getCountry());
+                                    address.setLastModifiedBy(userLogin);
+                                    address.setLastModifiedDate(Instant.now());
+                                    address.setLatitude(dto.getLatitude());
+                                    address.setLongitude(dto.getLongitude());
+                                }
+                            );
+
+                        return Stream.of(address);
+                    }
+                )
+                .collect(Collectors.toList());
+
+            userAddressRepository.saveAll(updateObjects);
+
+            List<UserAddress> createObjects = userDTO
+                .getUserAddressList()
+                .stream()
+                .filter(userAddressDTO -> Objects.isNull(userAddressDTO.getId()))
+                .flatMap(
+                    dto -> {
+                        dto.setLastModifiedDate(Instant.now());
+                        dto.setLastModifiedBy(userLogin);
+                        dto.setCreatedBy(userLogin);
+                        dto.setCreatedDate(Instant.now());
+                        return Stream.of(userAddressMapper.toEntity(dto));
+                    }
+                )
+                .collect(Collectors.toList());
+
+            userAddressRepository.saveAll(createObjects);
+        }
+
         this.clearUserCaches(user);
 
         return userDTO;
@@ -273,30 +360,28 @@ public class AccountService {
     }
 
     @Transactional
-    public ActivatedPayload activateAccount(String key) throws Exception {
-        String login = SecurityUtils.getCurrentUserLogin().orElse("System");
-        if (Objects.isNull(key)) {
+    public ActivatedPayload activateAccount(String userId) throws Exception {
+        String login = SecurityUtils.getCurrentUserLogin().orElse(Constants.SYSTEM_ACCOUNT);
+        if (Objects.isNull(userId)) {
             throw new BadRequestAlertException("User Not Found", "USER", Constants.ID_NOT_NULL);
         }
 
-        Optional<User> existingUser = userRepository.findOneByActivationKey(key);
+        Optional<User> existingUser = userRepository.findById(userId);
 
         User user = existingUser.orElseThrow(() -> new BadRequestAlertException("User not found", "User", Constants.USER_NOT_FOUND));
 
-        this.clearUserCaches(user);
-
-        log.debug("Activated user: {}", user);
-
-        com.okta.sdk.resource.user.User account = oktaService.activateAccount(user.getId());
+        UserActivationToken account = oktaService.activateAccount(user.getId());
 
         user.setLastModifiedBy(login);
         user.setLastModifiedDate(Instant.now());
         user.setActivationKey(null);
-        user.setActivated(true);
+        user.setActivated(false);
+        user.setActivationUrl(account.getActivationUrl());
+        user.setActivationKey(account.getActivationToken());
         userRepository.save(user);
         this.clearUserCaches(user);
 
-        return ActivatedPayload.builder().success(account.getActivated() != null).userId(account.getId()).build();
+        return ActivatedPayload.builder().success(true).userId(userId).build();
     }
 
     public UserDTO getAccount(String userId) {
@@ -324,6 +409,13 @@ public class AccountService {
         userDTO.setLastModifiedBy(user.getLastModifiedBy());
         userDTO.setLastModifiedDate(user.getLastModifiedDate());
         userDTO.setCreatedDate(user.getCreatedDate());
+
+        Optional<UserProfile> userProfileOptional = userProfileRepository.findById(userId);
+        userProfileOptional.ifPresent(userProfile -> userDTO.setUserProfileDto(userProfileMapper.toDto(userProfile)));
+
+        List<UserAddress> userAddresses = userAddressRepository.findAllByUserId(userId);
+        userDTO.setUserAddressList(userAddressMapper.toDto(userAddresses));
+
         return userDTO;
     }
 
@@ -340,7 +432,6 @@ public class AccountService {
         response.setSize(userPages.getSize());
         response.setItems(userPages.getContent());
         return response;
-
     }
 
     private void clearUserCaches(User user) {
@@ -349,6 +440,4 @@ public class AccountService {
             Objects.requireNonNull(cacheManager.getCache(UserRepository.USERS_BY_EMAIL_CACHE)).evict(user.getEmail());
         }
     }
-
-
 }

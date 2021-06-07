@@ -41,7 +41,6 @@ public class OktaService {
     }
 
     public User createOktaAccount(UserDTO userDTO, String tempPassword) throws Exception {
-
         GroupList groups = client.listGroups();
 
         List<GroupProfile> groupProfiles = groups.stream().map(Group::getProfile).collect(Collectors.toList());
@@ -85,10 +84,9 @@ public class OktaService {
         return user;
     }
 
-    public User activateAccount(String userId) throws Exception {
+    public UserActivationToken activateAccount(String userId) {
         User userDb = client.getUser(userId);
-        userDb.activate(true);
-        return userDb;
+        return userDb.activate(true);
     }
 
     public void removeAccount(String userId) {
@@ -97,16 +95,13 @@ public class OktaService {
         user.delete();
     }
 
-
     public Group createGroup(String groupName, String description) {
-        return GroupBuilder.instance()
-            .setName(groupName)
-            .setDescription(description)
-            .buildAndCreate(client);
+        return GroupBuilder.instance().setName(groupName).setDescription(description).buildAndCreate(client);
     }
 
     public void removeGroup(String groupName) {
-        client.listGroups()
+        client
+            .listGroups()
             .stream()
             .filter(group -> group.getProfile().getName().equalsIgnoreCase(groupName))
             .forEach(group -> group.delete());

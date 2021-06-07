@@ -1,15 +1,12 @@
 package com.vts.clientcenter.domain;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-import javax.persistence.*;
-import javax.validation.constraints.*;
-
+import com.vts.clientcenter.domain.enumeration.Gender;
 import java.io.Serializable;
 import java.time.Instant;
-
-import com.vts.clientcenter.domain.enumeration.Gender;
+import javax.persistence.*;
+import javax.validation.constraints.*;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 /**
  * A UserProfile.
@@ -18,7 +15,6 @@ import com.vts.clientcenter.domain.enumeration.Gender;
 @Table(name = "tv_user_profile")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class UserProfile implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
     @NotNull
@@ -48,6 +44,12 @@ public class UserProfile implements Serializable {
 
     @Column(name = "last_modified_by")
     private String lastModifiedBy;
+
+    @Column(name = "home_phone")
+    private String homePhone;
+
+    @Column(name = "avatar_url")
+    private String avatarUrl;
 
     @OneToOne
     @MapsId
@@ -166,7 +168,24 @@ public class UserProfile implements Serializable {
     public void setLastModifiedBy(String lastModifiedBy) {
         this.lastModifiedBy = lastModifiedBy;
     }
+
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
+
+    public String getHomePhone() {
+        return homePhone;
+    }
+
+    public void setHomePhone(String homePhone) {
+        this.homePhone = homePhone;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
 
     @Override
     public boolean equals(Object o) {

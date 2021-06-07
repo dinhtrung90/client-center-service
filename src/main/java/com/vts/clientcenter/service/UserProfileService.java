@@ -1,17 +1,14 @@
 package com.vts.clientcenter.service;
 
 import com.vts.clientcenter.service.dto.UserProfileDTO;
-
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import java.util.Optional;
 
 /**
  * Service Interface for managing {@link com.vts.clientcenter.domain.UserProfile}.
  */
 public interface UserProfileService {
-
     /**
      * Save a userProfile.
      *
@@ -28,19 +25,18 @@ public interface UserProfileService {
      */
     Page<UserProfileDTO> findAll(Pageable pageable);
 
-
     /**
      * Get the "id" userProfile.
      *
      * @param id the id of the entity.
      * @return the entity.
      */
-    Optional<UserProfileDTO> findOne(Long id);
+    Optional<UserProfileDTO> findOne(String id);
 
     /**
      * Delete the "id" userProfile.
      *
      * @param id the id of the entity.
      */
-    void delete(Long id);
+    void delete(String id);
 }

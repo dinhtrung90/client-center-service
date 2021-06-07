@@ -7,6 +7,9 @@ import com.vts.clientcenter.repository.AuthorityRepository;
 import com.vts.clientcenter.repository.UserRepository;
 import com.vts.clientcenter.security.SecurityUtils;
 import com.vts.clientcenter.service.dto.UserDTO;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;
@@ -18,10 +21,6 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Service class for managing users.
@@ -39,7 +38,12 @@ public class UserService {
 
     private final OktaService oktaService;
 
-    public UserService(UserRepository userRepository, AuthorityRepository authorityRepository, CacheManager cacheManager, OktaService oktaService) {
+    public UserService(
+        UserRepository userRepository,
+        AuthorityRepository authorityRepository,
+        CacheManager cacheManager,
+        OktaService oktaService
+    ) {
         this.userRepository = userRepository;
         this.authorityRepository = authorityRepository;
         this.cacheManager = cacheManager;
@@ -123,7 +127,7 @@ public class UserService {
             log.debug("Saving user '{}' in local database", user.getLogin());
             com.okta.sdk.resource.user.User oktaUser = oktaService.getUser(user.getId());
             user.setStatus(oktaUser.getStatus());
-
+            user.setActivated(oktaUser.getActivated() != null);
             userRepository.save(user);
             this.clearUserCaches(user);
         }
@@ -208,9 +212,9 @@ public class UserService {
             // set langKey to default if not specified by IdP
             user.setLangKey(Constants.DEFAULT_LANGUAGE);
         }
-//        if (details.get("picture") != null) {
-//            user.setImageUrl((String) details.get("picture"));
-//        }
+        //        if (details.get("picture") != null) {
+        //            user.setImageUrl((String) details.get("picture"));
+        //        }
         user.setActivated(true);
         return user;
     }
@@ -221,5 +225,4 @@ public class UserService {
             Objects.requireNonNull(cacheManager.getCache(UserRepository.USERS_BY_EMAIL_CACHE)).evict(user.getEmail());
         }
     }
-
 }
