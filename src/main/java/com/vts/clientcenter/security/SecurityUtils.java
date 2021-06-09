@@ -3,6 +3,8 @@ package com.vts.clientcenter.security;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.vts.clientcenter.config.Constants;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -83,8 +85,16 @@ public final class SecurityUtils {
     }
 
     @SuppressWarnings("unchecked")
+//    private static Collection<String> getRolesFromClaims(Map<String, Object> claims) {
+//        return (Collection<String>) claims.getOrDefault("groups", claims.getOrDefault("roles", new ArrayList<>()));
+//    }
+
     private static Collection<String> getRolesFromClaims(Map<String, Object> claims) {
-        return (Collection<String>) claims.getOrDefault("groups", claims.getOrDefault("roles", new ArrayList<>()));
+        Optional<List<String>> roles = claims.keySet().stream()
+            .filter(key -> key.contains(Constants.AUDIENCE + "/roles"))
+            .map(key -> (List<String>) claims.get(key))
+            .findFirst();
+        return roles.orElse(new ArrayList<>());
     }
 
     private static List<GrantedAuthority> mapRolesToGrantedAuthorities(Collection<String> roles) {

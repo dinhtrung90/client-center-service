@@ -30,6 +30,7 @@ public final class Constants {
     public static final String ID_IS_NULL = "ID_IS_NULL";
     public static final String ROLE_NOT_DELETE = "ROLE_NOT_DELETE";
     public static final String ACCOUNT_CREATION_MESSAGE = "You just create a new account.";
+    public static final String AUDIENCE = "nttech-api.tech";
 
     private Constants() {}
 }

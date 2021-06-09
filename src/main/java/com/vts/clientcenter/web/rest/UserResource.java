@@ -2,12 +2,10 @@ package com.vts.clientcenter.web.rest;
 
 import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.security.AuthoritiesConstants;
+import com.vts.clientcenter.service.Auth0Service;
 import com.vts.clientcenter.service.RolePermissionExtensionService;
 import com.vts.clientcenter.service.UserService;
-import com.vts.clientcenter.service.dto.EditPermissionResponseDto;
-import com.vts.clientcenter.service.dto.UserAuthorizedResponseDto;
-import com.vts.clientcenter.service.dto.UserDTO;
-import com.vts.clientcenter.service.dto.UserRolePermissionResponse;
+import com.vts.clientcenter.service.dto.*;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import io.github.jhipster.web.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
@@ -65,9 +63,12 @@ public class UserResource {
 
     private final RolePermissionExtensionService rolePermissionExtensionService;
 
-    public UserResource(UserService userService, RolePermissionExtensionService rolePermissionExtensionService) {
+    private final Auth0Service auth0Service;
+
+    public UserResource(UserService userService, RolePermissionExtensionService rolePermissionExtensionService, Auth0Service auth0Service) {
         this.userService = userService;
         this.rolePermissionExtensionService = rolePermissionExtensionService;
+        this.auth0Service = auth0Service;
     }
 
     /**
@@ -130,4 +131,5 @@ public class UserResource {
             throw new BadRequestAlertException("User is not able to sync.", "Users", Constants.USER_NOT_FOUND);
         }
     }
+
 }

@@ -18,9 +18,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.oidc.OidcIdToken;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Service class for managing users.
@@ -152,20 +155,38 @@ public class UserService {
             throw new IllegalArgumentException("AuthenticationToken is not OAuth2 or JWT!");
         }
         User user = getUser(attributes);
-        user.setAuthorities(
-            authToken
-                .getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .map(
-                    authority -> {
-                        Authority auth = new Authority();
-                        auth.setName(authority);
-                        return auth;
-                    }
-                )
-                .collect(Collectors.toSet())
-        );
+
+        if (CollectionUtils.isEmpty(authToken.getAuthorities())) {
+            List<GrantedAuthority> grantedAuthorities = SecurityUtils.extractAuthorityFromClaims(attributes);
+            user.setAuthorities(
+                grantedAuthorities
+                    .stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .map(
+                        authority -> {
+                            Authority auth = new Authority();
+                            auth.setName(authority);
+                            return auth;
+                        }
+                    )
+                    .collect(Collectors.toSet())
+            );
+        } else {
+            user.setAuthorities(
+                authToken
+                    .getAuthorities()
+                    .stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .map(
+                        authority -> {
+                            Authority auth = new Authority();
+                            auth.setName(authority);
+                            return auth;
+                        }
+                    )
+                    .collect(Collectors.toSet())
+            );
+        }
         return new UserDTO(syncUserWithIdP(attributes, user));
     }
 

@@ -160,11 +160,17 @@ spring:
       client:
         provider:
           oidc:
-            issuer-uri: https://dev-50654898.okta.com/oauth2/default
+            issuer-uri: https://elend.us.auth0.com/
         registration:
           oidc:
-            client-id: 0oacfluyt7Q66W0xz5d6
-            client-secret: -AokVfKCOnoT42UAX0unsq-W9uhm6s1hPfEjsWEc
+            client-id: BNPtup1kb1G1a0V6gSTWQ5JsbPJe25Go
+            client-secret: 2Ug-60vKU-XB4mGGVdB4-utiJNjun3J3F8c-zcbhWbliv5z1T70Hvo39Uo_YZ15j
+            scope:
+              - openid
+              - profile
+              - email
+              - group
+              - roles
   flyway:
     enabled: true
     out-of-order: true
@@ -217,6 +223,10 @@ jhipster:
         - account
         - api://default
         - 0oalhgrpkTSLs0spA5d6
+        - nttech-api
+        - BNPtup1kb1G1a0V6gSTWQ5JsbPJe25Go
+        - C7WpfUB7DhUcj5lm6AtQi6gtMlqbuCt5
+        - https://elend.us.auth0.com/api/v2/
 #kafka:
 #  bootstrap-servers: ${app.kafka-url}:9092
 #  consumer:
