@@ -130,4 +130,8 @@ public class UserResource {
             throw new BadRequestAlertException("User is not able to sync.", "Users", Constants.USER_NOT_FOUND);
         }
     }
+    @PostMapping("/users/clearCache")
+    public void clearCache() {
+        userService.clearCachesAllUsers();
+    }
 }

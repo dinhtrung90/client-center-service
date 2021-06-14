@@ -125,9 +125,6 @@ public class UserService {
             }
         } else {
             log.debug("Saving user '{}' in local database", user.getLogin());
-            com.okta.sdk.resource.user.User oktaUser = oktaService.getUser(user.getId());
-            user.setStatus(oktaUser.getStatus());
-            user.setActivated(oktaUser.getActivated() != null);
             userRepository.save(user);
             this.clearUserCaches(user);
         }
@@ -225,4 +222,12 @@ public class UserService {
             Objects.requireNonNull(cacheManager.getCache(UserRepository.USERS_BY_EMAIL_CACHE)).evict(user.getEmail());
         }
     }
+
+    public void clearCachesAllUsers() {
+
+        userRepository.findAll()
+            .forEach(this::clearUserCaches);
+    }
+
+
 }
