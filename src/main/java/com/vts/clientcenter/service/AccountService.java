@@ -76,20 +76,19 @@ public class AccountService {
     @Autowired
     private UserQueryService userQueryService;
 
+    @Autowired
+    private IdentityService identityService;
+
     @Transactional
     public UserDTO createUserAccount(UserDTO userDTO) throws Exception {
+
         Optional<User> existingUser = userRepository.findOneByEmailIgnoreCase(userDTO.getEmail());
 
         if (existingUser.isPresent()) {
             throw new BadRequestAlertException("Account has existed.", "User", Constants.USER_HAS_EXISTED);
         }
 
-        String password = PasswordGenerator.generateRandomPassword(8);
-
-        com.okta.sdk.resource.user.User oktaUser = oktaService.createOktaAccount(userDTO, password);
-
-        // send email to users
-        UserActivationToken activate = oktaUser.activate(true);
+        userDTO = identityService.createUser(userDTO);
 
         String loginUser = SecurityUtils.getCurrentUserLogin().orElse(Constants.SYSTEM_ACCOUNT);
 
@@ -104,9 +103,7 @@ public class AccountService {
         user.setLastModifiedBy(loginUser);
         user.setLastModifiedDate(Instant.now());
         user.setCreatedBy(loginUser);
-        user.setActivationKey(activate.getActivationToken());
-        user.setActivationUrl(activate.getActivationUrl());
-        user.setStatus(oktaUser.getStatus());
+
 
         //add role for users
         Collection<String> dbAuthorities = getAuthorities();
@@ -135,9 +132,7 @@ public class AccountService {
         }
         user.setAuthorities(new HashSet<>(authorities));
 
-        userDTO.setId(oktaUser.getId());
-
-        user.setId(oktaUser.getId());
+        user.setId(userDTO.getId());
 
         //TODO publish user to notification
         applicationEventPublisher.publishEvent(new UserCreatedEvent(user));

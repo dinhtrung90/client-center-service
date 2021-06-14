@@ -160,11 +160,11 @@ spring:
       client:
         provider:
           oidc:
-            issuer-uri: https://dev-50654898.okta.com/oauth2/default
+            issuer-uri: ${app.keycloak.authorizeUrl}/realms/elend
         registration:
           oidc:
-            client-id: 0oacfluyt7Q66W0xz5d6
-            client-secret: -AokVfKCOnoT42UAX0unsq-W9uhm6s1hPfEjsWEc
+            client-id: elend-api-gateway
+            client-secret: 566beb1a-d0af-46d0-b8d7-0741fe86e2d2
   flyway:
     enabled: true
     out-of-order: true

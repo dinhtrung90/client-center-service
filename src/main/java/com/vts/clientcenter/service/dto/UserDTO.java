@@ -5,6 +5,7 @@ import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.domain.Authority;
 import com.vts.clientcenter.domain.User;
 import com.vts.clientcenter.domain.UserAddress;
+import com.vts.clientcenter.domain.enumeration.Gender;
 
 import java.time.Instant;
 import java.util.List;
@@ -36,6 +37,8 @@ public class UserDTO {
     @Email
     @Size(min = 5, max = 254)
     private String email;
+
+    private Gender gender;
 
     private boolean activated = false;
 
