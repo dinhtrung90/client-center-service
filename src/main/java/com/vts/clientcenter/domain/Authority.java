@@ -42,33 +42,10 @@ public class Authority extends AbstractAuditingEntity {
         return name;
     }
 
-    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private Set<RolePermission> rolePermissions;
-
-    @ManyToMany(mappedBy = "authorities", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @Cache(usage = CacheConcurrencyStrategy.NONE)
-    @JsonIgnore
-    private Set<User> users;
-
-    public void addUser(User user) {
-        this.users.add(user);
-        user.getAuthorities().add(this);
-    }
-
-    public void removeUser(User user) {
-        this.users.remove(user);
-        user.getAuthorities().remove(this);
-    }
-
-    public Authority addRolePermission(RolePermission rolePermission) {
-        this.rolePermissions.add(rolePermission);
-        rolePermission.setRole(this);
-        return this;
-    }
-
-    public Authority removeRolePermission(RolePermission rolePermission) {
-        this.rolePermissions.remove(rolePermission);
-        rolePermission.setRole(null);
-        return this;
-    }
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "tv_role_permission",
+        joinColumns = { @JoinColumn(name = "role_name") },
+        inverseJoinColumns = { @JoinColumn(name = "permission_id") })
+    public Set<Permission> permissions;
 }

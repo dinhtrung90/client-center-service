@@ -2,12 +2,16 @@ package com.vts.clientcenter.service.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.vts.clientcenter.domain.Authority;
 import com.vts.clientcenter.domain.User;
+import com.vts.clientcenter.service.dto.AuthorityDto;
 import com.vts.clientcenter.service.dto.UserDTO;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +38,7 @@ public class UserMapperTest {
 //        user.setImageUrl("image_url");
         user.setLangKey("en");
 
-        userDto = new UserDTO(user);
+        userDto = userMapper.userToUserDTO(user);
     }
 
     @Test
@@ -65,7 +69,7 @@ public class UserMapperTest {
     public void userDTOsToUsersWithAuthoritiesStringShouldMapToUsersWithAuthoritiesDomain() {
         Set<String> authoritiesAsString = new HashSet<>();
         authoritiesAsString.add("ADMIN");
-        userDto.setAuthorities(authoritiesAsString);
+        userDto.setAuthorities(authoritiesAsString.stream().map(u -> new AuthorityDto()).collect(Collectors.toSet()));
 
         List<UserDTO> usersDto = new ArrayList<>();
         usersDto.add(userDto);
@@ -98,7 +102,7 @@ public class UserMapperTest {
     public void userDTOToUserMapWithAuthoritiesStringShouldReturnUserWithAuthorities() {
         Set<String> authoritiesAsString = new HashSet<>();
         authoritiesAsString.add("ADMIN");
-        userDto.setAuthorities(authoritiesAsString);
+        userDto.setAuthorities(authoritiesAsString.stream().map(u -> new AuthorityDto()).collect(Collectors.toSet()));
 
         User user = userMapper.userDTOToUser(userDto);
 

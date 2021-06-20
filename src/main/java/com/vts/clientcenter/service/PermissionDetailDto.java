@@ -1,8 +1,7 @@
 package com.vts.clientcenter.service;
 
-import com.vts.clientcenter.domain.PermissionOperation;
 import com.vts.clientcenter.domain.enumeration.OperationEnum;
-import com.vts.clientcenter.service.dto.PermissionOperationDTO;
+
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import lombok.*;

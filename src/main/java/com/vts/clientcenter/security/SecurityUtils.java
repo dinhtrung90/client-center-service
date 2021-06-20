@@ -100,11 +100,10 @@ public final class SecurityUtils {
 
     protected static List<GrantedAuthority>  mapKeycloakRolesToAuthorities(Set<String> realmRoles,
                                                                            Set<String> clientRoles) {
-        List<GrantedAuthority> combinedAuthorities = new ArrayList<>();
 
         List<SimpleGrantedAuthority> authorities = realmRoles.stream().filter(role -> role.startsWith("ROLE_")).map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 
-        combinedAuthorities.addAll(authorities);
+        List<GrantedAuthority> combinedAuthorities = new ArrayList<>(authorities);
 
         List<SimpleGrantedAuthority> clientAuthorities = clientRoles.stream().filter(role -> role.startsWith("ROLE_")).map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 

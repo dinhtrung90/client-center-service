@@ -2,6 +2,7 @@ package com.vts.clientcenter.service.dto;
 
 import com.okta.sdk.resource.user.UserStatus;
 import com.vts.clientcenter.domain.*;
+import com.vts.clientcenter.domain.enumeration.AccountStatus;
 import io.github.jhipster.service.Criteria;
 import io.github.jhipster.service.filter.Filter;
 import io.github.jhipster.service.filter.InstantFilter;
@@ -19,7 +20,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class UserCriteria implements Serializable, Criteria {
 
-    public static class UserStatusFilter extends Filter<UserStatus> {
+    public static class UserStatusFilter extends Filter<AccountStatus> {
 
         public UserStatusFilter() {
         }

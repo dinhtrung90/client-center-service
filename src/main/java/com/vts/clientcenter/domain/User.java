@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.vts.clientcenter.domain.enumeration.AccountStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
@@ -57,19 +58,14 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @Column(name = "lang_key", length = 10)
     private String langKey;
 
-    @Size(max = 20)
-    @Column(name = "activation_key", length = 20)
-    @JsonIgnore
-    private String activationKey;
+    @Column(name = "has_verified_email")
+    private boolean hasVerifiedEmail;
 
-    @Size(max = 20)
-    @Column(name = "reset_key", length = 20)
-    @JsonIgnore
-    private String resetKey;
+    @Column(name = "has_enabled")
+    private boolean hasEnabled;
 
-    @Column(name = "status")
-    @Enumerated(EnumType.STRING)
-    private UserStatus status;
+    @Column(name = "account_status")
+    private AccountStatus accountStatus;
 
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -81,9 +77,6 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @BatchSize(size = 20)
     private Set<Authority> authorities = new HashSet<>();
-
-    @Column(name = "activation_url", length = 2000)
-    private String activationUrl;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserAddress> userAddresses= new HashSet<>();
@@ -152,42 +145,8 @@ public class User extends AbstractAuditingEntity implements Serializable {
         this.authorities = authorities;
     }
 
-    public String getResetKey() {
-        return resetKey;
-    }
-
-    public void setResetKey(String resetKey) {
-        this.resetKey = resetKey;
-    }
-
-    public String getActivationKey() {
-        return activationKey;
-    }
-
-    public void setActivationKey(String activationKey) {
-        this.activationKey = activationKey;
-    }
-
     public boolean isActivated() {
         return activated;
-    }
-
-    public void addAuthority(Authority authority) {
-        this.authorities.add(authority);
-        authority.getUsers().add(this);
-    }
-
-    public void removeAuthority(Authority authority) {
-        this.authorities.remove(authority);
-        authority.getUsers().remove(this);
-    }
-
-    public String getActivationUrl() {
-        return activationUrl;
-    }
-
-    public void setActivationUrl(String activationUrl) {
-        this.activationUrl = activationUrl;
     }
 
     public Set<UserAddress> getUserAddresses() {
@@ -196,14 +155,6 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     public void setUserAddresses(Set<UserAddress> userAddresses) {
         this.userAddresses = userAddresses;
-    }
-
-    public UserStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(UserStatus status) {
-        this.status = status;
     }
 
     public void addUserAddress(UserAddress userAddresses) {
@@ -216,6 +167,35 @@ public class User extends AbstractAuditingEntity implements Serializable {
         userAddresses.setUser(null);
         return this;
     }
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    public boolean hasVerifiedEmail() {
+        return hasVerifiedEmail;
+    }
+
+    public void setHasVerifiedEmail(boolean hasVerifiedEmail) {
+        this.hasVerifiedEmail = hasVerifiedEmail;
+    }
+
+    public boolean hasEnabled() {
+        return hasEnabled;
+    }
+
+    public void setHasEnabled(boolean hasEnabled) {
+        this.hasEnabled = hasEnabled;
+    }
+
+    public AccountStatus getAccountStatus() {
+        return accountStatus;
+    }
+
+    public void setAccountStatus(AccountStatus accountStatus) {
+        this.accountStatus = accountStatus;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

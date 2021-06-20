@@ -41,10 +41,10 @@ public class AuthorityQueryService extends QueryService<Authority> {
             r ->
                 AuthorityDto
                     .builder()
-                    .roleName(r.getName())
+                    .name(r.getName())
                     .description(r.getDescription())
-                    .createDate(r.getCreatedDate())
-                    .modifiedDate(r.getLastModifiedDate())
+                    .createdDate(r.getCreatedDate())
+                    .lastModifiedDate(r.getLastModifiedDate())
                     .build()
         ).collect(Collectors.toList()));
 

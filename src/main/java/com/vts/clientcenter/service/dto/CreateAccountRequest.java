@@ -1,26 +1,21 @@
 package com.vts.clientcenter.service.dto;
 
+
 import com.vts.clientcenter.config.Constants;
-import com.vts.clientcenter.domain.enumeration.AccountStatus;
+import com.vts.clientcenter.domain.enumeration.Gender;
 import lombok.*;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
-/**
- * A DTO representing a user, with his authorities.
- */
 @Setter
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-public class UserDTO {
-    private String id;
+public class CreateAccountRequest {
 
     @NotBlank
     @Pattern(regexp = Constants.LOGIN_REGEX)
@@ -40,14 +35,6 @@ public class UserDTO {
     @Size(max = 256)
     private String imageUrl;
 
-    private boolean isVerifiedEmail;
-
-    private boolean isEnabled;
-
-    private AccountStatus accountStatus;
-
-    private boolean activated = false;
-
     @Size(min = 2, max = 10)
     private String langKey;
 
@@ -60,4 +47,15 @@ public class UserDTO {
     private Instant lastModifiedDate;
 
     private Set<AuthorityDto> authorities;
+
+    @NotNull
+    private String tempPassword;
+
+    private boolean isIsTempPassword;
+
+    private boolean isIsEnable;
+
+    private List<UserAddressDTO> userAddressList;
+
+    private UserProfileDTO userProfileDto;
 }

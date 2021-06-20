@@ -6,6 +6,7 @@ package com.vts.clientcenter.config;
 public final class Constants {
     // Regex for acceptable logins
     public static final String LOGIN_REGEX = "^(?>[a-zA-Z0-9!$&*+=?^_`{|}~.-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)|(?>[_.@A-Za-z0-9-]+)$";
+    public static final String PHONE_REGEX = "/^(1-?)?(\\([2-9]\\d{2}\\)|[2-9]\\d{2})-?[2-9]\\d{2}-?\\d{4}$/";
 
     public static final String SYSTEM_ACCOUNT = "system";
     public static final String DEFAULT_LANGUAGE = "en";
@@ -29,6 +30,7 @@ public final class Constants {
     public static final String PERMISSION_IS_NULL = "PERMISSION_IS_NULL";
     public static final String ID_IS_NULL = "ID_IS_NULL";
     public static final String ROLE_NOT_DELETE = "ROLE_NOT_DELETE";
+    public static final String ACCOUNT_STATUS_FIELD = "accountStatus";
     public static final String ACCOUNT_CREATION_MESSAGE = "You just create a new account.";
 
     private Constants() {}

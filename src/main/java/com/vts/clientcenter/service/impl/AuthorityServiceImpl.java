@@ -9,7 +9,6 @@ import com.vts.clientcenter.service.UserService;
 import com.vts.clientcenter.service.dto.AuthorityDto;
 import java.time.Instant;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,10 +34,10 @@ public class AuthorityServiceImpl extends AbstractBaseService implements Authori
                 r ->
                     AuthorityDto
                         .builder()
-                        .roleName(r.getName())
+                        .name(r.getName())
                         .description(r.getDescription())
-                        .createDate(r.getCreatedDate())
-                        .modifiedDate(r.getLastModifiedDate())
+                        .createdDate(r.getCreatedDate())
+                        .lastModifiedDate(r.getLastModifiedDate())
                         .build()
             )
             .collect(Collectors.toList());
@@ -48,11 +47,11 @@ public class AuthorityServiceImpl extends AbstractBaseService implements Authori
     public AuthorityDto save(AuthorityDto dto) {
         Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
 
-        Optional<Authority> authorityOptional = authorityRepository.findById(dto.getRoleName());
+        Optional<Authority> authorityOptional = authorityRepository.findById(dto.getName());
 
         if (!authorityOptional.isPresent()) {
             Authority authority = new Authority();
-            authority.setName(dto.getRoleName());
+            authority.setName(dto.getName());
             authority.setDescription(dto.getDescription());
             authority.setCreatedBy(currentUserLogin.get());
             authority.setLastModifiedBy(currentUserLogin.get());
@@ -68,9 +67,9 @@ public class AuthorityServiceImpl extends AbstractBaseService implements Authori
 
         return AuthorityDto
             .builder()
-            .modifiedDate(authority.getLastModifiedDate())
-            .createDate(authority.getCreatedDate())
-            .roleName(authority.getName())
+            .lastModifiedDate(authority.getLastModifiedDate())
+            .createdDate(authority.getCreatedDate())
+            .name(authority.getName())
             .description(authority.getDescription())
             .build();
     }

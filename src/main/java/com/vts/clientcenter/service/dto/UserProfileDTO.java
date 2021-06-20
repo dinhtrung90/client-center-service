@@ -20,6 +20,7 @@ public class UserProfileDTO implements Serializable {
     @Size(max = 20)
     private String id;
 
+    @NotNull
     private String phone;
 
     private String homePhone;

@@ -1,16 +1,8 @@
 package com.vts.clientcenter.web.rest;
 
-import com.vts.clientcenter.config.Constants;
-import com.vts.clientcenter.security.AuthoritiesConstants;
-import com.vts.clientcenter.service.RolePermissionExtensionService;
 import com.vts.clientcenter.service.UserService;
-import com.vts.clientcenter.service.dto.EditPermissionResponseDto;
-import com.vts.clientcenter.service.dto.UserAuthorizedResponseDto;
 import com.vts.clientcenter.service.dto.UserDTO;
-import com.vts.clientcenter.service.dto.UserRolePermissionResponse;
-import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import io.github.jhipster.web.util.PaginationUtil;
-import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,15 +11,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * REST controller for managing users.
@@ -63,11 +50,8 @@ public class UserResource {
 
     private final UserService userService;
 
-    private final RolePermissionExtensionService rolePermissionExtensionService;
-
-    public UserResource(UserService userService, RolePermissionExtensionService rolePermissionExtensionService) {
+    public UserResource(UserService userService) {
         this.userService = userService;
-        this.rolePermissionExtensionService = rolePermissionExtensionService;
     }
 
     /**
@@ -83,53 +67,6 @@ public class UserResource {
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
     }
 
-    /**
-     * Gets a list of all roles.
-     * @return a string list of all roles.
-     */
-    @GetMapping("/users/authorities")
-    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
-    public List<String> getAuthorities() {
-        return userService.getAuthorities();
-    }
-
-    /**
-     * {@code GET /users/:login} : get the "login" user.
-     *
-     * @param login the login of the user to find.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the "login" user, or with status {@code 404 (Not Found)}.
-     */
-    @GetMapping("/users/{login:" + Constants.LOGIN_REGEX + "}")
-    public ResponseEntity<UserDTO> getUser(@PathVariable String login) {
-        log.debug("REST request to get User : {}", login);
-        return ResponseUtil.wrapOrNotFound(userService.getUserWithAuthoritiesByLogin(login).map(UserDTO::new));
-    }
-
-    // API sync account from Okta into db
-    @PostMapping("/users/sync")
-    public UserAuthorizedResponseDto getAccount(Principal principal) {
-        if (principal instanceof AbstractAuthenticationToken) {
-
-            UserDTO userFromAuthentication = userService.getUserFromAuthentication((AbstractAuthenticationToken) principal);
-
-            List<UserRolePermissionResponse> permissionList = new ArrayList<>();
-
-            for (String authority : userFromAuthentication.getAuthorities()) {
-                UserRolePermissionResponse responseDto = rolePermissionExtensionService.getRoleWithPermissions(authority);
-                if (Objects.nonNull(responseDto)) {
-                    permissionList.add(responseDto);
-                }
-            }
-
-            return UserAuthorizedResponseDto.builder()
-                .rolePermissions(permissionList)
-                .userDto(userFromAuthentication)
-                .build();
-
-        } else {
-            throw new BadRequestAlertException("User is not able to sync.", "Users", Constants.USER_NOT_FOUND);
-        }
-    }
     @PostMapping("/users/clearCache")
     public void clearCache() {
         userService.clearCachesAllUsers();

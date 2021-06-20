@@ -10,6 +10,8 @@ import com.vts.clientcenter.service.dto.UserDTO;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import com.vts.clientcenter.service.mapper.UserMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;
@@ -36,18 +38,18 @@ public class UserService {
 
     private final CacheManager cacheManager;
 
-    private final OktaService oktaService;
+    private final UserMapper userMapper;
 
     public UserService(
         UserRepository userRepository,
         AuthorityRepository authorityRepository,
         CacheManager cacheManager,
-        OktaService oktaService
-    ) {
+        OktaService oktaService,
+        UserMapper userMapper) {
         this.userRepository = userRepository;
         this.authorityRepository = authorityRepository;
         this.cacheManager = cacheManager;
-        this.oktaService = oktaService;
+        this.userMapper = userMapper;
     }
 
     /**
@@ -78,7 +80,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public Page<UserDTO> getAllManagedUsers(Pageable pageable) {
-        return userRepository.findAllByLoginNot(pageable, Constants.ANONYMOUS_USER).map(UserDTO::new);
+        return userRepository.findAllByLoginNot(pageable, Constants.ANONYMOUS_USER).map(userMapper::userToDto);
     }
 
     @Transactional(readOnly = true)
@@ -163,7 +165,11 @@ public class UserService {
                 )
                 .collect(Collectors.toSet())
         );
-        return new UserDTO(syncUserWithIdP(attributes, user));
+        return userMapper.userToDto(syncUserWithIdP(attributes, user));
+    }
+
+    public void synUserFromClaim(Map<String, Object> detail)  {
+        syncUserWithIdP(detail, getUser(detail));
     }
 
     private static User getUser(Map<String, Object> details) {
@@ -212,7 +218,7 @@ public class UserService {
         //        if (details.get("picture") != null) {
         //            user.setImageUrl((String) details.get("picture"));
         //        }
-        user.setActivated(true);
+        user.setActivated(user.hasEnabled() && user.hasVerifiedEmail());
         return user;
     }
 

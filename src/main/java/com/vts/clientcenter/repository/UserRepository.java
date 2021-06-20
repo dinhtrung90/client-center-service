@@ -35,6 +35,4 @@ public interface UserRepository extends JpaRepository<User, String>, JpaSpecific
 
     Optional<User> findOneByEmailIgnoreCase(String email);
 
-    Optional<User> findOneByActivationKey(String key);
-
 }

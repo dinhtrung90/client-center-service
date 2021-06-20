@@ -1,5 +1,5 @@
 create table tv_user_profile(
-    user_id varchar(50) unique not null primary key,
+    user_id varchar(100) unique not null primary key,
     gender varchar(50) null,
     avatar_url varchar(255) null,
     phone varchar(50) not null,

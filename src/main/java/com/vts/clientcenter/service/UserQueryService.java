@@ -81,7 +81,7 @@ public class UserQueryService extends QueryService<User> {
                 specification = specification.and(buildStringSpecification(criteria.getEmail(), User_.email));
             }
             if (criteria.getStatus() != null) {
-                specification = specification.and(buildSpecification(criteria.getStatus(), User_.status));
+                specification = specification.and(buildSpecification(criteria.getStatus(), User_.accountStatus));
             }
             if (criteria.getCreatedDate() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getCreatedDate(), User_.createdDate));

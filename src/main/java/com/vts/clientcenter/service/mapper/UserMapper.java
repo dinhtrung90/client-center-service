@@ -1,10 +1,12 @@
 package com.vts.clientcenter.service.mapper;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import com.vts.clientcenter.domain.Authority;
 import com.vts.clientcenter.domain.User;
+import com.vts.clientcenter.service.dto.AuthorityDto;
 import com.vts.clientcenter.service.dto.UserDTO;
-import java.util.*;
-import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -15,17 +17,40 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class UserMapper {
+    @Autowired
+    private AuthorityMapper authorityMapper;
 
     public List<UserDTO> usersToUserDTOs(List<User> users) {
         return users.stream().filter(Objects::nonNull).map(this::userToUserDTO).collect(Collectors.toList());
     }
 
     public UserDTO userToUserDTO(User user) {
-        return new UserDTO(user);
+        return userToDto(user);
     }
 
     public List<User> userDTOsToUsers(List<UserDTO> userDTOs) {
         return userDTOs.stream().filter(Objects::nonNull).map(this::userDTOToUser).collect(Collectors.toList());
+    }
+
+    public UserDTO userToDto(User user) {
+        UserDTO dto = new UserDTO();
+        dto.setId(user.getId());
+        dto.setLogin(user.getLogin());
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setEmail(user.getEmail());
+        dto.setActivated(user.getActivated());
+        dto.setLangKey(user.getLangKey());
+        dto.setCreatedBy(user.getCreatedBy());
+        dto.setCreatedDate(user.getCreatedDate());
+        dto.setLastModifiedBy(user.getLastModifiedBy());
+        dto.setLastModifiedDate(user.getLastModifiedDate());
+        dto.setEnabled(user.hasEnabled());
+        dto.setVerifiedEmail(user.hasVerifiedEmail());
+        dto.setAccountStatus(user.getAccountStatus());
+        List<AuthorityDto> authorityDtos = authorityMapper.authorityToDtos(new ArrayList<>(user.getAuthorities()));
+        dto.setAuthorities(new HashSet<>(authorityDtos));
+        return dto;
     }
 
     public User userDTOToUser(UserDTO userDTO) {
@@ -40,9 +65,11 @@ public class UserMapper {
             user.setEmail(userDTO.getEmail());
             user.setActivated(userDTO.isActivated());
             user.setLangKey(userDTO.getLangKey());
-            user.setStatus(userDTO.getStatus());
-            Set<Authority> authorities = this.authoritiesFromStrings(userDTO.getAuthorities());
+            Set<Authority> authorities = new HashSet<>(authorityMapper.dtoToAuthorities(new ArrayList<>(userDTO.getAuthorities())));
             user.setAuthorities(authorities);
+            user.setHasEnabled(userDTO.isEnabled());
+            user.setHasVerifiedEmail(userDTO.isVerifiedEmail());
+            user.setAccountStatus(userDTO.getAccountStatus());
             return user;
         }
     }

@@ -9,11 +9,16 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthorityDto {
-    private String roleName;
 
-    private Instant createDate;
-
-    private Instant modifiedDate;
+    private String name;
 
     private String description;
+
+    private String createdBy;
+
+    private Instant createdDate;
+
+    private String lastModifiedBy;
+
+    private Instant lastModifiedDate;
 }

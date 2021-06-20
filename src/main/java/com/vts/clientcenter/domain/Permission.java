@@ -9,6 +9,7 @@ import javax.validation.constraints.*;
 import lombok.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.springframework.security.core.GrantedAuthority;
 
 /**
  * A Permission.
@@ -24,7 +25,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @NoArgsConstructor
 @AllArgsConstructor
 
-public class Permission extends AbstractAuditingEntity {
+public class Permission  extends AbstractAuditingEntity implements GrantedAuthority {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -38,8 +39,19 @@ public class Permission extends AbstractAuditingEntity {
     @Column(name = "description")
     private String description;
 
-    @OneToMany(mappedBy = "permission", fetch = FetchType.LAZY)
-    private Set<RolePermission> rolePermissions;
+    @Override
+    public String getAuthority() {
+        return name;
+    }
 
+    @Override
+    public boolean equals(Object o) {
+        GrantedAuthority ga = (GrantedAuthority) o;
+        return (getAuthority().equals(ga.getAuthority()));
+    }
 
+    @Override
+    public int hashCode() {
+        return getAuthority().hashCode();
+    }
 }

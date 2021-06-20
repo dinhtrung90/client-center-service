@@ -18,9 +18,15 @@ app:
   mysql-url: vps-5785f290.vps.ovh.ca
   keycloak:
     authorizeUrl: https://auth.fingmeup.com/auth
-    clientId: elend-api
-    clientSecret: 2cf0bef1-dab9-4610-a165-713447fa6b6a
-    realmName: elend
+    clientId: admin-cli
+    clientSecret: bd97d894-4a84-45d2-a142-cb753b2a3e2c
+    realmName: master
+    connectionPoolSize: 10
+    grantType: password
+    realmApp: elend
+    admin:
+      username: admin
+      password: Pa55w0rd
 
   kafka:
     retryPeriod: 5

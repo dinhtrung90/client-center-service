@@ -189,6 +189,7 @@ CREATE TABLE `DATABASECHANGELOGLOCK` (
 DROP TABLE IF EXISTS `jhi_authority`;
 CREATE TABLE `jhi_authority` (
                                  `name` varchar(50) NOT NULL,
+                                 `description` varchar(255) NULL,
                                  PRIMARY KEY (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -230,6 +231,9 @@ CREATE TABLE `jhi_user` (
                             `email` varchar(191) DEFAULT NULL,
                             `phone` varchar(191) DEFAULT NULL,
                             `image_url` varchar(256) DEFAULT NULL,
+                            `has_verified_email` bit(1) NOT NULL,
+                            `has_enabled` bit(1) NOT NULL,
+                            `account_status` varchar(50) NOT NULL,
                             `activated` bit(1) NOT NULL,
                             `lang_key` varchar(10) DEFAULT NULL,
                             `created_by` varchar(50) NOT NULL,

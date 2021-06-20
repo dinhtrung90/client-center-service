@@ -6,6 +6,7 @@ import com.vts.clientcenter.domain.User;
 import com.vts.clientcenter.kafka.KafkaSender;
 import com.vts.clientcenter.kafka.messages.MessageType;
 import com.vts.clientcenter.kafka.messages.UserCreatedMessage;
+import com.vts.clientcenter.service.AccountService;
 import com.vts.clientcenter.service.OktaService;
 import com.vts.clientcenter.service.dto.UserDTO;
 import java.util.Objects;
@@ -25,7 +26,7 @@ public class UserCreatedEventListener {
     private KafkaSender<UserCreatedMessage> kafkaSender;
 
     @Autowired
-    private OktaService oktaService;
+    private AccountService accountService;
 
     @Value("${cloudkarafka.email-invitation}")
     private String emailTopic;
@@ -56,7 +57,7 @@ public class UserCreatedEventListener {
     public void processUserCreatedEventAfterRollBack(UserCreatedEvent event) {
         LOGGER.info("Event received: " + event);
         if (Objects.nonNull(event.getUser()) && Objects.nonNull(event.getUser().getId())) {
-            oktaService.removeAccount(event.getUser().getId());
+            accountService.removeAccountFromKeycloak(event.getUser().getId());
         }
     }
 
