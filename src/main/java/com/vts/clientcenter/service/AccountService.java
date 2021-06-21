@@ -5,15 +5,18 @@ import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.config.KeycloakConfig;
 import com.vts.clientcenter.domain.Authority;
 import com.vts.clientcenter.domain.User;
+import com.vts.clientcenter.domain.UserAddress;
 import com.vts.clientcenter.domain.UserProfile;
 import com.vts.clientcenter.domain.enumeration.ActionsEmail;
 import com.vts.clientcenter.events.UserCreatedEvent;
 import com.vts.clientcenter.repository.AuthorityRepository;
+import com.vts.clientcenter.repository.UserAddressRepository;
 import com.vts.clientcenter.repository.UserProfileRepository;
 import com.vts.clientcenter.repository.UserRepository;
 import com.vts.clientcenter.security.SecurityUtils;
 import com.vts.clientcenter.service.dto.*;
 import com.vts.clientcenter.service.keycloak.KeycloakFacade;
+import com.vts.clientcenter.service.mapper.UserAddressMapper;
 import com.vts.clientcenter.service.mapper.UserMapper;
 import com.vts.clientcenter.service.mapper.UserProfileMapper;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
@@ -25,6 +28,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -32,9 +36,11 @@ import org.springframework.util.CollectionUtils;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import javax.ws.rs.ClientErrorException;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -74,6 +80,12 @@ public class AccountService {
 
     @Autowired
     private UserProfileMapper userProfileMapper;
+
+    @Autowired
+    private UserAddressMapper userAddressMapper;
+
+    @Autowired
+    private UserAddressRepository userAddressRepository;
 
     @Transactional
     public UserReferenceDto createUserAccount(CreateAccountRequest request) {
@@ -129,11 +141,31 @@ public class AccountService {
 
         referenceDto.setUserId(user.getId());
 
+        List<UserAddress> createObjects = request
+            .getUserAddressList()
+            .stream()
+            .filter(userAddressDTO -> Objects.isNull(userAddressDTO.getId()))
+            .flatMap(
+                dto -> {
+                    dto.setLastModifiedDate(Instant.now());
+                    dto.setLastModifiedBy(userLogin);
+                    dto.setCreatedBy(userLogin);
+                    dto.setCreatedDate(Instant.now());
+                    return Stream.of(userAddressMapper.toEntity(dto));
+                }
+            )
+            .collect(Collectors.toList());
+
+        userAddressRepository.saveAll(createObjects);
+
+
         return referenceDto;
     }
 
     public void removeAccountFromKeycloak(String userId)  {
         keycloakFacade.deleteUser(setting.getRealmApp(), userId);
+        Optional<User> userOptional = userRepository.findById(userId);
+        userOptional.ifPresent( u -> userRepository.delete(u));
     }
 
     @Transactional
@@ -219,5 +251,59 @@ public class AccountService {
         keycloakFacade.executeActionEmail(setting.getRealmApp(), userId, actions);
 
         return ApiResponse.builder().response(userDto).isIsSuccess(true).build();
+    }
+
+    public ApiResponse resendVerifyEmail(String userId) {
+
+        UserDTO userDto = keycloakFacade.findUserById(setting.getRealmApp(), userId);
+        if (Objects.isNull(userDto)) {
+            throw new BadRequestAlertException("Account not found.", "User", Constants.USER_NOT_FOUND);
+        }
+
+
+        boolean isSuccess = true;
+        String message = "Sending email Successfully";
+        HttpStatus statusCode = HttpStatus.OK;
+        try {
+            keycloakFacade.sendVerifiedEmail(setting.getRealmApp(), userId);
+        } catch (ClientErrorException e) {
+            e.printStackTrace();
+            isSuccess = false;
+            message = e.getMessage();
+            statusCode = HttpStatus.BAD_REQUEST;
+        }
+
+        ResendVerifyEmailResponse res = ResendVerifyEmailResponse.builder()
+            .userId(userId)
+            .email(userDto.getEmail()).build();
+
+        return ApiResponse.builder().response(res).isIsSuccess(isSuccess).message(message).statusCode(statusCode).build();
+    }
+
+    public ApiResponse resetPassworUser(String userId) {
+
+        UserDTO userDto = keycloakFacade.findUserById(setting.getRealmApp(), userId);
+        if (Objects.isNull(userDto)) {
+            throw new BadRequestAlertException("Account not found.", "User", Constants.USER_NOT_FOUND);
+        }
+
+
+        boolean isSuccess = true;
+        String message = "Reset Password Successfully";
+        HttpStatus statusCode = HttpStatus.OK;
+        try {
+            keycloakFacade.sendResetPasswordEmail(setting.getRealmApp(), userId);
+        } catch (ClientErrorException e) {
+            e.printStackTrace();
+            isSuccess = false;
+            message = e.getMessage();
+            statusCode = HttpStatus.BAD_REQUEST;
+        }
+
+        ResendVerifyEmailResponse res = ResendVerifyEmailResponse.builder()
+            .userId(userId)
+            .email(userDto.getEmail()).build();
+
+        return ApiResponse.builder().response(res).isIsSuccess(isSuccess).message(message).statusCode(statusCode).build();
     }
 }

@@ -104,6 +104,14 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
     }
 
     @Override
+    public void resetPassword(String realmId, String userId, String password) {
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setValue(password);
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setTemporary(false);
+    }
+
+    @Override
     public UpdateUserResponse updateUser(String realmId, UserDTO userDto) {
         UserResource userResource = getUserResource(realmId, userDto.getId());
         UserRepresentation userRepresentation = userResource.toRepresentation();
@@ -173,36 +181,20 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
     }
 
     @Override
-    public boolean createRole(Authority authority, String realmName) {
-        try {
-            RoleRepresentation roleRepresentation = new RoleRepresentation();
-            roleRepresentation.setName(authority.getName());
-            roleRepresentation.setDescription(authority.getDescription());
-            keycloak.realm(realmName).roles().create(roleRepresentation);
-            return true;
-        } catch (ClientErrorException e) {
-            if (e.getResponse().getStatus() == Response.Status.CONFLICT.getStatusCode()) {
-                System.out.println(authority.getName() + " has already been created.");
-            } else {
-                handleClientErrorException(e);
-            }
-        }
-        return false;
+    public void createRole(Authority authority, String realmName) {
+        RoleRepresentation roleRepresentation = new RoleRepresentation();
+        roleRepresentation.setName(authority.getName());
+        roleRepresentation.setDescription(authority.getDescription());
+        keycloak.realm(realmName).roles().create(roleRepresentation);
     }
 
     @Override
-    public boolean updateRole(String roleName, String realmName, Authority updateAuthority) {
-        try {
-            RoleRepresentation roleRepresentation = getRoleResource(realmName).get(roleName).toRepresentation();
-            roleRepresentation.setDescription(updateAuthority.getDescription());
-            roleRepresentation.setName(updateAuthority.getName());
-            getRoleResource(realmName).get(roleName).update(roleRepresentation);
-            return true;
-        } catch (ClientErrorException e) {
-            handleClientErrorException(e);
-        }
-
-        return false;
+    public void updateRole(String olRoleName, String realmName, Authority updateAuthority) {
+        RoleResource roleResource = getRoleResource(realmName).get(olRoleName);
+        RoleRepresentation roleRepresentation = roleResource.toRepresentation();
+        roleRepresentation.setDescription(updateAuthority.getDescription());
+        roleRepresentation.setName(updateAuthority.getName());
+        roleResource.update(roleRepresentation);
     }
 
     @Override

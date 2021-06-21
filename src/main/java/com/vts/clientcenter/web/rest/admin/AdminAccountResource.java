@@ -69,6 +69,22 @@ public class AdminAccountResource {
             .body(referenceDto);
     }
 
+    @PostMapping("/account/{userId}/resend-verify-email")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+    public ResponseEntity<ApiResponse> resendVerifyEmail(@PathVariable String userId) throws URISyntaxException {
+        log.debug("REST request to create User : {}", userId);
+        ApiResponse response = accountService.resendVerifyEmail(userId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PostMapping("/account/{userId}/reset-password-email")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+    public ResponseEntity<ApiResponse> resetPasswordUser(@PathVariable String userId) throws URISyntaxException {
+        log.debug("REST request to create User : {}", userId);
+        ApiResponse response = accountService.resetPassworUser(userId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
     @GetMapping("/account/get")
     public ResponseEntity<List<UserDTO>> getAllAccountInSystem(UserCriteria criteria, Pageable pageable) {
         log.debug("REST request to get accounts by criteria: {}", criteria);
@@ -83,5 +99,13 @@ public class AdminAccountResource {
         log.debug("REST request to set required actions : {}", actions);
         ApiResponse response = accountService.setRequiredActions(userId, actions);
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/account/{userId}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+    public ResponseEntity<ApiResponse> deleteUser(@PathVariable String userId) throws URISyntaxException {
+        log.debug("REST request to delete user : {}", userId);
+         accountService.removeAccountFromKeycloak(userId);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -10,11 +10,11 @@ import java.util.Optional;
 public interface KeycloakFacade {
     List<Authority> syncRoles(String realm);
 
-    boolean createRole(Authority authority, String realmName);
+    void createRole(Authority authority, String realmName);
 
     boolean deleteRole(String roleId, String realmName);
 
-    boolean updateRole(String roleName, String realmName, Authority updateAuthority);
+    void updateRole(String oldRoleName, String realmName, Authority updateAuthority);
 
     UserDTO findUserById(String realmId, String userId);
 
@@ -33,6 +33,8 @@ public interface KeycloakFacade {
     void sendVerifiedEmail(String realmId, String userId);
 
     void sendResetPasswordEmail(String realmId, String userId);
+
+    void resetPassword(String realmId, String userId, String password);
 
     UpdateUserResponse updateUser(String realmId, UserDTO userDto);
 }

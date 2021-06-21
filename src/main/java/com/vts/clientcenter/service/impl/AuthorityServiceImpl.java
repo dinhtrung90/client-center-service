@@ -15,9 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.vts.clientcenter.config.Constants.SYSTEM_ACCOUNT;
+
 @Service
 @Transactional
 public class AuthorityServiceImpl extends AbstractBaseService implements AuthorityService {
+
+
     @Autowired
     private AuthorityRepository authorityRepository;
 
@@ -45,24 +49,28 @@ public class AuthorityServiceImpl extends AbstractBaseService implements Authori
 
     @Override
     public AuthorityDto save(AuthorityDto dto) {
-        Optional<String> currentUserLogin = SecurityUtils.getCurrentUserLogin();
+        String currentUserLogin = SecurityUtils.getCurrentUserLogin().orElse(SYSTEM_ACCOUNT);
 
         Optional<Authority> authorityOptional = authorityRepository.findById(dto.getName());
 
+        Authority authority = null;
+
         if (!authorityOptional.isPresent()) {
-            Authority authority = new Authority();
+
+            authority = new Authority();
             authority.setName(dto.getName());
             authority.setDescription(dto.getDescription());
-            authority.setCreatedBy(currentUserLogin.get());
-            authority.setLastModifiedBy(currentUserLogin.get());
+            authority.setCreatedBy(currentUserLogin);
+            authority.setLastModifiedBy(currentUserLogin);
             authority.setLastModifiedDate(Instant.now());
+            keycloakFacade.createRole(authority, setting.getRealmApp());
+        } else {
+            authority = authorityOptional.get();
+            authority.setDescription(dto.getDescription());
+            authority.setLastModifiedBy(currentUserLogin);
+            authority.setLastModifiedDate(Instant.now());
+            keycloakFacade.updateRole(authority.getName(), setting.getRealmApp(), authority);
         }
-
-        Authority authority = authorityOptional.get();
-        authority.setDescription(dto.getDescription());
-        authority.setLastModifiedBy(currentUserLogin.get());
-        authority.setLastModifiedDate(Instant.now());
-
         authorityRepository.save(authority);
 
         return AuthorityDto

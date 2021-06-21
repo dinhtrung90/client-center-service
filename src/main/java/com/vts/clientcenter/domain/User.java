@@ -65,6 +65,7 @@ public class User extends AbstractAuditingEntity implements Serializable {
     private boolean hasEnabled;
 
     @Column(name = "account_status")
+    @Enumerated(EnumType.STRING)
     private AccountStatus accountStatus;
 
     @JsonIgnore
