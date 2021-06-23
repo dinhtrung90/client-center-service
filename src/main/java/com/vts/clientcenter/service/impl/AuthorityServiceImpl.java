@@ -94,7 +94,7 @@ public class AuthorityServiceImpl extends AbstractBaseService implements Authori
             .collect(Collectors.toSet());
         authority.setCompositeRoles(authorities);
 
-        keycloakFacade.createWithCompositeRoles(dto, setting.getRealmApp());
+        keycloakFacade.createWithCompositeRoles(dto, setting.getRealmApp(), setting.getClientUUID());
 
         authorityRepository.save(authority);
 
@@ -113,7 +113,7 @@ public class AuthorityServiceImpl extends AbstractBaseService implements Authori
 
         authority.setCompositeRoles(authorities);
 
-        keycloakFacade.updateWithCompositeRoles(dto, setting.getRealmApp());
+        keycloakFacade.updateWithCompositeRoles(dto, setting.getRealmApp(), setting.getClientUUID());
 
         authority.addCompositeRoles(authorities);
         authorityRepository.save(authority);

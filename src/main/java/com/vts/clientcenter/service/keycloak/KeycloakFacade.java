@@ -38,7 +38,7 @@ public interface KeycloakFacade {
 
     UpdateUserResponse updateUser(String realmId, UserDTO userDto);
 
-    RoleDetailResponse createWithCompositeRoles(CreateRoleRequest request, String realmName);
+    RoleDetailResponse createWithCompositeRoles(CreateRoleRequest request, String realmName, String clientUUID);
 
-    RoleDetailResponse updateWithCompositeRoles(CreateRoleRequest dto, String realmApp);
+    RoleDetailResponse updateWithCompositeRoles(CreateRoleRequest dto, String realmApp, String clientUUID);
 }

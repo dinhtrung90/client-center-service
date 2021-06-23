@@ -37,4 +37,8 @@ public class KeycloakConfig {
 
     @Value("${app.keycloak.realmApp}")
     private String realmApp;
+
+    @Value("${app.keycloak.clientUUID}")
+    private String clientUUID;
+
 }

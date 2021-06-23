@@ -10,6 +10,7 @@ import org.keycloak.admin.client.resource.*;
 import org.keycloak.representations.idm.*;
 import org.keycloak.util.JsonSerialization;
 import org.springframework.util.CollectionUtils;
+import org.thymeleaf.util.ListUtils;
 
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.vts.clientcenter.config.Constants.ACCOUNT_STATUS_FIELD;
 import static java.util.Objects.nonNull;
@@ -182,8 +184,12 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
         return authority;
     }
 
+    private ClientResource getClientResource(String realmName, String clientUUID) {
+        return keycloak.realm(realmName).clients().get(clientUUID);
+    }
+
     @Override
-    public RoleDetailResponse createWithCompositeRoles(CreateRoleRequest request, String realmName) {
+    public RoleDetailResponse createWithCompositeRoles(CreateRoleRequest request, String realmName, String clientUUID) {
 
         RolesResource rolesResource = keycloak.realm(realmName).roles();
         //create new role
@@ -196,31 +202,43 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
         rolesResource.create(roleRepresentation);
 
         RoleDetailResponse response = RoleDetailResponse.builder()
+            .success(true)
             .effectiveRoles(request.getEffectiveRoles())
+            .isCompositeRole(isComposite)
             .availablePrivileges(request.getAvailablePrivileges())
+            .roleName(roleRepresentation.getName())
+            .description(roleRepresentation.getDescription())
             .build();
 
         if (!isComposite) {
             return response;
         }
 
-        Set<String> compositeRoles = org.mapstruct.ap.internal.util.Collections.asSet(request.getEffectiveRoles(), request.getEffectiveRoles());
-
         //get effective roles
         List<RoleRepresentation> compositeRolesRepresentations = rolesResource.list()
             .stream()
-            .filter(rr -> compositeRoles.contains(rr.getName()))
+            .filter(rr -> request.getEffectiveRoles().contains(rr.getName()))
+            .collect(Collectors.toList());
+
+        // set privileges
+        ClientResource clientResource = getClientResource(realmName, clientUUID);
+        RolesResource clientRoleResource = clientResource.roles();
+        List<RoleRepresentation> clientRolesRepresentations = clientRoleResource.list()
+            .stream()
+            .filter(rr -> request.getAvailablePrivileges().contains(rr.getName()))
+            .collect(Collectors.toList());
+
+        List<RoleRepresentation> roleRepresentations = Stream.concat(compositeRolesRepresentations.stream(), clientRolesRepresentations.stream())
             .collect(Collectors.toList());
 
         RoleResource roleResource = rolesResource.get(request.getRoleName());
-        roleResource.addComposites(compositeRolesRepresentations);
 
-
+        roleResource.addComposites(roleRepresentations);
         return response;
     }
 
     @Override
-    public RoleDetailResponse updateWithCompositeRoles(CreateRoleRequest request, String realmName) {
+    public RoleDetailResponse updateWithCompositeRoles(CreateRoleRequest request, String realmName, String clientUUID) {
 
         RolesResource rolesResource = keycloak.realm(realmName).roles();
 
@@ -235,25 +253,39 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
         roleRepresentation.setComposite(isComposite);
         roleResource.update(roleRepresentation);
 
-        Set<RoleRepresentation> deleteRoleRepresentations = org.mapstruct.ap.internal.util.Collections.asSet(roleResource.getRealmRoleComposites(), roleResource.getClientRoleComposites(realmName));
+        Set<RoleRepresentation> deleteRoleRepresentations = org.mapstruct.ap.internal.util.Collections.asSet(roleResource.getRealmRoleComposites(), roleResource.getClientRoleComposites(clientUUID));
 
         roleResource.deleteComposites(new ArrayList<>(deleteRoleRepresentations));
 
         if (isComposite) {
-            Set<String> effectiveRoles = org.mapstruct.ap.internal.util.Collections.asSet(request.getAvailablePrivileges(), request.getEffectiveRoles());
 
+            //get effective roles
             List<RoleRepresentation> compositeRolesRepresentations = rolesResource.list()
                 .stream()
-                .filter(rr -> effectiveRoles.contains(rr.getName()))
+                .filter(rr -> request.getEffectiveRoles().contains(rr.getName()))
                 .collect(Collectors.toList());
 
-            roleResource.addComposites(compositeRolesRepresentations);
+            // set privileges
+            ClientResource clientResource = getClientResource(realmName, clientUUID);
+            RolesResource clientRoleResource = clientResource.roles();
+            List<RoleRepresentation> clientRolesRepresentations = clientRoleResource.list()
+                .stream()
+                .filter(rr -> request.getAvailablePrivileges().contains(rr.getName()))
+                .collect(Collectors.toList());
+
+            List<RoleRepresentation> roleRepresentations = Stream.concat(compositeRolesRepresentations.stream(), clientRolesRepresentations.stream())
+                .collect(Collectors.toList());
+
+            roleResource.addComposites(roleRepresentations);
         }
 
-        return RoleDetailResponse
-            .builder()
-            .availablePrivileges(request.getAvailablePrivileges())
+        return RoleDetailResponse.builder()
+            .success(true)
             .effectiveRoles(request.getEffectiveRoles())
+            .isCompositeRole(isComposite)
+            .availablePrivileges(request.getAvailablePrivileges())
+            .roleName(roleRepresentation.getName())
+            .description(roleRepresentation.getDescription())
             .build();
     }
 

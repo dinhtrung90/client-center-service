@@ -20,6 +20,7 @@ app:
     authorizeUrl: https://auth.fingmeup.com/auth
     clientId: admin-cli
     clientSecret: Digital-Eastern-App
+    clientUUID: b2a60d53-44c9-4c93-9cde-2723bc9eee36
     realmName: master
     connectionPoolSize: 10
     grantType: password

@@ -15,7 +15,11 @@ public class RoleDetailResponse {
 
     private String description;
 
+    private boolean isCompositeRole;
+
     private List<String> effectiveRoles;
 
     private List<String> availablePrivileges;
+
+    private boolean success;
 }

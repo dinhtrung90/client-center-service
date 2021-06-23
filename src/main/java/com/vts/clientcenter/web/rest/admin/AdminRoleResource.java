@@ -66,10 +66,7 @@ public class AdminRoleResource {
     public ResponseEntity<RoleDetailResponse> createRole(@Valid @RequestBody CreateRoleRequest dto) throws URISyntaxException {
         log.debug("REST request to create authorityDto : {}", dto);
         RoleDetailResponse authorityDto = authorityService.save(dto);
-        return ResponseEntity
-            .created(new URI("/api/cms/role/" + authorityDto.getRoleName()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, "ACCOUNT", authorityDto.getRoleName()))
-            .body(authorityDto);
+        return ResponseEntity.ok(authorityDto);
     }
 
     @GetMapping("/role/get")
