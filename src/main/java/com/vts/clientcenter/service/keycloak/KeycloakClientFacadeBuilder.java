@@ -3,6 +3,7 @@ package com.vts.clientcenter.service.keycloak;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.token.TokenService;
 
 public class KeycloakClientFacadeBuilder {
     private String serverUrl;
@@ -18,6 +19,7 @@ public class KeycloakClientFacadeBuilder {
     private String password;
 
     private ResteasyClient resteasyClient;
+
 
     public KeycloakFacade build() {
         KeycloakBuilder builder = username == null
@@ -82,4 +84,5 @@ public class KeycloakClientFacadeBuilder {
         this.resteasyClient = resteasyClient;
         return this;
     }
+
 }

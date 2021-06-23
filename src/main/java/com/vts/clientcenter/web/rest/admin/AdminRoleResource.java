@@ -48,6 +48,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/cms")
+@PreAuthorize("denyAll()")
 public class AdminRoleResource {
     private final Logger log = LoggerFactory.getLogger(AdminRoleResource.class);
 
@@ -61,20 +62,22 @@ public class AdminRoleResource {
     }
 
     @PostMapping("/role/create")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
-    public ResponseEntity<AuthorityDto> createRole(@Valid @RequestBody AuthorityDto dto) throws URISyntaxException {
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN')")
+    public ResponseEntity<RoleDetailResponse> createRole(@Valid @RequestBody CreateRoleRequest dto) throws URISyntaxException {
         log.debug("REST request to create authorityDto : {}", dto);
-        AuthorityDto authorityDto = authorityService.save(dto);
+        RoleDetailResponse authorityDto = authorityService.save(dto);
         return ResponseEntity
-            .created(new URI("/api/cms/role/" + authorityDto.getName()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, "ACCOUNT", authorityDto.getName()))
+            .created(new URI("/api/cms/role/" + authorityDto.getRoleName()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, "ACCOUNT", authorityDto.getRoleName()))
             .body(authorityDto);
     }
 
     @GetMapping("/role/get")
-    public ResponseEntity<List<AuthorityDto>> getAllRoles() {
-        List<AuthorityDto> response = authorityService.getAuthorities();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN')")
+    public ResponseEntity<List<AuthorityDto>> getAllRoles(Pageable pageable) {
+        Page<AuthorityDto> response = authorityService.getAuthorities(pageable);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), response);
+        return new ResponseEntity<>(response.getContent(), headers, HttpStatus.OK);
     }
 
 }

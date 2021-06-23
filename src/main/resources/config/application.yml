@@ -160,11 +160,11 @@ spring:
       client:
         provider:
           oidc:
-            issuer-uri: ${app.keycloak.authorizeUrl}/realms/elend
+            issuer-uri: ${app.keycloak.authorizeUrl}/realms/Digital-Eastern
         registration:
           oidc:
-            client-id: elend-api-gateway
-            client-secret: 566beb1a-d0af-46d0-b8d7-0741fe86e2d2
+            client-id: Digital-Eastern-App
+            client-secret: Digital-Eastern-App
   flyway:
     enabled: true
     out-of-order: true
@@ -217,7 +217,7 @@ jhipster:
         - account
         - api://default
         - 0oalhgrpkTSLs0spA5d6
-        - elend-api-gateway
+        - Digital-Eastern-App
 #kafka:
 #  bootstrap-servers: ${app.kafka-url}:9092
 #  consumer:

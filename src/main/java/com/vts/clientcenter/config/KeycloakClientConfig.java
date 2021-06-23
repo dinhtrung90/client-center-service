@@ -19,7 +19,6 @@ public class KeycloakClientConfig {
             .setServerUrl(setting.getServerUrl()) //
             .setRealmId(setting.getRealmName()) //
             .setClientId(setting.getClientId()) //
-            .setClientSecret(setting.getClientSecret()) //
             .setUsername(setting.getUsername())
             .setPassword(setting.getPassword())
             .build();

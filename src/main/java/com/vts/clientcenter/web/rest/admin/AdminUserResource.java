@@ -1,4 +1,4 @@
-package com.vts.clientcenter.web.rest;
+package com.vts.clientcenter.web.rest.admin;
 
 import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.service.UserService;
@@ -14,7 +14,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.security.Principal;
@@ -45,30 +48,31 @@ import java.util.List;
  * Another option would be to have a specific JPA entity graph to handle this case.
  */
 @RestController
-@RequestMapping("/api")
-public class UserResource {
-    private final Logger log = LoggerFactory.getLogger(UserResource.class);
+@RequestMapping("/api/cms")
+public class AdminUserResource {
+    private final Logger log = LoggerFactory.getLogger(AdminUserResource.class);
 
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
 
     private final UserService userService;
 
-    public UserResource(UserService userService) {
+    public AdminUserResource(UserService userService) {
         this.userService = userService;
     }
 
-    /**
-     * {@code GET /users} : get all users.
-     *
-     * @param pageable the pagination information.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body all users.
-     */
-    @GetMapping("/users")
-    public ResponseEntity<List<UserDTO>> getAllUsers(Pageable pageable) {
-        final Page<UserDTO> page = userService.getAllManagedUsers(pageable);
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
-        return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+    @PostMapping("/users/clearCache")
+    public void clearCache() {
+        userService.clearCachesAllUsers();
+    }
+
+    @GetMapping("/users/sync")
+    public UserDTO getAccount(Principal principal) {
+        if (principal instanceof AbstractAuthenticationToken) {
+            return userService.getUserFromAuthentication((AbstractAuthenticationToken) principal);
+        } else {
+            throw new BadRequestAlertException("User is not able to sync.", "Users", Constants.USER_NOT_FOUND);
+        }
     }
 
 }

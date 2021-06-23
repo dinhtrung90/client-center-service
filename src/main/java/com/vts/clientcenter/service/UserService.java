@@ -3,6 +3,7 @@ package com.vts.clientcenter.service;
 import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.domain.Authority;
 import com.vts.clientcenter.domain.User;
+import com.vts.clientcenter.domain.enumeration.AccountStatus;
 import com.vts.clientcenter.repository.AuthorityRepository;
 import com.vts.clientcenter.repository.UserRepository;
 import com.vts.clientcenter.security.SecurityUtils;
@@ -168,10 +169,6 @@ public class UserService {
         return userMapper.userToDto(syncUserWithIdP(attributes, user));
     }
 
-    public void synUserFromClaim(Map<String, Object> detail)  {
-        syncUserWithIdP(detail, getUser(detail));
-    }
-
     private static User getUser(Map<String, Object> details) {
         User user = new User();
         // handle resource server JWT, where sub claim is email and uid is ID
@@ -195,6 +192,7 @@ public class UserService {
         if (details.get("email_verified") != null) {
             user.setActivated((Boolean) details.get("email_verified"));
         }
+
         if (details.get("email") != null) {
             user.setEmail(((String) details.get("email")).toLowerCase());
         } else {
@@ -218,6 +216,12 @@ public class UserService {
         //        if (details.get("picture") != null) {
         //            user.setImageUrl((String) details.get("picture"));
         //        }
+
+        if (details.get("account_status") != null) {
+            user.setAccountStatus(AccountStatus.valueOf(((String) details.get("account_status")).toUpperCase()));
+        } else {
+            user.setAccountStatus(AccountStatus.PENDING);
+        }
         user.setActivated(user.hasEnabled() && user.hasVerifiedEmail());
         return user;
     }

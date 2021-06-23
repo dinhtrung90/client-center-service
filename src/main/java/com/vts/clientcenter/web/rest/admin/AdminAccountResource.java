@@ -1,7 +1,9 @@
 package com.vts.clientcenter.web.rest.admin;
 
+import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.service.AccountService;
 import com.vts.clientcenter.service.dto.*;
+import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import io.github.jhipster.web.util.HeaderUtil;
 import io.github.jhipster.web.util.PaginationUtil;
 import org.slf4j.Logger;
@@ -13,11 +15,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.Principal;
 import java.util.List;
 
 /**
@@ -81,7 +85,7 @@ public class AdminAccountResource {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
     public ResponseEntity<ApiResponse> resetPasswordUser(@PathVariable String userId) throws URISyntaxException {
         log.debug("REST request to create User : {}", userId);
-        ApiResponse response = accountService.resetPassworUser(userId);
+        ApiResponse response = accountService.resetPasswordUser(userId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
@@ -108,4 +112,5 @@ public class AdminAccountResource {
          accountService.removeAccountFromKeycloak(userId);
         return ResponseEntity.noContent().build();
     }
+
 }

@@ -21,8 +21,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.vts.clientcenter.config.Constants.ACCOUNT_STATUS_FIELD;
+import static java.util.Objects.nonNull;
 
 public class DefaultKeycloakFacade implements KeycloakFacade {
+
     private final Keycloak keycloak;
 
     public DefaultKeycloakFacade(Keycloak keycloak) {
@@ -181,6 +183,81 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
     }
 
     @Override
+    public RoleDetailResponse createWithCompositeRoles(CreateRoleRequest request, String realmName) {
+
+        RolesResource rolesResource = keycloak.realm(realmName).roles();
+        //create new role
+        boolean isComposite = !CollectionUtils.isEmpty(request.getEffectiveRoles());
+
+        RoleRepresentation roleRepresentation = new RoleRepresentation();
+        roleRepresentation.setName(request.getRoleName());
+        roleRepresentation.setDescription(request.getDescription());
+        roleRepresentation.setComposite(isComposite);
+        rolesResource.create(roleRepresentation);
+
+        RoleDetailResponse response = RoleDetailResponse.builder()
+            .effectiveRoles(request.getEffectiveRoles())
+            .availablePrivileges(request.getAvailablePrivileges())
+            .build();
+
+        if (!isComposite) {
+            return response;
+        }
+
+        Set<String> compositeRoles = org.mapstruct.ap.internal.util.Collections.asSet(request.getEffectiveRoles(), request.getEffectiveRoles());
+
+        //get effective roles
+        List<RoleRepresentation> compositeRolesRepresentations = rolesResource.list()
+            .stream()
+            .filter(rr -> compositeRoles.contains(rr.getName()))
+            .collect(Collectors.toList());
+
+        RoleResource roleResource = rolesResource.get(request.getRoleName());
+        roleResource.addComposites(compositeRolesRepresentations);
+
+
+        return response;
+    }
+
+    @Override
+    public RoleDetailResponse updateWithCompositeRoles(CreateRoleRequest request, String realmName) {
+
+        RolesResource rolesResource = keycloak.realm(realmName).roles();
+
+        boolean isComposite = !CollectionUtils.isEmpty(request.getEffectiveRoles());
+
+        RoleResource roleResource = rolesResource.get(request.getRoleName());
+
+        RoleRepresentation roleRepresentation = roleResource.toRepresentation();
+
+        roleRepresentation.setName(request.getRoleName());
+        roleRepresentation.setDescription(request.getDescription());
+        roleRepresentation.setComposite(isComposite);
+        roleResource.update(roleRepresentation);
+
+        Set<RoleRepresentation> deleteRoleRepresentations = org.mapstruct.ap.internal.util.Collections.asSet(roleResource.getRealmRoleComposites(), roleResource.getClientRoleComposites(realmName));
+
+        roleResource.deleteComposites(new ArrayList<>(deleteRoleRepresentations));
+
+        if (isComposite) {
+            Set<String> effectiveRoles = org.mapstruct.ap.internal.util.Collections.asSet(request.getAvailablePrivileges(), request.getEffectiveRoles());
+
+            List<RoleRepresentation> compositeRolesRepresentations = rolesResource.list()
+                .stream()
+                .filter(rr -> effectiveRoles.contains(rr.getName()))
+                .collect(Collectors.toList());
+
+            roleResource.addComposites(compositeRolesRepresentations);
+        }
+
+        return RoleDetailResponse
+            .builder()
+            .availablePrivileges(request.getAvailablePrivileges())
+            .effectiveRoles(request.getEffectiveRoles())
+            .build();
+    }
+
+    @Override
     public void createRole(Authority authority, String realmName) {
         RoleRepresentation roleRepresentation = new RoleRepresentation();
         roleRepresentation.setName(authority.getName());
@@ -249,7 +326,7 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
         userDto.setVerifiedEmail(userRepresentation.isEmailVerified());
         userDto.setEnabled(userRepresentation.isEnabled());
 
-        List<String> accountStatus = Objects.nonNull(userRepresentation.getAttributes()) ? userRepresentation.getAttributes().get(ACCOUNT_STATUS_FIELD): new ArrayList<>();
+        List<String> accountStatus = nonNull(userRepresentation.getAttributes()) ? userRepresentation.getAttributes().get(ACCOUNT_STATUS_FIELD): new ArrayList<>();
 
         if (!CollectionUtils.isEmpty(accountStatus)) {
             userDto.setAccountStatus(AccountStatus.valueOf(accountStatus.get(0)));

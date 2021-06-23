@@ -1,11 +1,14 @@
 package com.vts.clientcenter.service;
 
 import com.vts.clientcenter.service.dto.AuthorityDto;
-import java.util.List;
+import com.vts.clientcenter.service.dto.CreateRoleRequest;
+import com.vts.clientcenter.service.dto.RoleDetailResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface AuthorityService {
 
-    List<AuthorityDto> getAuthorities();
+    Page<AuthorityDto> getAuthorities(Pageable pageable);
 
-    AuthorityDto save(AuthorityDto dto);
+    RoleDetailResponse save(CreateRoleRequest dto);
 }

@@ -16,6 +16,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.springframework.util.CollectionUtils;
 
 /**
  * An authority (a security role) used by Spring Security.
@@ -48,4 +49,20 @@ public class Authority extends AbstractAuditingEntity {
         joinColumns = { @JoinColumn(name = "role_name") },
         inverseJoinColumns = { @JoinColumn(name = "permission_id") })
     public Set<Permission> permissions;
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {})
+    @JoinTable(name = "tv_composite_role", joinColumns = @JoinColumn(name = "composite"), inverseJoinColumns = @JoinColumn(name = "child_role"))
+    private Set<Authority> compositeRoles;
+
+
+    public Set<Authority> getCompositeRoles() {
+        return compositeRoles;
+    }
+
+    public void addCompositeRoles(Set<Authority> compositeRoles) {
+        if (!CollectionUtils.isEmpty(compositeRoles)) {
+            this.compositeRoles.clear();
+        }
+        this.compositeRoles = compositeRoles;
+    }
 }

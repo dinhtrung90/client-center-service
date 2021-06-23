@@ -29,6 +29,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -280,7 +281,7 @@ public class AccountService {
         return ApiResponse.builder().response(res).isIsSuccess(isSuccess).message(message).statusCode(statusCode).build();
     }
 
-    public ApiResponse resetPassworUser(String userId) {
+    public ApiResponse resetPasswordUser(String userId) {
 
         UserDTO userDto = keycloakFacade.findUserById(setting.getRealmApp(), userId);
         if (Objects.isNull(userDto)) {
@@ -306,4 +307,6 @@ public class AccountService {
 
         return ApiResponse.builder().response(res).isIsSuccess(isSuccess).message(message).statusCode(statusCode).build();
     }
+
+
 }

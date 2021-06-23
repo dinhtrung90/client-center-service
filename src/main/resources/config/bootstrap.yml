@@ -19,11 +19,11 @@ app:
   keycloak:
     authorizeUrl: https://auth.fingmeup.com/auth
     clientId: admin-cli
-    clientSecret: bd97d894-4a84-45d2-a142-cb753b2a3e2c
+    clientSecret: Digital-Eastern-App
     realmName: master
     connectionPoolSize: 10
     grantType: password
-    realmApp: elend
+    realmApp: Digital-Eastern
     admin:
       username: admin
       password: Pa55w0rd
