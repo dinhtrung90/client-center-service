@@ -190,7 +190,7 @@ public class UserService {
             user.setLastName((String) details.get("family_name"));
         }
         if (details.get("email_verified") != null) {
-            user.setActivated((Boolean) details.get("email_verified"));
+            user.setHasVerifiedEmail((Boolean) details.get("email_verified"));
         }
 
         if (details.get("email") != null) {
@@ -221,6 +221,11 @@ public class UserService {
             user.setAccountStatus(AccountStatus.valueOf(((String) details.get("account_status")).toUpperCase()));
         } else {
             user.setAccountStatus(AccountStatus.PENDING);
+        }
+        if (details.get("account_enabled")  != null) {
+            user.setHasEnabled((Boolean) details.get("account_enabled"));
+        } else {
+            user.setHasEnabled(false);
         }
         user.setActivated(user.hasEnabled() && user.hasVerifiedEmail());
         return user;
