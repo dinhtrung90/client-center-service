@@ -32,6 +32,7 @@ public final class Constants {
     public static final String ROLE_NOT_DELETE = "ROLE_NOT_DELETE";
     public static final String ACCOUNT_STATUS_FIELD = "accountStatus";
     public static final String ACCOUNT_CREATION_MESSAGE = "You just create a new account.";
+    public static final String DATE_FORMAT_YYYY_MM_DD = "yyyy-MM-dd";
 
     private Constants() {}
 }

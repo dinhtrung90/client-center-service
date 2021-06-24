@@ -1,8 +1,11 @@
 package com.vts.clientcenter.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.domain.enumeration.Gender;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Date;
 import javax.validation.constraints.*;
 import lombok.*;
 
@@ -29,7 +32,8 @@ public class UserProfileDTO implements Serializable {
 
     private Gender gender;
 
-    private Instant birthDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Constants.DATE_FORMAT_YYYY_MM_DD)
+    private Date birthDate;
 
     private Instant createdDate;
 

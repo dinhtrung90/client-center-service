@@ -152,14 +152,14 @@ public class AccountService {
                     dto.setLastModifiedBy(userLogin);
                     dto.setCreatedBy(userLogin);
                     dto.setCreatedDate(Instant.now());
+                    dto.setUserId(user.getId());
                     return Stream.of(userAddressMapper.toEntity(dto));
                 }
             )
             .collect(Collectors.toList());
 
-        userAddressRepository.saveAll(createObjects);
-
-
+        userAddressRepository.saveAll(createObjects.stream().peek(u -> u.setUser(user)).collect(Collectors.toList()));
+        
         return referenceDto;
     }
 

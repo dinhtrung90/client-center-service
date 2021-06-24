@@ -59,7 +59,7 @@ public class UserAddress implements Serializable {
     private String lastModifiedBy;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "user_id")
     private User user;
 
