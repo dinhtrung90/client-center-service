@@ -113,4 +113,10 @@ public class AdminAccountResource {
         return ResponseEntity.noContent().build();
     }
 
+    @RequestMapping(value = "/account", method = RequestMethod.GET)
+    public ResponseEntity<UserFullInfoResponse> getAccount(@RequestParam(name = "userId") String userId) {
+        log.debug("REST request to get account : {}", userId);
+        UserFullInfoResponse payload = accountService.getAccount(userId);
+        return ResponseEntity.ok(payload);
+    }
 }

@@ -3,6 +3,7 @@ package com.vts.clientcenter.web.rest;
 import com.vts.clientcenter.service.AccountService;
 import com.vts.clientcenter.service.dto.ActivatedPayload;
 import com.vts.clientcenter.service.dto.UserDTO;
+import com.vts.clientcenter.service.dto.UserFullInfoResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,12 +63,4 @@ public class AccountResource {
         ActivatedPayload payload = accountService.activateAccount(key);
         return ResponseEntity.ok(payload);
     }
-
-    @RequestMapping(value = "/account", method = RequestMethod.GET)
-    public ResponseEntity<UserDTO> getAccount(@RequestParam(name = "userId") String userId) {
-        log.debug("REST request to get account : {}", userId);
-        UserDTO payload = accountService.getAccount(userId);
-        return ResponseEntity.ok(payload);
-    }
-
 }

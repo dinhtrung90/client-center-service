@@ -5,4 +5,5 @@ import com.vts.clientcenter.service.dto.UserDTO;
 
 public interface UserDao {
     void handleRemoveFromRole(String role);
+
 }

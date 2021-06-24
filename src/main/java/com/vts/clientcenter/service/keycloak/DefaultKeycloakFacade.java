@@ -34,7 +34,7 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
     }
 
     @Override
-    public void assignUserRole(String realmId, UserDTO userDTO) {
+    public List<RoleRepresentation> assignUserRole(String realmId, UserDTO userDTO) {
 
         UserResource userResource = getUserResource(realmId, userDTO.getId());
 
@@ -51,8 +51,9 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
             .stream()
             .allMatch(r -> existedRolesRes.stream().map(re -> re.getName()).collect(Collectors.toSet()).contains(r.getName()));
 
+        List<RoleRepresentation> effectiveRoles = new ArrayList<>();
         if (isMatch) {
-            return;
+            return effectiveRoles;
         }
 
         List<RoleRepresentation> roles = getRealmResource(realmId).roles().list();
@@ -79,6 +80,10 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
             .collect(Collectors.toList());
 
         userResource.roles().realmLevel().add(roleRepresentations);
+
+        effectiveRoles = userResource.roles().realmLevel().listEffective();
+
+        return effectiveRoles;
     }
 
     @Override

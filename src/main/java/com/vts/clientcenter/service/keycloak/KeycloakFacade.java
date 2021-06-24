@@ -3,6 +3,7 @@ package com.vts.clientcenter.service.keycloak;
 
 import com.vts.clientcenter.domain.Authority;
 import com.vts.clientcenter.service.dto.*;
+import org.keycloak.representations.idm.RoleRepresentation;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +27,7 @@ public interface KeycloakFacade {
 
     void deleteUser(String realmId, String userId);
 
-    void assignUserRole(String realmId, UserDTO userDTO);
+    List<RoleRepresentation> assignUserRole(String realmId, UserDTO userDTO);
 
     void executeActionEmail(String realmId, String userId, List<String> actions);
 

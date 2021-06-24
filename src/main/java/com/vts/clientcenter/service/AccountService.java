@@ -20,6 +20,7 @@ import com.vts.clientcenter.service.mapper.UserAddressMapper;
 import com.vts.clientcenter.service.mapper.UserMapper;
 import com.vts.clientcenter.service.mapper.UserProfileMapper;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
+import org.keycloak.representations.idm.RoleRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,10 +115,10 @@ public class AccountService {
 
         UserDTO userDTO = userDTOOptional.get();
         userDTO.setAuthorities(request.getAuthorities());
-        keycloakFacade.assignUserRole(setting.getRealmApp(), userDTOOptional.get());
+        List<RoleRepresentation> allRoles = keycloakFacade.assignUserRole(setting.getRealmApp(), userDTOOptional.get());
 
         User user = userMapper.userDTOToUser(userDTO);
-        Set<Authority> userRoles = authorityRepository.findAllByNameIn(userDTO.getAuthorities().stream().map(AuthorityDto::getName).collect(Collectors.toList()));
+        Set<Authority> userRoles = authorityRepository.findAllByNameIn(allRoles.stream().map(RoleRepresentation::getName).collect(Collectors.toList()));
         user.setAuthorities(userRoles);
         applicationEventPublisher.publishEvent(new UserCreatedEvent(user));
 
@@ -159,7 +160,7 @@ public class AccountService {
             .collect(Collectors.toList());
 
         userAddressRepository.saveAll(createObjects.stream().peek(u -> u.setUser(user)).collect(Collectors.toList()));
-        
+
         return referenceDto;
     }
 
@@ -221,8 +222,29 @@ public class AccountService {
         return ActivatedPayload.builder().success(true).userId(userId).build();
     }
 
-    public UserDTO getAccount(String userId) {
-        return null;
+    @Transactional(readOnly = true)
+    public UserFullInfoResponse getAccount(String userId) {
+
+        Optional<User> userOptional = userRepository.findByUserId(userId);
+        if (!userOptional.isPresent()) {
+            throw new BadRequestAlertException("User Not Found", "USER", Constants.USER_NOT_FOUND);
+        }
+
+        User user = userOptional.get();
+
+        UserDTO userDTO = userMapper.userToUserDTO(user);
+
+        UserProfileDTO userProfileDTO = userProfileMapper.toDto(userProfileRepository.getOne(userId));
+
+        List<UserAddress> userAddresses = new ArrayList<>(user.getUserAddresses());
+
+        List<UserAddressDTO> dtoList = userAddressMapper.toDto(userAddresses);
+
+        return UserFullInfoResponse.builder()
+            .userAddressList(dtoList)
+            .userDto(userDTO)
+            .userProfileDto(userProfileDTO)
+            .build();
     }
 
     @Transactional(readOnly = true)
@@ -307,6 +329,5 @@ public class AccountService {
 
         return ApiResponse.builder().response(res).isIsSuccess(isSuccess).message(message).statusCode(statusCode).build();
     }
-
 
 }

@@ -35,4 +35,10 @@ public interface UserRepository extends JpaRepository<User, String>, JpaSpecific
 
     Optional<User> findOneByEmailIgnoreCase(String email);
 
+    @Query("select u from User u " +
+        "left join fetch u.userProfile " +
+        " left join fetch u.userAddresses " +
+        "where u.id =:userId")
+    Optional<User> findByUserId(@Param("userId") String userId);
+
 }

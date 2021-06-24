@@ -48,7 +48,8 @@ public class UserMapper {
         dto.setEnabled(user.hasEnabled());
         dto.setVerifiedEmail(user.hasVerifiedEmail());
         dto.setAccountStatus(user.getAccountStatus());
-        List<AuthorityDto> authorityDtos = authorityMapper.authorityToDtos(new ArrayList<>(user.getAuthorities()));
+        ArrayList<Authority> authorities = new ArrayList<>(user.getAuthorities());
+        List<AuthorityDto> authorityDtos = authorityMapper.authorityToDtos(authorities);
         dto.setAuthorities(new HashSet<>(authorityDtos));
         return dto;
     }
