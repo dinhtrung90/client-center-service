@@ -330,4 +330,7 @@ public class AccountService {
         return ApiResponse.builder().response(res).isIsSuccess(isSuccess).message(message).statusCode(statusCode).build();
     }
 
+    public UserFullInfoResponse updateUser(UpdateAccountRequest userDto) {
+        return null;
+    }
 }

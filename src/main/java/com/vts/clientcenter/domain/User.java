@@ -83,7 +83,7 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserAddress> userAddresses= new HashSet<>();
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "user")
     private UserProfile userProfile;
 
     public String getId() {

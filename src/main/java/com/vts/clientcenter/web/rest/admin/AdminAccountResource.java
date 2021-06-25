@@ -74,8 +74,6 @@ public class AdminAccountResource {
             .body(referenceDto);
     }
 
-
-
     @PostMapping("/account/{userId}/resend-verify-email")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
     public ResponseEntity<ApiResponse> resendVerifyEmail(@PathVariable String userId) throws URISyntaxException {
@@ -122,5 +120,14 @@ public class AdminAccountResource {
         log.debug("REST request to get account : {}", userId);
         UserFullInfoResponse payload = accountService.getAccount(userId);
         return ResponseEntity.ok(payload);
+    }
+
+    @PostMapping("/account/update")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+    public ResponseEntity<UserFullInfoResponse> updateUser(@RequestBody UpdateAccountRequest userDto) throws URISyntaxException {
+        log.debug("REST request to create User : {}", userDto);
+        UserFullInfoResponse response = accountService.updateUser(userDto);
+        return ResponseEntity
+           .ok(response);
     }
 }

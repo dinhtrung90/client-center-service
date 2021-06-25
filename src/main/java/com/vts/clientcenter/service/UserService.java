@@ -8,6 +8,7 @@ import com.vts.clientcenter.domain.UserProfile;
 import com.vts.clientcenter.domain.enumeration.AccountStatus;
 import com.vts.clientcenter.domain.enumeration.Gender;
 import com.vts.clientcenter.repository.AuthorityRepository;
+import com.vts.clientcenter.repository.UserProfileRepository;
 import com.vts.clientcenter.repository.UserRepository;
 import com.vts.clientcenter.security.SecurityUtils;
 import com.vts.clientcenter.service.dto.AuthorityDto;
@@ -15,7 +16,6 @@ import com.vts.clientcenter.service.dto.UserDTO;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.vts.clientcenter.service.keycloak.KeycloakFacade;
 import com.vts.clientcenter.service.mapper.UserMapper;
@@ -28,7 +28,6 @@ import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -36,7 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import static com.vts.clientcenter.config.Constants.*;
-import static java.util.Objects.nonNull;
 
 /**
  * Service class for managing users.
@@ -47,6 +45,8 @@ public class UserService {
     private final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
+
+    private final UserProfileRepository userProfileRepository;
 
     private final AuthorityRepository authorityRepository;
 
@@ -63,11 +63,12 @@ public class UserService {
 
     public UserService(
         UserRepository userRepository,
-        AuthorityRepository authorityRepository,
+        UserProfileRepository userProfileRepository, AuthorityRepository authorityRepository,
         CacheManager cacheManager,
         OktaService oktaService,
         UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userProfileRepository = userProfileRepository;
         this.authorityRepository = authorityRepository;
         this.cacheManager = cacheManager;
         this.userMapper = userMapper;
@@ -166,20 +167,18 @@ public class UserService {
             }
             // sync profile
             UserProfile profile = UserProfile.builder()
-                .user(newUser)
                 .build();
             mapUserRepresentationToProfile(userRepresentation, profile);
-            newUser.setUserProfile(profile);
-
-            userRepository.save(newUser);
+            profile.setUser(newUser);
+            userProfileRepository.save(profile);
             this.clearUserCaches(newUser);
         } else {
+            newUser = existingUser.get();
             if (details.get(ACCOUNT_UPDATED_AT_FLAG_FIELD) != null) {
                 Instant dbModifiedDate = existingUser.get().getLastModifiedDate();
                 Instant idpModifiedDate = (Instant) details.get(ACCOUNT_UPDATED_AT_FLAG_FIELD);
                 if (idpModifiedDate.isAfter(dbModifiedDate)) {
                     log.debug("Updating user '{}' in local database", user.getLogin());
-                    newUser = existingUser.get();
                     UserRepresentation userRepresentation = mapUserRepresentationToUser(user.getId(), newUser, user.getLogin(), false, idpModifiedDate);
                     UserProfile profile = newUser.getUserProfile();
                     mapUserRepresentationToProfile(userRepresentation, profile);
