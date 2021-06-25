@@ -50,6 +50,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/cms")
+@PreAuthorize("denyAll()")
 public class AdminAccountResource {
     private final Logger log = LoggerFactory.getLogger(AdminAccountResource.class);
 
@@ -72,6 +73,8 @@ public class AdminAccountResource {
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, "ACCOUNT", referenceDto.getUserId().toString()))
             .body(referenceDto);
     }
+
+
 
     @PostMapping("/account/{userId}/resend-verify-email")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
@@ -114,6 +117,7 @@ public class AdminAccountResource {
     }
 
     @RequestMapping(value = "/account", method = RequestMethod.GET)
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
     public ResponseEntity<UserFullInfoResponse> getAccount(@RequestParam(name = "userId") String userId) {
         log.debug("REST request to get account : {}", userId);
         UserFullInfoResponse payload = accountService.getAccount(userId);

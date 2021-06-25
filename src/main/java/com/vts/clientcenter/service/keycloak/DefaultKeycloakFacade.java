@@ -3,6 +3,7 @@ package com.vts.clientcenter.service.keycloak;
 import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.domain.Authority;
 import com.vts.clientcenter.domain.enumeration.AccountStatus;
+import com.vts.clientcenter.domain.enumeration.Gender;
 import com.vts.clientcenter.service.dto.*;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import org.keycloak.admin.client.Keycloak;
@@ -22,6 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.vts.clientcenter.config.Constants.ACCOUNT_GENDER_FIELD;
 import static com.vts.clientcenter.config.Constants.ACCOUNT_STATUS_FIELD;
 import static java.util.Objects.nonNull;
 
@@ -142,6 +144,12 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
         ur.setEnabled(true);
         Map<String, List<String>> attributes = new HashMap<>();
         attributes.put(ACCOUNT_STATUS_FIELD, Collections.singletonList(AccountStatus.PENDING.name()));
+        userInfo.getUserProfileDto().getGender().toString();
+        Gender gender = Gender.Unknown;
+        if (Objects.nonNull(userInfo.getUserProfileDto()) && Objects.nonNull(userInfo.getUserProfileDto().getGender()))  {
+            gender = userInfo.getUserProfileDto().getGender();
+        }
+        attributes.put(ACCOUNT_GENDER_FIELD, Collections.singletonList(gender.toString()));
         ur.setAttributes(attributes);
         CredentialRepresentation password = new CredentialRepresentation();
         password.setValue(userInfo.getTempPassword());

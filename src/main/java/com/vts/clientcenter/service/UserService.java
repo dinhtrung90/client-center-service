@@ -1,9 +1,12 @@
 package com.vts.clientcenter.service;
 
 import com.vts.clientcenter.config.Constants;
+import com.vts.clientcenter.config.KeycloakConfig;
 import com.vts.clientcenter.domain.Authority;
 import com.vts.clientcenter.domain.User;
+import com.vts.clientcenter.domain.UserProfile;
 import com.vts.clientcenter.domain.enumeration.AccountStatus;
+import com.vts.clientcenter.domain.enumeration.Gender;
 import com.vts.clientcenter.repository.AuthorityRepository;
 import com.vts.clientcenter.repository.UserRepository;
 import com.vts.clientcenter.security.SecurityUtils;
@@ -12,9 +15,12 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.vts.clientcenter.service.keycloak.KeycloakFacade;
 import com.vts.clientcenter.service.mapper.UserMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +46,13 @@ public class UserService {
     private final CacheManager cacheManager;
 
     private final UserMapper userMapper;
+
+    @Autowired
+    private KeycloakConfig setting;
+
+    @Autowired
+    @Qualifier("keycloakFacade")
+    private KeycloakFacade keycloakFacade;
 
     public UserService(
         UserRepository userRepository,
@@ -100,16 +113,16 @@ public class UserService {
 
     private User syncUserWithIdP(Map<String, Object> details, User user) {
         // save authorities in to sync user roles/groups between IdP and JHipster's local database
-        Collection<String> dbAuthorities = getAuthorities();
-        Collection<String> userAuthorities = user.getAuthorities().stream().map(Authority::getName).collect(Collectors.toList());
-        for (String authority : userAuthorities) {
-            if (!dbAuthorities.contains(authority)) {
-                log.debug("Saving authority '{}' in local database", authority);
-                Authority authorityToSave = new Authority();
-                authorityToSave.setName(authority);
-                authorityRepository.save(authorityToSave);
-            }
-        }
+//        Collection<String> dbAuthorities = getAuthorities();
+//        Collection<String> userAuthorities = user.getAuthorities().stream().map(Authority::getName).collect(Collectors.toList());
+//        for (String authority : userAuthorities) {
+//            if (!dbAuthorities.contains(authority)) {
+//                log.debug("Saving authority '{}' in local database", authority);
+//                Authority authorityToSave = new Authority();
+//                authorityToSave.setName(authority);
+//                authorityRepository.save(authorityToSave);
+//            }
+//        }
         // save account in to sync users between IdP and JHipster's local database
         Optional<User> existingUser = userRepository.findOneByLogin(user.getLogin());
         if (existingUser.isPresent()) {
@@ -127,12 +140,21 @@ public class UserService {
                 updateUser(user.getFirstName(), user.getLastName(), user.getEmail(), user.getLangKey());
             }
         } else {
-            log.debug("Saving user '{}' in local database", user.getLogin());
-            userRepository.save(user);
-            this.clearUserCaches(user);
+            syncUserFromKeycloak(user);
         }
         return user;
     }
+
+    private User syncUserFromKeycloak(User user) {
+        // save account in to sync users between IdP and JHipster's local database
+        log.debug("Saving user '{}' in local database", user.getLogin());
+        UserDTO userDto = keycloakFacade.findUserById(setting.getRealmApp(), user.getId());
+        userRepository.save(userMapper.userDTOToUser(userDto));
+        this.clearUserCaches(user);
+        return user;
+    }
+
+
 
     /**
      * Returns the user from an OAuth 2.0 login or resource server with JWT.

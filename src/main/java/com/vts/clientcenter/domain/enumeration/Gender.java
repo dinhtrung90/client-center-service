@@ -3,7 +3,7 @@ package com.vts.clientcenter.domain.enumeration;
 public enum Gender {
     Female("Female"),
     Male("Male"),
-    Common("Common");
+    Common("Common"), Unknown("Unknown");
 
     private String value;
 
