@@ -5,6 +5,7 @@ import com.okta.sdk.resource.user.UserStatus;
 import com.vts.clientcenter.config.Constants;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 import javax.persistence.*;
@@ -82,7 +83,7 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserAddress> userAddresses= new HashSet<>();
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "user")
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserProfile userProfile;
 
     public String getId() {
@@ -172,6 +173,27 @@ public class User extends AbstractAuditingEntity implements Serializable {
         return this;
     }
 
+    public void addAuthority(Authority authority) {
+        this.authorities.add(authority);
+        authority.getUsers().add(this);
+    }
+
+    public void removeAuthority(Authority authority) {
+        this.authorities.remove(authority);
+        authority.getUsers().remove(this);
+    }
+
+    public void removeAuthorities() {
+        Iterator<Authority> iterator = this.authorities.iterator();
+
+        while (iterator.hasNext()) {
+            Authority authority = iterator.next();
+
+            authority.getUsers().remove(this);
+            iterator.remove();
+        }
+    }
+
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }
@@ -218,6 +240,7 @@ public class User extends AbstractAuditingEntity implements Serializable {
         }
         return id != null && id.equals(((User) o).id);
     }
+
 
     @Override
     public int hashCode() {

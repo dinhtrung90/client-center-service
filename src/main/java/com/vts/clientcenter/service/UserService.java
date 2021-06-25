@@ -10,13 +10,16 @@ import com.vts.clientcenter.domain.enumeration.Gender;
 import com.vts.clientcenter.repository.AuthorityRepository;
 import com.vts.clientcenter.repository.UserRepository;
 import com.vts.clientcenter.security.SecurityUtils;
+import com.vts.clientcenter.service.dto.AuthorityDto;
 import com.vts.clientcenter.service.dto.UserDTO;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vts.clientcenter.service.keycloak.KeycloakFacade;
 import com.vts.clientcenter.service.mapper.UserMapper;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +33,10 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
+import static com.vts.clientcenter.config.Constants.*;
+import static java.util.Objects.nonNull;
 
 /**
  * Service class for managing users.
@@ -140,20 +147,100 @@ public class UserService {
                 updateUser(user.getFirstName(), user.getLastName(), user.getEmail(), user.getLangKey());
             }
         } else {
-            syncUserFromKeycloak(user);
         }
         return user;
     }
 
-    private User syncUserFromKeycloak(User user) {
-        // save account in to sync users between IdP and JHipster's local database
-        log.debug("Saving user '{}' in local database", user.getLogin());
-        UserDTO userDto = keycloakFacade.findUserById(setting.getRealmApp(), user.getId());
-        userRepository.save(userMapper.userDTOToUser(userDto));
-        this.clearUserCaches(user);
-        return user;
+    private User syncUserFromKeycloak(Map<String, Object> details, User user) {
+        Optional<User> existingUser = userRepository.findOneByLogin(user.getLogin());
+        User newUser = new User();
+        if (!existingUser.isPresent()) {
+            // save account in to sync users between IdP and JHipster's local database
+            log.debug("Saving user '{}' in local database", user.getLogin());
+            UserRepresentation userRepresentation = mapUserRepresentationToUser(user.getId(), newUser, user.getLogin(), false, Instant.now());
+
+            //sync roles
+            Set<Authority> userRoles = syncRolesByUserId(user.getId());
+            for (Authority userRole : userRoles) {
+                newUser.addAuthority(userRole);
+            }
+            // sync profile
+            UserProfile profile = UserProfile.builder()
+                .user(newUser)
+                .build();
+            mapUserRepresentationToProfile(userRepresentation, profile);
+            newUser.setUserProfile(profile);
+
+            userRepository.save(newUser);
+            this.clearUserCaches(newUser);
+        } else {
+            if (details.get(ACCOUNT_UPDATED_AT_FLAG_FIELD) != null) {
+                Instant dbModifiedDate = existingUser.get().getLastModifiedDate();
+                Instant idpModifiedDate = (Instant) details.get(ACCOUNT_UPDATED_AT_FLAG_FIELD);
+                if (idpModifiedDate.isAfter(dbModifiedDate)) {
+                    log.debug("Updating user '{}' in local database", user.getLogin());
+                    newUser = existingUser.get();
+                    UserRepresentation userRepresentation = mapUserRepresentationToUser(user.getId(), newUser, user.getLogin(), false, idpModifiedDate);
+                    UserProfile profile = newUser.getUserProfile();
+                    mapUserRepresentationToProfile(userRepresentation, profile);
+                    userRepository.save(newUser);
+                    this.clearUserCaches(newUser);
+                }
+            }
+        }
+        return newUser;
     }
 
+    private Set<Authority>  syncRolesByUserId(String userId) {
+        List<AuthorityDto> effectiveRoles = keycloakFacade.findEffectiveRoleByUserId(setting.getRealmApp(), userId);
+        List<String> roles = effectiveRoles.stream().map(AuthorityDto::getName).collect(Collectors.toList());
+        return authorityRepository.findAllByNameIn(roles);
+    }
+
+    private void mapUserRepresentationToProfile(UserRepresentation userRepresentation, UserProfile profile) {
+        if (Objects.nonNull(userRepresentation.getAttributes())) {
+            List<String> genders = userRepresentation.getAttributes().get(ACCOUNT_GENDER_FIELD);
+            if (!CollectionUtils.isEmpty(genders)) {
+                profile.setGender(Gender.valueOf(genders.get(0)));
+            } else {
+                profile.setGender(Gender.Unknown);
+            }
+            // phones
+            List<String> phones = userRepresentation.getAttributes().get(ACCOUNT_PHONE_FIELD);
+            if (!CollectionUtils.isEmpty(phones)) {
+                profile.setPhone(phones.get(0));
+            } else {
+                profile.setPhone("Pls provide phone");
+            }
+        }
+    }
+
+    private UserRepresentation mapUserRepresentationToUser(String userId, User newUser,  String createdBy, boolean isUpdated, Instant updateAt) {
+        UserRepresentation userRepresentation = keycloakFacade.getUserRepresentationById(setting.getRealmApp(), userId);
+        newUser.setId(userRepresentation.getId());
+        newUser.setActivated(userRepresentation.isEmailVerified() && userRepresentation.isEnabled());
+        newUser.setEmail(userRepresentation.getEmail());
+        newUser.setFirstName(userRepresentation.getFirstName());
+        newUser.setLastName(userRepresentation.getLastName());
+        newUser.setLogin(userRepresentation.getUsername());
+        newUser.setLangKey(Constants.DEFAULT_LANGUAGE);
+        newUser.setHasVerifiedEmail(userRepresentation.isEmailVerified());
+        newUser.setHasEnabled(userRepresentation.isEnabled());
+        if (!isUpdated) {
+            newUser.setCreatedBy(createdBy);
+            newUser.setCreatedDate(Instant.now());
+        }
+        newUser.setLastModifiedDate(updateAt);
+        newUser.setLastModifiedBy(createdBy);
+
+        if (Objects.nonNull(userRepresentation.getAttributes())) {
+            List<String> accountStatus = userRepresentation.getAttributes().get(ACCOUNT_STATUS_FIELD);
+            if (!CollectionUtils.isEmpty(accountStatus)) {
+                newUser.setAccountStatus(AccountStatus.valueOf(accountStatus.get(0)));
+            }
+        }
+        return userRepresentation;
+    }
 
 
     /**
@@ -173,22 +260,10 @@ public class UserService {
         } else {
             throw new IllegalArgumentException("AuthenticationToken is not OAuth2 or JWT!");
         }
+        // syncUserFromKeycloak
         User user = getUser(attributes);
-        user.setAuthorities(
-            authToken
-                .getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .map(
-                    authority -> {
-                        Authority auth = new Authority();
-                        auth.setName(authority);
-                        return auth;
-                    }
-                )
-                .collect(Collectors.toSet())
-        );
-        return userMapper.userToDto(syncUserWithIdP(attributes, user));
+        User newUser = syncUserFromKeycloak(attributes, user);
+        return userMapper.userToDto(newUser);
     }
 
     private static User getUser(Map<String, Object> details) {

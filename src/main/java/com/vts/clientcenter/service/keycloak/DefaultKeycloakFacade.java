@@ -23,8 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.vts.clientcenter.config.Constants.ACCOUNT_GENDER_FIELD;
-import static com.vts.clientcenter.config.Constants.ACCOUNT_STATUS_FIELD;
+import static com.vts.clientcenter.config.Constants.*;
 import static java.util.Objects.nonNull;
 
 public class DefaultKeycloakFacade implements KeycloakFacade {
@@ -146,10 +145,21 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
         attributes.put(ACCOUNT_STATUS_FIELD, Collections.singletonList(AccountStatus.PENDING.name()));
         userInfo.getUserProfileDto().getGender().toString();
         Gender gender = Gender.Unknown;
-        if (Objects.nonNull(userInfo.getUserProfileDto()) && Objects.nonNull(userInfo.getUserProfileDto().getGender()))  {
-            gender = userInfo.getUserProfileDto().getGender();
+        String phone = "";
+        if (Objects.nonNull(userInfo.getUserProfileDto()))  {
+            UserProfileDTO userProfileDto = userInfo.getUserProfileDto();
+            if (Objects.nonNull(userProfileDto.getGender())) {
+                gender = userProfileDto.getGender();
+            }
+
+            if (Objects.nonNull(userProfileDto.getPhone())) {
+                phone = userProfileDto.getPhone();
+            }
         }
+
         attributes.put(ACCOUNT_GENDER_FIELD, Collections.singletonList(gender.toString()));
+        attributes.put(ACCOUNT_PHONE_FIELD, Collections.singletonList(phone));
+        attributes.put(ACCOUNT_UPDATED_AT_FLAG_FIELD, Collections.singletonList(Instant.now().toString()));
         ur.setAttributes(attributes);
         CredentialRepresentation password = new CredentialRepresentation();
         password.setValue(userInfo.getTempPassword());
@@ -325,8 +335,16 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
         UserRepresentation userRepresentation = userResource.toRepresentation();
         List<AuthorityDto> effectiveRoles = findEffectiveRoleByUserId(realmId, userRepresentation.getId());
         UserDTO userDto = mapUserRepresentationToUserDto(userRepresentation);
+        List<String> accountStatuses = nonNull(userRepresentation.getAttributes()) ? userRepresentation.getAttributes().get(ACCOUNT_STATUS_FIELD): new ArrayList<>();
+        List<String> genderString = nonNull(userRepresentation.getAttributes()) ? userRepresentation.getAttributes().get(ACCOUNT_GENDER_FIELD): new ArrayList<>();
         userDto.setAuthorities(new HashSet<>(effectiveRoles));
         return userDto;
+    }
+
+    @Override
+    public UserRepresentation getUserRepresentationById(String realmId, String userId) {
+        UserResource userResource = getUserResource(realmId, userId);
+        return userResource.toRepresentation();
     }
 
     @Override

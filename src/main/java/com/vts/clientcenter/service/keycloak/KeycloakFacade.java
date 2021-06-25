@@ -4,6 +4,7 @@ package com.vts.clientcenter.service.keycloak;
 import com.vts.clientcenter.domain.Authority;
 import com.vts.clientcenter.service.dto.*;
 import org.keycloak.representations.idm.RoleRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +19,8 @@ public interface KeycloakFacade {
     void updateRole(String oldRoleName, String realmName, Authority updateAuthority);
 
     UserDTO findUserById(String realmId, String userId);
+
+    UserRepresentation getUserRepresentationById(String realmId, String userId);
 
     Optional<UserDTO> searchUserByUserName(String realmId, String userName);
 

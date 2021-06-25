@@ -3,6 +3,7 @@ package com.vts.clientcenter.domain;
 import java.awt.print.Book;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
@@ -54,6 +55,8 @@ public class Authority extends AbstractAuditingEntity {
     @JoinTable(name = "tv_composite_role", joinColumns = @JoinColumn(name = "composite"), inverseJoinColumns = @JoinColumn(name = "child_role"))
     private Set<Authority> compositeRoles;
 
+    @ManyToMany(mappedBy = "authorities")
+    private Set<User> users = new HashSet<>();
 
     public Set<Authority> getCompositeRoles() {
         return compositeRoles;
@@ -65,4 +68,6 @@ public class Authority extends AbstractAuditingEntity {
         }
         this.compositeRoles = compositeRoles;
     }
+
+
 }
