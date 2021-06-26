@@ -13,10 +13,6 @@ import com.vts.clientcenter.repository.UserRepository;
 import com.vts.clientcenter.security.SecurityUtils;
 import com.vts.clientcenter.service.dto.AuthorityDto;
 import com.vts.clientcenter.service.dto.UserDTO;
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.vts.clientcenter.service.keycloak.KeycloakFacade;
 import com.vts.clientcenter.service.mapper.UserMapper;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -33,6 +29,10 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.vts.clientcenter.config.Constants.*;
 
@@ -207,7 +207,7 @@ public class UserService {
                 newUser.setAccountStatus(accountStatus);
                 userRepository.save(newUser);
                 this.clearUserCaches(newUser);
-                keycloakFacade.updateUserStatus(accountStatus, setting.getRealmApp(), newUser.getId());
+                keycloakFacade.updateUserStatus(accountStatus, setting.getRealmApp(), newUser.getId(), Instant.now());
             }
         }
         return newUser;
@@ -256,7 +256,7 @@ public class UserService {
 
         if (Objects.nonNull(userRepresentation.getAttributes())) {
             AccountStatus accountStatus = handleAccountStatus(newUser);
-            keycloakFacade.updateUserStatus(accountStatus, setting.getRealmApp(), userId);
+            keycloakFacade.updateUserStatus(accountStatus, setting.getRealmApp(), userId, updateAt);
             newUser.setAccountStatus(accountStatus);
         }
         return userRepresentation;
