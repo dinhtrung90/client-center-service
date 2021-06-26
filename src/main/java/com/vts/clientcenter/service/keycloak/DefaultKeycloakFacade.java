@@ -360,11 +360,25 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
     }
 
     @Override
-    public void updateUserStatus(AccountStatus accountStatus, String realmId, String userId) {
+    public void forceApproveAccount(AccountStatus active, String realmId, String userId, Instant updatedAt) {
+        UserResource userResource = getUserResource(realmId, userId);
+        UserRepresentation userRepresentation = userResource.toRepresentation();
+        userRepresentation.setEmailVerified(true);
+        userRepresentation.setEnabled(true);
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put(ACCOUNT_STATUS_FIELD, Collections.singletonList(active.name()));
+        attributes.put(ACCOUNT_UPDATED_AT_FLAG_FIELD, Collections.singletonList(updatedAt.toString()));
+        userRepresentation.setAttributes(attributes);
+        userResource.update(userRepresentation);
+    }
+
+    @Override
+    public void updateUserStatus(AccountStatus accountStatus, String realmId, String userId, Instant updatedAt) {
         UserResource userResource = getUserResource(realmId, userId);
         UserRepresentation userRepresentation = userResource.toRepresentation();
         Map<String, List<String>> attributes = new HashMap<>();
         attributes.put(ACCOUNT_STATUS_FIELD, Collections.singletonList(accountStatus.name()));
+        attributes.put(ACCOUNT_UPDATED_AT_FLAG_FIELD, Collections.singletonList(updatedAt.toString()));
         userRepresentation.setAttributes(attributes);
         userResource.update(userRepresentation);
     }

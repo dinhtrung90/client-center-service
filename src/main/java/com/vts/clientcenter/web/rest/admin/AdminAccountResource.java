@@ -50,6 +50,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/cms")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
 public class AdminAccountResource {
     private final Logger log = LoggerFactory.getLogger(AdminAccountResource.class);
 
@@ -63,7 +64,6 @@ public class AdminAccountResource {
     }
 
     @PostMapping("/account/create")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
     public ResponseEntity<UserReferenceDto> createUser(@RequestBody CreateAccountRequest userDto) throws URISyntaxException {
         log.debug("REST request to create User : {}", userDto);
         UserReferenceDto referenceDto = accountService.createUserAccount(userDto);
@@ -74,7 +74,6 @@ public class AdminAccountResource {
     }
 
     @PostMapping("/account/{userId}/resend-verify-email")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
     public ResponseEntity<ApiResponse> resendVerifyEmail(@PathVariable String userId) throws URISyntaxException {
         log.debug("REST request to create User : {}", userId);
         ApiResponse response = accountService.resendVerifyEmail(userId);
@@ -82,7 +81,6 @@ public class AdminAccountResource {
     }
 
     @PostMapping("/account/{userId}/reset-password-email")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
     public ResponseEntity<ApiResponse> resetPasswordUser(@PathVariable String userId) throws URISyntaxException {
         log.debug("REST request to create User : {}", userId);
         ApiResponse response = accountService.resetPasswordUser(userId);
@@ -90,7 +88,6 @@ public class AdminAccountResource {
     }
 
     @GetMapping("/account/get")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
     public ResponseEntity<List<UserDTO>> getAllAccountInSystem(UserCriteria criteria, Pageable pageable) {
         log.debug("REST request to get accounts by criteria: {}", criteria);
         Page<UserDTO> response = accountService.getAccounts(criteria, pageable);
@@ -99,7 +96,6 @@ public class AdminAccountResource {
     }
 
     @PostMapping("/account/{userId}/required-actions")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
     public ResponseEntity<ApiResponse> createUser(@PathVariable String userId, @RequestBody List<String> actions) throws URISyntaxException {
         log.debug("REST request to set required actions : {}", actions);
         ApiResponse response = accountService.setRequiredActions(userId, actions);
@@ -107,7 +103,6 @@ public class AdminAccountResource {
     }
 
     @DeleteMapping("/account/{userId}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
     public ResponseEntity<ApiResponse> deleteUser(@PathVariable String userId) throws URISyntaxException {
         log.debug("REST request to delete user : {}", userId);
          accountService.removeAccountFromKeycloak(userId);
@@ -115,7 +110,6 @@ public class AdminAccountResource {
     }
 
     @RequestMapping(value = "/account", method = RequestMethod.GET)
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
     public ResponseEntity<UserFullInfoResponse> getAccount(@RequestParam(name = "userId") String userId) {
         log.debug("REST request to get account : {}", userId);
         UserFullInfoResponse payload = accountService.getAccount(userId);
@@ -123,11 +117,17 @@ public class AdminAccountResource {
     }
 
     @PostMapping("/account/update")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
     public ResponseEntity<UserFullInfoResponse> updateUser(@RequestBody UpdateAccountRequest userDto) throws URISyntaxException {
         log.debug("REST request to create User : {}", userDto);
         UserFullInfoResponse response = accountService.updateUser(userDto);
         return ResponseEntity
            .ok(response);
+    }
+
+    @PostMapping("/account/approve/{userId}")
+    public ResponseEntity<UserFullInfoResponse> approvalAccount(@PathVariable String userId) throws URISyntaxException {
+        log.debug("REST request to create User : {}", userId);
+        UserFullInfoResponse response = accountService.approveAccount(userId);
+        return ResponseEntity.ok(response);
     }
 }

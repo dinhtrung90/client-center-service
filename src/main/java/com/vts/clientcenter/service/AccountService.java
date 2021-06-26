@@ -379,7 +379,7 @@ public class AccountService {
         if (Objects.nonNull(userRepresentation.getAttributes())) {
             AccountStatus accountStatus = UserService.handleAccountStatus(user);
             user.setAccountStatus(accountStatus);
-            keycloakFacade.updateUserStatus(accountStatus, setting.getRealmApp(), user.getId());
+            keycloakFacade.updateUserStatus(accountStatus, setting.getRealmApp(), user.getId(), Instant.now());
         }
 
         List<String> genders = userRepresentation.getAttributes().get(ACCOUNT_GENDER_FIELD);
@@ -405,5 +405,47 @@ public class AccountService {
             user.setLastModifiedDate(Instant.now());
         }
 
+    }
+
+    public UserFullInfoResponse approveAccount(String userId) {
+        String createdBy = SecurityUtils.getCurrentUserLogin().orElse(SYSTEM_ACCOUNT);
+        if (Objects.isNull(userId)) {
+            throw new BadRequestAlertException("User Not Found", "USER", Constants.ID_NOT_NULL);
+        }
+
+        Optional<User> existingUser = userRepository.findById(userId);
+
+        if (!existingUser.isPresent()) {
+            throw new BadRequestAlertException("User Not Found", "USER", Constants.USER_NOT_FOUND);
+        }
+        User user = existingUser.get();
+        UserFullInfoResponse response = UserFullInfoResponse.builder()
+            .build();
+
+
+        if (!user.hasEnabled() && !SecurityUtils.isCurrentUserInRole(ROLE_SUPER_ADMIN)) {
+            throw new BadRequestAlertException("User can not be approved, this account banned by admin", "User", userId);
+        }
+        if (!user.hasVerifiedEmail() && !SecurityUtils.isCurrentUserInRole(ROLE_SUPER_ADMIN))  {
+            throw new BadRequestAlertException("User can not be approved. this account need verify email before", "User", userId);
+        }
+        //enable and verified email
+        boolean isValidAccount = user.hasEnabled() && user.hasVerifiedEmail();
+        user.setAccountStatus(AccountStatus.ACTIVE);
+        user.setLastModifiedBy(createdBy);
+        user.setLastModifiedDate(Instant.now());
+        if (isValidAccount) {
+            keycloakFacade.updateUserStatus(AccountStatus.ACTIVE, setting.getRealmApp(), userId, Instant.now());
+        } else {
+            keycloakFacade.forceApproveAccount(AccountStatus.ACTIVE, setting.getRealmApp(), userId, Instant.now());
+        }
+
+        userRepository.save(user);
+        this.clearUserCaches(user);
+
+        response.setUserDto(userMapper.userToDto(user));
+        response.setUserProfileDto(userProfileMapper.toDto(user.getUserProfile()));
+        response.setUserAddressList(userAddressMapper.toDto(new ArrayList<>(user.getUserAddresses())));
+        return response;
     }
 }

@@ -7,6 +7,7 @@ import com.vts.clientcenter.service.dto.*;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,5 +48,7 @@ public interface KeycloakFacade {
 
     RoleDetailResponse updateWithCompositeRoles(CreateRoleRequest dto, String realmApp, String clientUUID);
 
-    void updateUserStatus(AccountStatus accountStatus, String realmId, String userId);
+    void updateUserStatus(AccountStatus accountStatus, String realmId, String userId,  Instant updatedAt);
+
+    void forceApproveAccount(AccountStatus active, String realmApp, String userId,  Instant updatedAt);
 }
