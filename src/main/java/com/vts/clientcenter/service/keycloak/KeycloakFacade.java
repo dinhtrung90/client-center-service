@@ -40,7 +40,7 @@ public interface KeycloakFacade {
 
     void resetPassword(String realmId, String userId, String password);
 
-    UpdateUserResponse updateUser(String realmId, UserDTO userDto);
+    UserRepresentation updateUser(String realmId, UpdateAccountRequest userDto);
 
     RoleDetailResponse createWithCompositeRoles(CreateRoleRequest request, String realmName, String clientUUID);
 

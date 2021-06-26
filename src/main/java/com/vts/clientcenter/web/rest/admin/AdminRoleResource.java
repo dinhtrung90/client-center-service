@@ -48,7 +48,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/cms")
-@PreAuthorize("denyAll()")
 public class AdminRoleResource {
     private final Logger log = LoggerFactory.getLogger(AdminRoleResource.class);
 

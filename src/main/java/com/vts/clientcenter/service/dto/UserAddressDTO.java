@@ -37,6 +37,8 @@ public class UserAddressDTO implements Serializable {
 
     private String userId;
 
+    private boolean isIsPrimary;
+
     public Long getId() {
         return id;
     }
@@ -139,6 +141,14 @@ public class UserAddressDTO implements Serializable {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public boolean isIsPrimary() {
+        return isIsPrimary;
+    }
+
+    public void setIsPrimary(boolean isPrimary) {
+        isIsPrimary = isPrimary;
     }
 
     @Override

@@ -63,6 +63,9 @@ public class UserAddress implements Serializable {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(name = "is_primary")
+    private boolean isIsPrimary;
+
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
         return id;
@@ -223,6 +226,15 @@ public class UserAddress implements Serializable {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+
+    public boolean isIsPrimary() {
+        return isIsPrimary;
+    }
+
+    public void setIsPrimary(boolean isPrimary) {
+        isIsPrimary = isPrimary;
     }
 
     @Override

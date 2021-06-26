@@ -50,17 +50,4 @@ public class AccountResource {
         this.accountService = accountService;
     }
 
-    @RequestMapping(value = "/account/update", method = RequestMethod.PUT)
-    public ResponseEntity<UserDTO> updateAccount(@Valid @RequestBody UserDTO dto) throws Exception {
-        log.debug("REST request to create account : {}", dto);
-        UserDTO userAccount = accountService.updateAccount(dto);
-        return ResponseEntity.ok(userAccount);
-    }
-
-    @RequestMapping(value = "/account/activate", method = RequestMethod.GET)
-    public ResponseEntity<ActivatedPayload> activeAccount(@RequestParam(value = "key") String key) throws Exception {
-        log.debug("REST request to activate account : {}", key);
-        ActivatedPayload payload = accountService.activateAccount(key);
-        return ResponseEntity.ok(payload);
-    }
 }

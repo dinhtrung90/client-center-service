@@ -14,4 +14,5 @@ public interface UserAddressRepository extends JpaRepository<UserAddress, Long>,
     List<UserAddress> findAllByUserId(String userId);
 
     void deleteAllByIdNotIn(List<Long> ides);
+    void deleteAllByIdIn(List<Long> ides);
 }

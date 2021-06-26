@@ -50,7 +50,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/cms")
-@PreAuthorize("denyAll()")
 public class AdminAccountResource {
     private final Logger log = LoggerFactory.getLogger(AdminAccountResource.class);
 

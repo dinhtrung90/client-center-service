@@ -13,6 +13,7 @@ import org.keycloak.util.JsonSerialization;
 import org.springframework.util.CollectionUtils;
 import org.thymeleaf.util.ListUtils;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
@@ -122,14 +123,44 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
     }
 
     @Override
-    public UpdateUserResponse updateUser(String realmId, UserDTO userDto) {
-        UserResource userResource = getUserResource(realmId, userDto.getId());
+    public UserRepresentation updateUser(String realmId, UpdateAccountRequest userDto) {
+        UserResource userResource = getUserResource(realmId, userDto.getUserId());
+        // user info
         UserRepresentation userRepresentation = userResource.toRepresentation();
-        userRepresentation.setEmail(userDto.getEmail());
-        userRepresentation.setUsername(userDto.getLogin());
         userRepresentation.setFirstName(userDto.getFirstName());
         userRepresentation.setLastName(userDto.getLastName());
-        return UpdateUserResponse.builder().success(true).userInfo(userDto).build();
+
+        Map<String, List<String>> attributes = new HashMap<>();
+        if (Objects.nonNull(userDto.getUserProfileDto())) {
+            Gender gender = userDto.getUserProfileDto().getGender();
+            Gender savingGender =  gender != null ? gender : Gender.Unknown;
+            attributes.put(ACCOUNT_GENDER_FIELD, Collections.singletonList(savingGender.toString()));
+
+            String phone = userDto.getUserProfileDto().getPhone();
+            attributes.put(ACCOUNT_PHONE_FIELD, Collections.singletonList(phone !=  null ? phone : "Invalid"));
+        }
+        attributes.put(ACCOUNT_STATUS_FIELD, Collections.singletonList(userDto.getAccountStatus().toString()));
+        attributes.put(ACCOUNT_UPDATED_AT_FLAG_FIELD, Collections.singletonList(Instant.now().toString()));
+        userRepresentation.setAttributes(attributes);
+
+        // update password
+        if (Objects.nonNull(userDto.getTempPassword()))  {
+            CredentialRepresentation password = new CredentialRepresentation();
+            password.setValue(userDto.getTempPassword());
+            password.setType(CredentialRepresentation.PASSWORD);
+            password.setTemporary(userDto.isIsTempPassword());
+            userRepresentation.setCredentials(Collections.singletonList(password));
+        }
+
+        //update authorities
+        if (!CollectionUtils.isEmpty(userDto.getAuthorities())) {
+            UserDTO userDTO = new UserDTO();
+            userDTO.setId(userDto.getUserId());
+            userDTO.setAuthorities(userDto.getAuthorities());
+            assignUserRole(realmId, userDTO);
+        }
+        userResource.update(userRepresentation);
+        return userRepresentation;
     }
 
     @Override
@@ -143,7 +174,6 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
         ur.setEnabled(true);
         Map<String, List<String>> attributes = new HashMap<>();
         attributes.put(ACCOUNT_STATUS_FIELD, Collections.singletonList(AccountStatus.PENDING.name()));
-        userInfo.getUserProfileDto().getGender().toString();
         Gender gender = Gender.Unknown;
         String phone = "";
         if (Objects.nonNull(userInfo.getUserProfileDto()))  {

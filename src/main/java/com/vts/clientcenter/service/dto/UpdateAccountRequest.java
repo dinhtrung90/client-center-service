@@ -1,5 +1,6 @@
 package com.vts.clientcenter.service.dto;
 
+import com.vts.clientcenter.domain.enumeration.AccountStatus;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
@@ -27,6 +28,8 @@ public class UpdateAccountRequest {
     private String langKey;
 
     private Set<AuthorityDto> authorities;
+
+    private AccountStatus accountStatus;
 
     private String tempPassword;
 

@@ -7,8 +7,11 @@ import com.vts.clientcenter.domain.Authority;
 import com.vts.clientcenter.domain.User;
 import com.vts.clientcenter.domain.UserAddress;
 import com.vts.clientcenter.domain.UserProfile;
+import com.vts.clientcenter.domain.enumeration.AccountStatus;
 import com.vts.clientcenter.domain.enumeration.ActionsEmail;
+import com.vts.clientcenter.domain.enumeration.Gender;
 import com.vts.clientcenter.events.UserCreatedEvent;
+import com.vts.clientcenter.helpers.DateUtil;
 import com.vts.clientcenter.repository.AuthorityRepository;
 import com.vts.clientcenter.repository.UserAddressRepository;
 import com.vts.clientcenter.repository.UserProfileRepository;
@@ -21,6 +24,7 @@ import com.vts.clientcenter.service.mapper.UserMapper;
 import com.vts.clientcenter.service.mapper.UserProfileMapper;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import org.keycloak.representations.idm.RoleRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +34,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -43,6 +46,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.vts.clientcenter.config.Constants.*;
 
 @Service
 @Transactional
@@ -88,6 +93,9 @@ public class AccountService {
 
     @Autowired
     private UserAddressRepository userAddressRepository;
+
+    @Autowired
+    private DateUtil dateUtil;
 
     @Transactional
     public UserReferenceDto createUserAccount(CreateAccountRequest request) {
@@ -170,57 +178,10 @@ public class AccountService {
         userOptional.ifPresent( u -> userRepository.delete(u));
     }
 
-    @Transactional
-    public UserDTO updateAccount(UserDTO userDTO) throws Exception {
-
-
-        if (Objects.isNull(userDTO.getId())) {
-            throw new BadRequestAlertException("User Not Found", "USER", Constants.ID_NOT_NULL);
-        }
-
-        Optional<User> existingUser = userRepository.findOneByLogin(userDTO.getLogin());
-
-        if (!existingUser.isPresent()) {
-            throw new BadRequestAlertException("User Not Found", "USER", Constants.USER_NOT_FOUND);
-        }
-
-        if (CollectionUtils.isEmpty(userDTO.getAuthorities())) {
-            throw new BadRequestAlertException("Role can not empty.", "USER", Constants.USER_ROLE_NOT_FOUND);
-        }
-
-        return userDTO;
-    }
-
-    private Validator buildValidator() {
-        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
-        return validatorFactory.getValidator();
-    }
-
-    @Transactional
-    public ActivatedPayload activateAccount(String userId) throws Exception {
-        String login = SecurityUtils.getCurrentUserLogin().orElse(Constants.SYSTEM_ACCOUNT);
-        if (Objects.isNull(userId)) {
-            throw new BadRequestAlertException("User Not Found", "USER", Constants.ID_NOT_NULL);
-        }
-
-        Optional<User> existingUser = userRepository.findById(userId);
-
-        User user = existingUser.orElseThrow(() -> new BadRequestAlertException("User not found", "User", Constants.USER_NOT_FOUND));
-
-        UserActivationToken account = oktaService.activateAccount(user.getId());
-
-        user.setLastModifiedBy(login);
-
-        user.setLastModifiedDate(Instant.now());
-
-        user.setActivated(false);
-
-        userRepository.save(user);
-
-        this.clearUserCaches(user);
-
-        return ActivatedPayload.builder().success(true).userId(userId).build();
-    }
+//    private Validator buildValidator() {
+//        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
+//        return validatorFactory.getValidator();
+//    }
 
     @Transactional(readOnly = true)
     public UserFullInfoResponse getAccount(String userId) {
@@ -310,7 +271,6 @@ public class AccountService {
             throw new BadRequestAlertException("Account not found.", "User", Constants.USER_NOT_FOUND);
         }
 
-
         boolean isSuccess = true;
         String message = "Reset Password Successfully";
         HttpStatus statusCode = HttpStatus.OK;
@@ -330,7 +290,118 @@ public class AccountService {
         return ApiResponse.builder().response(res).isIsSuccess(isSuccess).message(message).statusCode(statusCode).build();
     }
 
+    @Transactional
     public UserFullInfoResponse updateUser(UpdateAccountRequest userDto) {
-        return null;
+
+        String createdBy = SecurityUtils.getCurrentUserLogin().orElse(SYSTEM_ACCOUNT);
+        if (Objects.isNull(userDto.getUserId())) {
+            throw new BadRequestAlertException("User Not Found", "USER", Constants.ID_NOT_NULL);
+        }
+
+        Optional<User> existingUser = userRepository.findById(userDto.getUserId());
+
+        if (!existingUser.isPresent()) {
+            throw new BadRequestAlertException("User Not Found", "USER", Constants.USER_NOT_FOUND);
+        }
+
+        if (CollectionUtils.isEmpty(userDto.getAuthorities())) {
+            throw new BadRequestAlertException("Role can not empty.", "USER", Constants.USER_ROLE_NOT_FOUND);
+        }
+        UserFullInfoResponse response = UserFullInfoResponse.builder()
+            .build();
+        UserRepresentation userRepresentation = keycloakFacade.updateUser(setting.getRealmApp(), userDto);
+
+        // update info local
+        User user = existingUser.get();
+        mapUserRepresentationToUser(userRepresentation, user, createdBy);
+
+        // update roles
+        List<AuthorityDto> effectiveRoles = keycloakFacade.findEffectiveRoleByUserId(setting.getRealmApp(), userDto.getUserId());
+        List<String> roles = effectiveRoles.stream().map(AuthorityDto::getName).collect(Collectors.toList());
+        Set<Authority> authorities = user.getAuthorities();
+        List<String> currentUserRoles = authorities.stream().map(Authority::getName).collect(Collectors.toList());
+        boolean match = currentUserRoles.containsAll(roles);
+        if (!match) {
+
+            Set<Authority> savingRoles = authorityRepository.findAllByNameIn(roles);
+
+            //remove not in list local
+            authorities.stream()
+                .filter(r -> !roles.contains(r.getName()))
+                .forEach(user::removeAuthority);
+
+            for (Authority savingRole : savingRoles) {
+                if (!currentUserRoles.contains(savingRole.getName())) {
+                    user.addAuthority(savingRole);
+                }
+            }
+        }
+
+        response.setUserDto(userMapper.userToDto(user));
+
+        userRepository.save(user);
+
+        // update address
+        List<UserAddress> userAddresses = userAddressMapper.toEntity(userDto.getUserAddressList());
+        Set<UserAddress> userAddressesLocal = user.getUserAddresses();
+        if (!userAddressesLocal.containsAll(userAddresses)) {
+
+            List<Long> deleteItems = userAddressesLocal.stream()
+                .filter(p -> !userAddresses.stream().map(UserAddress::getId).collect(Collectors.toList()).contains(p.getId()))
+                .map(UserAddress::getId).collect(Collectors.toList());
+
+            userAddressRepository.deleteAllByIdIn(deleteItems);
+
+            userAddressRepository.saveAll(userAddresses);
+        }
+        response.setUserProfileDto(userProfileMapper.toDto(user.getUserProfile()));
+        response.setUserAddressList(userAddressMapper.toDto(new ArrayList<>(userAddressRepository.findAllByUserId(user.getId()))));
+        clearUserCaches(user);
+        return response;
+    }
+
+    private void mapUserRepresentationToUser(UserRepresentation userRepresentation, User user, String createdBy) {
+
+        user.setId(userRepresentation.getId());
+        user.setActivated(userRepresentation.isEmailVerified() && userRepresentation.isEnabled());
+        user.setEmail(userRepresentation.getEmail());
+        user.setFirstName(userRepresentation.getFirstName());
+        user.setLastName(userRepresentation.getLastName());
+        user.setLogin(userRepresentation.getUsername());
+        user.setHasVerifiedEmail(userRepresentation.isEmailVerified());
+        user.setHasEnabled(userRepresentation.isEnabled());
+        user.setLastModifiedBy(createdBy);
+
+        UserProfile profile = user.getUserProfile();
+        if (Objects.nonNull(userRepresentation.getAttributes())) {
+            List<String> accountStatus = userRepresentation.getAttributes().get(ACCOUNT_STATUS_FIELD);
+            if (!CollectionUtils.isEmpty(accountStatus)) {
+                user.setAccountStatus(AccountStatus.valueOf(accountStatus.get(0)));
+            }
+        }
+
+        List<String> genders = userRepresentation.getAttributes().get(ACCOUNT_GENDER_FIELD);
+        if (!CollectionUtils.isEmpty(genders)) {
+            profile.setGender(Gender.valueOf(genders.get(0)));
+        } else {
+            profile.setGender(Gender.Unknown);
+        }
+        // phones
+        List<String> phones = userRepresentation.getAttributes().get(ACCOUNT_PHONE_FIELD);
+        if (!CollectionUtils.isEmpty(phones)) {
+            profile.setPhone(phones.get(0));
+        } else {
+            profile.setPhone("Pls provide phone");
+        }
+
+        List<String> updateAtStrings = userRepresentation.getAttributes().get(ACCOUNT_UPDATED_AT_FLAG_FIELD);
+        if (!CollectionUtils.isEmpty(phones)) {
+            String updatedAtFlag = updateAtStrings.get(0);
+            Date updatedAt = dateUtil.parse(updatedAtFlag, DATE_STANDARD_FORMAT);
+            user.setLastModifiedDate(updatedAt.toInstant());
+        } else {
+            user.setLastModifiedDate(Instant.now());
+        }
+
     }
 }
