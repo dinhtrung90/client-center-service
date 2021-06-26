@@ -44,6 +44,8 @@ public class UserDTO {
 
     private boolean isEnabled;
 
+    private boolean isApproved;
+
     private AccountStatus accountStatus;
 
     @Size(min = 2, max = 10)
@@ -58,4 +60,8 @@ public class UserDTO {
     private Instant lastModifiedDate;
 
     private Set<AuthorityDto> authorities;
+
+    public void setApproved(boolean approved) {
+        isApproved = approved;
+    }
 }

@@ -234,7 +234,6 @@ CREATE TABLE `jhi_user` (
                             `has_verified_email` bit(1) NOT NULL,
                             `has_enabled` bit(1) NOT NULL,
                             `account_status` varchar(50) NOT NULL,
-                            `activated` bit(1) NOT NULL,
                             `lang_key` varchar(10) DEFAULT NULL,
                             `created_by` varchar(50) NOT NULL,
                             `created_date` timestamp NULL DEFAULT NULL,
