@@ -438,6 +438,8 @@ public class AccountService {
             keycloakFacade.updateUserStatus(AccountStatus.ACTIVE, setting.getRealmApp(), userId, Instant.now());
         } else {
             keycloakFacade.forceApproveAccount(AccountStatus.ACTIVE, setting.getRealmApp(), userId, Instant.now());
+            user.setHasEnabled(true);
+            user.setHasVerifiedEmail(true);
         }
 
         userRepository.save(user);
