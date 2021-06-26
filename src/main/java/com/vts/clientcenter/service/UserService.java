@@ -7,6 +7,7 @@ import com.vts.clientcenter.domain.User;
 import com.vts.clientcenter.domain.UserProfile;
 import com.vts.clientcenter.domain.enumeration.AccountStatus;
 import com.vts.clientcenter.domain.enumeration.Gender;
+import com.vts.clientcenter.helpers.DateUtil;
 import com.vts.clientcenter.repository.AuthorityRepository;
 import com.vts.clientcenter.repository.UserProfileRepository;
 import com.vts.clientcenter.repository.UserRepository;
@@ -54,6 +55,8 @@ public class UserService {
 
     private final UserMapper userMapper;
 
+    private final DateUtil dateUtil;
+
     @Autowired
     private KeycloakConfig setting;
 
@@ -66,12 +69,13 @@ public class UserService {
         UserProfileRepository userProfileRepository, AuthorityRepository authorityRepository,
         CacheManager cacheManager,
         OktaService oktaService,
-        UserMapper userMapper) {
+        UserMapper userMapper, DateUtil dateUtil) {
         this.userRepository = userRepository;
         this.userProfileRepository = userProfileRepository;
         this.authorityRepository = authorityRepository;
         this.cacheManager = cacheManager;
         this.userMapper = userMapper;
+        this.dateUtil = dateUtil;
     }
 
     /**
@@ -191,7 +195,8 @@ public class UserService {
             newUser = existingUser.get();
             if (details.get(ACCOUNT_UPDATED_AT_FLAG_FIELD) != null) {
                 Instant dbModifiedDate = existingUser.get().getLastModifiedDate();
-                Instant idpModifiedDate = (Instant) details.get(ACCOUNT_UPDATED_AT_FLAG_FIELD);
+                String updateAtString = (String) details.get(ACCOUNT_UPDATED_AT_FLAG_FIELD);
+                Instant idpModifiedDate = dateUtil.parse(updateAtString, DATE_STANDARD_FORMAT).toInstant();
                 if (idpModifiedDate.isAfter(dbModifiedDate)) {
                     log.debug("Updating user '{}' in local database", user.getLogin());
                     UserRepresentation userRepresentation = mapUserRepresentationToUser(user.getId(), newUser, user.getLogin(), false, idpModifiedDate);

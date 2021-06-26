@@ -441,7 +441,7 @@ public class AccountService {
             user.setHasEnabled(true);
             user.setHasVerifiedEmail(true);
         }
-
+        user.setApproved(true);
         userRepository.save(user);
         this.clearUserCaches(user);
 
