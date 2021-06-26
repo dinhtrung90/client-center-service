@@ -173,7 +173,7 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
         ur.setEmailVerified(false);
         ur.setEnabled(true);
         Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put(ACCOUNT_STATUS_FIELD, Collections.singletonList(AccountStatus.PENDING.name()));
+        attributes.put(ACCOUNT_STATUS_FIELD, Collections.singletonList(AccountStatus.INACTIVE.name()));
         Gender gender = Gender.Unknown;
         String phone = "";
         if (Objects.nonNull(userInfo.getUserProfileDto()))  {
@@ -360,6 +360,16 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
     }
 
     @Override
+    public void updateUserStatus(AccountStatus accountStatus, String realmId, String userId) {
+        UserResource userResource = getUserResource(realmId, userId);
+        UserRepresentation userRepresentation = userResource.toRepresentation();
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put(ACCOUNT_STATUS_FIELD, Collections.singletonList(accountStatus.name()));
+        userRepresentation.setAttributes(attributes);
+        userResource.update(userRepresentation);
+    }
+
+    @Override
     public UserDTO findUserById(String realmId, String userId) {
         UserResource userResource = getUserResource(realmId, userId);
         UserRepresentation userRepresentation = userResource.toRepresentation();
@@ -410,7 +420,6 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
     private UserDTO mapUserRepresentationToUserDto(UserRepresentation userRepresentation) {
         UserDTO userDto = new UserDTO();
         userDto.setId(userRepresentation.getId());
-        userDto.setActivated(userRepresentation.isEmailVerified() && userRepresentation.isEnabled());
         userDto.setEmail(userRepresentation.getEmail());
         userDto.setFirstName(userRepresentation.getFirstName());
         userDto.setLastName(userRepresentation.getLastName());

@@ -141,10 +141,14 @@ public class AccountService {
         profile.setUser(user);
         userProfileRepository.save(profile);
 
+        List<String> requiredActions = Arrays.asList(ActionsEmail.VERIFY_EMAIL.name());
+        if (request.isIsTempPassword())  {
+            requiredActions.add(ActionsEmail.UPDATE_PASSWORD.name());
+        }
         keycloakFacade.executeActionEmail(
             setting.getRealmApp(),
             userDTOOptional.get().getId(),
-            (Arrays.asList(ActionsEmail.UPDATE_PASSWORD.name(), ActionsEmail.VERIFY_EMAIL.name()))
+            (requiredActions)
         );
 
         keycloakFacade.sendVerifiedEmail(setting.getRealmApp(), user.getId());
@@ -363,7 +367,6 @@ public class AccountService {
     private void mapUserRepresentationToUser(UserRepresentation userRepresentation, User user, String createdBy) {
 
         user.setId(userRepresentation.getId());
-        user.setActivated(userRepresentation.isEmailVerified() && userRepresentation.isEnabled());
         user.setEmail(userRepresentation.getEmail());
         user.setFirstName(userRepresentation.getFirstName());
         user.setLastName(userRepresentation.getLastName());
@@ -374,10 +377,9 @@ public class AccountService {
 
         UserProfile profile = user.getUserProfile();
         if (Objects.nonNull(userRepresentation.getAttributes())) {
-            List<String> accountStatus = userRepresentation.getAttributes().get(ACCOUNT_STATUS_FIELD);
-            if (!CollectionUtils.isEmpty(accountStatus)) {
-                user.setAccountStatus(AccountStatus.valueOf(accountStatus.get(0)));
-            }
+            AccountStatus accountStatus = UserService.handleAccountStatus(user);
+            user.setAccountStatus(accountStatus);
+            keycloakFacade.updateUserStatus(accountStatus, setting.getRealmApp(), user.getId());
         }
 
         List<String> genders = userRepresentation.getAttributes().get(ACCOUNT_GENDER_FIELD);

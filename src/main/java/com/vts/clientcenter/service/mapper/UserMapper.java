@@ -39,7 +39,6 @@ public class UserMapper {
         dto.setFirstName(user.getFirstName());
         dto.setLastName(user.getLastName());
         dto.setEmail(user.getEmail());
-        dto.setActivated(user.getActivated());
         dto.setLangKey(user.getLangKey());
         dto.setCreatedBy(user.getCreatedBy());
         dto.setCreatedDate(user.getCreatedDate());
@@ -64,7 +63,6 @@ public class UserMapper {
             user.setFirstName(userDTO.getFirstName());
             user.setLastName(userDTO.getLastName());
             user.setEmail(userDTO.getEmail());
-            user.setActivated(userDTO.isActivated());
             user.setLangKey(userDTO.getLangKey());
             Set<Authority> authorities = new HashSet<>(authorityMapper.dtoToAuthorities(new ArrayList<>(userDTO.getAuthorities())));
             user.setAuthorities(authorities);

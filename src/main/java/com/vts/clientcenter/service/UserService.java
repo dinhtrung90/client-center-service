@@ -152,6 +152,21 @@ public class UserService {
         return user;
     }
 
+    public static AccountStatus handleAccountStatus(User user) {
+        if (!user.hasEnabled()) {
+            return AccountStatus.BANNED;
+        }
+        if (!user.hasVerifiedEmail())  {
+            return AccountStatus.INACTIVE;
+        }
+        //enable and verified email
+
+        if (!user.isApproved()) {
+            return AccountStatus.PENDING; // -> waiting approval
+        }
+        return  AccountStatus.ACTIVE;
+    }
+
     private User syncUserFromKeycloak(Map<String, Object> details, User user) {
         Optional<User> existingUser = userRepository.findOneByLogin(user.getLogin());
         User newUser = new User();
@@ -186,6 +201,14 @@ public class UserService {
                     this.clearUserCaches(newUser);
                 }
             }
+            //update  status
+            AccountStatus accountStatus = handleAccountStatus(newUser);
+            if (!newUser.getAccountStatus().equals(accountStatus)) {
+                newUser.setAccountStatus(accountStatus);
+                userRepository.save(newUser);
+                this.clearUserCaches(newUser);
+                keycloakFacade.updateUserStatus(accountStatus, setting.getRealmApp(), newUser.getId());
+            }
         }
         return newUser;
     }
@@ -217,7 +240,6 @@ public class UserService {
     private UserRepresentation mapUserRepresentationToUser(String userId, User newUser,  String createdBy, boolean isUpdated, Instant updateAt) {
         UserRepresentation userRepresentation = keycloakFacade.getUserRepresentationById(setting.getRealmApp(), userId);
         newUser.setId(userRepresentation.getId());
-        newUser.setActivated(userRepresentation.isEmailVerified() && userRepresentation.isEnabled());
         newUser.setEmail(userRepresentation.getEmail());
         newUser.setFirstName(userRepresentation.getFirstName());
         newUser.setLastName(userRepresentation.getLastName());
@@ -233,10 +255,9 @@ public class UserService {
         newUser.setLastModifiedBy(createdBy);
 
         if (Objects.nonNull(userRepresentation.getAttributes())) {
-            List<String> accountStatus = userRepresentation.getAttributes().get(ACCOUNT_STATUS_FIELD);
-            if (!CollectionUtils.isEmpty(accountStatus)) {
-                newUser.setAccountStatus(AccountStatus.valueOf(accountStatus.get(0)));
-            }
+            AccountStatus accountStatus = handleAccountStatus(newUser);
+            keycloakFacade.updateUserStatus(accountStatus, setting.getRealmApp(), userId);
+            newUser.setAccountStatus(accountStatus);
         }
         return userRepresentation;
     }
@@ -323,7 +344,6 @@ public class UserService {
         } else {
             user.setHasEnabled(false);
         }
-        user.setActivated(user.hasEnabled() && user.hasVerifiedEmail());
         return user;
     }
 

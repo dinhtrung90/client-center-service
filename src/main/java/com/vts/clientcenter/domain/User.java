@@ -51,10 +51,6 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @Column(length = 254, unique = true)
     private String email;
 
-    @NotNull
-    @Column(nullable = false)
-    private boolean activated = false;
-
     @Size(min = 2, max = 10)
     @Column(name = "lang_key", length = 10)
     private String langKey;
@@ -85,6 +81,9 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "user")
     private UserProfile userProfile;
+
+    @Column(name = "is_approved")
+    private boolean isApproved;
 
     public String getId() {
         return id;
@@ -126,13 +125,6 @@ public class User extends AbstractAuditingEntity implements Serializable {
     public void setEmail(String email) {
         this.email = email;
     }
-    public boolean getActivated() {
-        return activated;
-    }
-
-    public void setActivated(boolean activated) {
-        this.activated = activated;
-    }
 
     public String getLangKey() {
         return langKey;
@@ -148,10 +140,6 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     public void setAuthorities(Set<Authority> authorities) {
         this.authorities = authorities;
-    }
-
-    public boolean isActivated() {
-        return activated;
     }
 
     public Set<UserAddress> getUserAddresses() {
@@ -230,6 +218,14 @@ public class User extends AbstractAuditingEntity implements Serializable {
         this.userProfile = userProfile;
     }
 
+    public boolean isApproved() {
+        return isApproved;
+    }
+
+    public void setApproved(boolean approved) {
+        isApproved = approved;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -255,7 +251,6 @@ public class User extends AbstractAuditingEntity implements Serializable {
             ", firstName='" + firstName + '\'' +
             ", lastName='" + lastName + '\'' +
             ", email='" + email + '\'' +
-            ", activated='" + activated + '\'' +
             ", langKey='" + langKey + '\'' +
             "}";
     }

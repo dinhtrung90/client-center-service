@@ -90,6 +90,7 @@ public class AdminAccountResource {
     }
 
     @GetMapping("/account/get")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
     public ResponseEntity<List<UserDTO>> getAllAccountInSystem(UserCriteria criteria, Pageable pageable) {
         log.debug("REST request to get accounts by criteria: {}", criteria);
         Page<UserDTO> response = accountService.getAccounts(criteria, pageable);

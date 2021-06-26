@@ -2,6 +2,7 @@ package com.vts.clientcenter.service.keycloak;
 
 
 import com.vts.clientcenter.domain.Authority;
+import com.vts.clientcenter.domain.enumeration.AccountStatus;
 import com.vts.clientcenter.service.dto.*;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -45,4 +46,6 @@ public interface KeycloakFacade {
     RoleDetailResponse createWithCompositeRoles(CreateRoleRequest request, String realmName, String clientUUID);
 
     RoleDetailResponse updateWithCompositeRoles(CreateRoleRequest dto, String realmApp, String clientUUID);
+
+    void updateUserStatus(AccountStatus accountStatus, String realmId, String userId);
 }
