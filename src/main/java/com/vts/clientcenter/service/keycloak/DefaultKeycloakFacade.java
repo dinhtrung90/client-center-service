@@ -4,6 +4,7 @@ import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.domain.Authority;
 import com.vts.clientcenter.domain.enumeration.AccountStatus;
 import com.vts.clientcenter.domain.enumeration.Gender;
+import com.vts.clientcenter.service.UserService;
 import com.vts.clientcenter.service.dto.*;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import org.keycloak.admin.client.Keycloak;
@@ -190,6 +191,7 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
         attributes.put(ACCOUNT_GENDER_FIELD, Collections.singletonList(gender.toString()));
         attributes.put(ACCOUNT_PHONE_FIELD, Collections.singletonList(phone));
         attributes.put(ACCOUNT_UPDATED_AT_FLAG_FIELD, Collections.singletonList(Instant.now().toString()));
+        attributes.put(ACCOUNT_APPROVAL_FIELD, Collections.singletonList("false"));
         ur.setAttributes(attributes);
         CredentialRepresentation password = new CredentialRepresentation();
         password.setValue(userInfo.getTempPassword());
@@ -360,14 +362,17 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
     }
 
     @Override
-    public void forceApproveAccount(AccountStatus active, String realmId, String userId, Instant updatedAt) {
+    public void forceApproveAccount(AccountStatus active, String realmId, String userId, Instant updatedAt, boolean isForceUpdate) {
         UserResource userResource = getUserResource(realmId, userId);
         UserRepresentation userRepresentation = userResource.toRepresentation();
-        userRepresentation.setEmailVerified(true);
-        userRepresentation.setEnabled(true);
+        if (isForceUpdate) {
+            userRepresentation.setEmailVerified(true);
+            userRepresentation.setEnabled(true);
+        }
         Map<String, List<String>> attributes = new HashMap<>();
         attributes.put(ACCOUNT_STATUS_FIELD, Collections.singletonList(active.name()));
         attributes.put(ACCOUNT_UPDATED_AT_FLAG_FIELD, Collections.singletonList(updatedAt.toString()));
+        attributes.put(ACCOUNT_APPROVAL_FIELD, Collections.singletonList(Boolean.toString(true)));
         userRepresentation.setAttributes(attributes);
         userResource.update(userRepresentation);
     }
@@ -389,8 +394,6 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
         UserRepresentation userRepresentation = userResource.toRepresentation();
         List<AuthorityDto> effectiveRoles = findEffectiveRoleByUserId(realmId, userRepresentation.getId());
         UserDTO userDto = mapUserRepresentationToUserDto(userRepresentation);
-        List<String> accountStatuses = nonNull(userRepresentation.getAttributes()) ? userRepresentation.getAttributes().get(ACCOUNT_STATUS_FIELD): new ArrayList<>();
-        List<String> genderString = nonNull(userRepresentation.getAttributes()) ? userRepresentation.getAttributes().get(ACCOUNT_GENDER_FIELD): new ArrayList<>();
         userDto.setAuthorities(new HashSet<>(effectiveRoles));
         return userDto;
     }

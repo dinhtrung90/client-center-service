@@ -30,6 +30,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.thymeleaf.util.MapUtils;
 
 import java.time.Instant;
 import java.util.*;
@@ -43,6 +44,10 @@ import static com.vts.clientcenter.config.Constants.*;
 @Service
 @Transactional
 public class UserService {
+
+    @Autowired
+    private static DateUtil dateUtil;
+
     private final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
@@ -55,7 +60,6 @@ public class UserService {
 
     private final UserMapper userMapper;
 
-    private final DateUtil dateUtil;
 
     @Autowired
     private KeycloakConfig setting;
@@ -69,13 +73,12 @@ public class UserService {
         UserProfileRepository userProfileRepository, AuthorityRepository authorityRepository,
         CacheManager cacheManager,
         OktaService oktaService,
-        UserMapper userMapper, DateUtil dateUtil) {
+        UserMapper userMapper) {
         this.userRepository = userRepository;
         this.userProfileRepository = userProfileRepository;
         this.authorityRepository = authorityRepository;
         this.cacheManager = cacheManager;
         this.userMapper = userMapper;
-        this.dateUtil = dateUtil;
     }
 
     /**
@@ -259,14 +262,69 @@ public class UserService {
         newUser.setLastModifiedDate(updateAt);
         newUser.setLastModifiedBy(createdBy);
 
-        if (Objects.nonNull(userRepresentation.getAttributes())) {
-            AccountStatus accountStatus = handleAccountStatus(newUser);
-            keycloakFacade.updateUserStatus(accountStatus, setting.getRealmApp(), userId, updateAt);
-            newUser.setAccountStatus(accountStatus);
-        }
+        AccountStatus accountStatus = handleAccountStatus(newUser);
+        keycloakFacade.updateUserStatus(accountStatus, setting.getRealmApp(), userId, updateAt);
+        newUser.setAccountStatus(accountStatus);
+
+        newUser.setApproved(getApproveValue(userRepresentation.getAttributes()));
+
         return userRepresentation;
     }
 
+    public static Instant getLastUpdatedFromKeycloak(Map<String, List<String>>  attributes) {
+        if (attributes == null){
+            return Instant.now();
+        }
+        List<String> updateAtStrings = attributes.get(ACCOUNT_UPDATED_AT_FLAG_FIELD);
+        if (!CollectionUtils.isEmpty(updateAtStrings)) {
+            String updatedAtFlag = updateAtStrings.get(0);
+            Date updatedAt = dateUtil.parse(updatedAtFlag, DATE_STANDARD_FORMAT);
+            return updatedAt.toInstant();
+        }
+        return Instant.now();
+    }
+
+    public static String getPhone(Map<String, List<String>>  attributes) {
+        if (attributes == null){
+            return "";
+        }
+        List<String> phones = attributes.get(ACCOUNT_PHONE_FIELD);
+        if (!CollectionUtils.isEmpty(phones)) {
+            return phones.get(0);
+        }
+        return "N/A";
+    }
+
+    public static Gender getGender(Map<String, List<String>>  attributes) {
+        if (attributes == null){
+            return Gender.Unknown;
+        }
+        List<String> genders = attributes.get(ACCOUNT_GENDER_FIELD);
+        if (!CollectionUtils.isEmpty(genders)) {
+            return Gender.valueOf(genders.get(0));
+        }
+        return Gender.Unknown;
+    }
+
+    public static boolean getApproveValue(Map<String, List<String>>  attributes) {
+        if (attributes == null){
+            return false;
+        }
+        //get approve status
+        List<String> approvedStatus = attributes.get(ACCOUNT_APPROVAL_FIELD);
+        if (!CollectionUtils.isEmpty(approvedStatus)) {
+            return Boolean.parseBoolean(approvedStatus.get(0));
+        }
+        return false;
+    }
+
+    public static void setApproveValue(boolean isApproved, Map<String, List<String>>  attributes) {
+        if (attributes == null) {
+            attributes = new HashMap<>();
+        }
+        attributes.put(ACCOUNT_APPROVAL_FIELD, Collections.singletonList(isApproved ? "true": "false"));
+
+    }
 
     /**
      * Returns the user from an OAuth 2.0 login or resource server with JWT.

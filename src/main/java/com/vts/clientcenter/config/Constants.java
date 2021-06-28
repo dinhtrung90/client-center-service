@@ -35,6 +35,7 @@ public final class Constants {
     public static final String ACCOUNT_GENDER_FIELD = "gender";
     public static final String ACCOUNT_PHONE_FIELD = "phone";
     public static final String ACCOUNT_UPDATED_AT_FLAG_FIELD = "updated_at_flag";
+    public static final String ACCOUNT_APPROVAL_FIELD = "is_approved";
     public static final String ACCOUNT_CREATION_MESSAGE = "You just create a new account.";
     public static final String DATE_FORMAT_YYYY_MM_DD = "yyyy-MM-dd";
     public static final String DATE_STANDARD_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";

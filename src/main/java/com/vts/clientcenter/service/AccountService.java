@@ -94,9 +94,6 @@ public class AccountService {
     @Autowired
     private UserAddressRepository userAddressRepository;
 
-    @Autowired
-    private DateUtil dateUtil;
-
     @Transactional
     public UserReferenceDto createUserAccount(CreateAccountRequest request) {
 
@@ -123,6 +120,7 @@ public class AccountService {
 
         UserDTO userDTO = userDTOOptional.get();
         userDTO.setAuthorities(request.getAuthorities());
+        userDTO.setApproved(false); // force false when create account.
         List<RoleRepresentation> allRoles = keycloakFacade.assignUserRole(setting.getRealmApp(), userDTOOptional.get());
 
         User user = userMapper.userDTOToUser(userDTO);
@@ -374,7 +372,7 @@ public class AccountService {
         user.setHasVerifiedEmail(userRepresentation.isEmailVerified());
         user.setHasEnabled(userRepresentation.isEnabled());
         user.setLastModifiedBy(createdBy);
-
+        user.setApproved(UserService.getApproveValue(userRepresentation.getAttributes()));
         UserProfile profile = user.getUserProfile();
         if (Objects.nonNull(userRepresentation.getAttributes())) {
             AccountStatus accountStatus = UserService.handleAccountStatus(user);
@@ -382,29 +380,12 @@ public class AccountService {
             keycloakFacade.updateUserStatus(accountStatus, setting.getRealmApp(), user.getId(), Instant.now());
         }
 
-        List<String> genders = userRepresentation.getAttributes().get(ACCOUNT_GENDER_FIELD);
-        if (!CollectionUtils.isEmpty(genders)) {
-            profile.setGender(Gender.valueOf(genders.get(0)));
-        } else {
-            profile.setGender(Gender.Unknown);
-        }
+        profile.setGender(UserService.getGender(userRepresentation.getAttributes()));
+
         // phones
-        List<String> phones = userRepresentation.getAttributes().get(ACCOUNT_PHONE_FIELD);
-        if (!CollectionUtils.isEmpty(phones)) {
-            profile.setPhone(phones.get(0));
-        } else {
-            profile.setPhone("Pls provide phone");
-        }
+        profile.setPhone(UserService.getPhone(userRepresentation.getAttributes()));
 
-        List<String> updateAtStrings = userRepresentation.getAttributes().get(ACCOUNT_UPDATED_AT_FLAG_FIELD);
-        if (!CollectionUtils.isEmpty(phones)) {
-            String updatedAtFlag = updateAtStrings.get(0);
-            Date updatedAt = dateUtil.parse(updatedAtFlag, DATE_STANDARD_FORMAT);
-            user.setLastModifiedDate(updatedAt.toInstant());
-        } else {
-            user.setLastModifiedDate(Instant.now());
-        }
-
+        user.setLastModifiedDate(UserService.getLastUpdatedFromKeycloak(userRepresentation.getAttributes()));
     }
 
     public UserFullInfoResponse approveAccount(String userId) {
@@ -430,18 +411,18 @@ public class AccountService {
             throw new BadRequestAlertException("User can not be approved. this account need verify email before", "User", userId);
         }
         //enable and verified email
-        boolean isValidAccount = user.hasEnabled() && user.hasVerifiedEmail();
+        boolean isForceUpdate = user.hasEnabled() && user.hasVerifiedEmail();
         user.setAccountStatus(AccountStatus.ACTIVE);
         user.setLastModifiedBy(createdBy);
         user.setLastModifiedDate(Instant.now());
-        if (isValidAccount) {
-            keycloakFacade.updateUserStatus(AccountStatus.ACTIVE, setting.getRealmApp(), userId, Instant.now());
-        } else {
-            keycloakFacade.forceApproveAccount(AccountStatus.ACTIVE, setting.getRealmApp(), userId, Instant.now());
+        if (!isForceUpdate) {
             user.setHasEnabled(true);
             user.setHasVerifiedEmail(true);
         }
         user.setApproved(true);
+
+        keycloakFacade.forceApproveAccount(AccountStatus.ACTIVE, setting.getRealmApp(), userId, Instant.now(), !isForceUpdate && SecurityUtils.isCurrentUserInRole(ROLE_SUPER_ADMIN));
+        
         userRepository.save(user);
         this.clearUserCaches(user);
 

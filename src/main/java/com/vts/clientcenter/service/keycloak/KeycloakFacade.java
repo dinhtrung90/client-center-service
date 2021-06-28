@@ -50,5 +50,5 @@ public interface KeycloakFacade {
 
     void updateUserStatus(AccountStatus accountStatus, String realmId, String userId,  Instant updatedAt);
 
-    void forceApproveAccount(AccountStatus active, String realmApp, String userId,  Instant updatedAt);
+    void forceApproveAccount(AccountStatus active, String realmApp, String userId,  Instant updatedAt, boolean isForce);
 }
