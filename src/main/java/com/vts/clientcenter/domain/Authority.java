@@ -49,11 +49,11 @@ public class Authority extends AbstractAuditingEntity {
         name = "tv_role_permission",
         joinColumns = { @JoinColumn(name = "role_name") },
         inverseJoinColumns = { @JoinColumn(name = "permission_id") })
-    public Set<Permission> permissions;
+    public Set<Permission> permissions = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {})
     @JoinTable(name = "tv_composite_role", joinColumns = @JoinColumn(name = "composite"), inverseJoinColumns = @JoinColumn(name = "child_role"))
-    private Set<Authority> compositeRoles;
+    private Set<Authority> compositeRoles = new HashSet<>();
 
     @ManyToMany(mappedBy = "authorities")
     private Set<User> users = new HashSet<>();
@@ -67,6 +67,18 @@ public class Authority extends AbstractAuditingEntity {
             this.compositeRoles.clear();
         }
         this.compositeRoles = compositeRoles;
+    }
+
+    public void addPermission(Set<Permission> permissions) {
+        if (!CollectionUtils.isEmpty(permissions)) {
+            this.permissions.clear();
+        }
+        permissions.forEach(u  -> addPermission(u));
+    }
+
+    public void addPermission(Permission permission) {
+        this.permissions.add(permission);
+        permission.getAuthorities().add(this);
     }
 
 

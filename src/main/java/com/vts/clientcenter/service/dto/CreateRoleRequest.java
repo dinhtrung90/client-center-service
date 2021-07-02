@@ -18,6 +18,6 @@ public class CreateRoleRequest {
 
     private List<String> effectiveRoles;
 
-    private List<String> availablePrivileges;
+    private List<PermissionDTO> availablePrivileges;
 
 }

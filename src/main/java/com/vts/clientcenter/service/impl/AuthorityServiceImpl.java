@@ -2,6 +2,7 @@ package com.vts.clientcenter.service.impl;
 
 import com.vts.clientcenter.config.KeycloakConfig;
 import com.vts.clientcenter.domain.Authority;
+import com.vts.clientcenter.domain.Permission;
 import com.vts.clientcenter.repository.AuthorityRepository;
 import com.vts.clientcenter.security.SecurityUtils;
 import com.vts.clientcenter.service.AbstractBaseService;
@@ -9,9 +10,12 @@ import com.vts.clientcenter.service.AuthorityService;
 import com.vts.clientcenter.service.UserService;
 import com.vts.clientcenter.service.dto.AuthorityDto;
 import com.vts.clientcenter.service.dto.CreateRoleRequest;
+import com.vts.clientcenter.service.dto.PermissionDTO;
 import com.vts.clientcenter.service.dto.RoleDetailResponse;
 import com.vts.clientcenter.service.keycloak.KeycloakFacade;
 import com.vts.clientcenter.service.mapper.AuthorityMapper;
+import com.vts.clientcenter.service.mapper.PermissionMapper;
+import com.vts.clientcenter.service.mapper.PermissionMapperImpl;
 import org.mapstruct.ap.internal.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,8 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.vts.clientcenter.config.Constants.SYSTEM_ACCOUNT;
@@ -44,6 +47,9 @@ public class AuthorityServiceImpl extends AbstractBaseService implements Authori
 
     @Autowired
     private AuthorityMapper authorityMapper;
+
+    @Autowired
+    private PermissionMapper permissionMapper;
 
     public AuthorityServiceImpl(UserService userService) {
         super(userService);
@@ -70,13 +76,12 @@ public class AuthorityServiceImpl extends AbstractBaseService implements Authori
             handleCreateRole(dto, currentUserLogin);
         } else {
             handleUpdateRole(dto, currentUserLogin, authorityOptional.get());
-
         }
 
         return RoleDetailResponse
             .builder()
             .effectiveRoles(dto.getEffectiveRoles())
-            .availablePrivileges(dto.getAvailablePrivileges())
+            .availablePrivileges(permissionMapper.toDto(new ArrayList<>(authorityRepository.getOne(dto.getRoleName()).getPermissions())))
             .build();
     }
 
@@ -89,10 +94,18 @@ public class AuthorityServiceImpl extends AbstractBaseService implements Authori
         authority.setLastModifiedBy(createdBy);
         authority.setLastModifiedDate(Instant.now());
 
-        Set<Authority> authorities = Collections.asSet(dto.getEffectiveRoles(), dto.getAvailablePrivileges()).stream()
+        Set<Authority> authorities = dto.getEffectiveRoles()
+            .stream()
             .map(u -> authorityRepository.getOne(u))
             .collect(Collectors.toSet());
+
         authority.setCompositeRoles(authorities);
+
+        List<PermissionDTO> availablePrivileges = dto.getAvailablePrivileges();
+
+        List<Permission> permissions = permissionMapper.toEntity(availablePrivileges);
+
+        authority.setPermissions(new HashSet<>(permissions));
 
         keycloakFacade.createWithCompositeRoles(dto, setting.getRealmApp(), setting.getClientUUID());
 
@@ -105,17 +118,19 @@ public class AuthorityServiceImpl extends AbstractBaseService implements Authori
         authority.setDescription(dto.getDescription());
         authority.setLastModifiedBy(updateBy);
         authority.setLastModifiedDate(Instant.now());
+
         keycloakFacade.updateRole(authority.getName(), setting.getRealmApp(), authority);
 
-        Set<Authority> authorities = Collections.asSet(dto.getEffectiveRoles(), dto.getAvailablePrivileges()).stream()
+        Set<Authority> authorities = dto.getEffectiveRoles().stream()
             .map(u -> authorityRepository.getOne(u))
             .collect(Collectors.toSet());
-
-        authority.setCompositeRoles(authorities);
+        authority.addCompositeRoles(authorities);
 
         keycloakFacade.updateWithCompositeRoles(dto, setting.getRealmApp(), setting.getClientUUID());
 
-        authority.addCompositeRoles(authorities);
+        List<PermissionDTO> availablePrivileges = dto.getAvailablePrivileges();
+        List<Permission> permissions = permissionMapper.toEntity(availablePrivileges);
+        authority.addPermission(new HashSet<>(permissions));
         authorityRepository.save(authority);
 
 

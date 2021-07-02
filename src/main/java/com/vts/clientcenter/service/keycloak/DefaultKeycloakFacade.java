@@ -166,6 +166,12 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
 
     @Override
     public UserReferenceDto  createUser(String realmId, CreateAccountRequest userInfo) {
+
+        UsersResource usersResource = findUsersResource(realmId);
+        List<UserRepresentation> existedUsersKeycloak = usersResource.search(userInfo.getEmail());
+        if (!CollectionUtils.isEmpty(existedUsersKeycloak)) {
+            throw new BadRequestAlertException("User have existed in systems", "Users", Constants.USER_HAS_EXISTED);
+        }
         UserRepresentation ur = new UserRepresentation();
         ur.setUsername(userInfo.getLogin());
         ur.setFirstName(userInfo.getFirstName());

@@ -2,6 +2,7 @@ package com.vts.clientcenter.domain;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
 import javax.validation.constraints.*;
@@ -49,6 +50,9 @@ public class Permission  extends AbstractAuditingEntity implements GrantedAuthor
         GrantedAuthority ga = (GrantedAuthority) o;
         return (getAuthority().equals(ga.getAuthority()));
     }
+
+    @ManyToMany(mappedBy = "permissions")
+    private Set<Authority> authorities = new HashSet<>();
 
     @Override
     public int hashCode() {

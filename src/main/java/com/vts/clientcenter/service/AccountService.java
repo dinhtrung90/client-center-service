@@ -139,7 +139,8 @@ public class AccountService {
         profile.setUser(user);
         userProfileRepository.save(profile);
 
-        List<String> requiredActions = Arrays.asList(ActionsEmail.VERIFY_EMAIL.name());
+        List<String> requiredActions = new ArrayList<>();
+        requiredActions.add(ActionsEmail.VERIFY_EMAIL.name());
         if (request.isIsTempPassword())  {
             requiredActions.add(ActionsEmail.UPDATE_PASSWORD.name());
         }
@@ -422,7 +423,7 @@ public class AccountService {
         user.setApproved(true);
 
         keycloakFacade.forceApproveAccount(AccountStatus.ACTIVE, setting.getRealmApp(), userId, Instant.now(), !isForceUpdate && SecurityUtils.isCurrentUserInRole(ROLE_SUPER_ADMIN));
-        
+
         userRepository.save(user);
         this.clearUserCaches(user);
 

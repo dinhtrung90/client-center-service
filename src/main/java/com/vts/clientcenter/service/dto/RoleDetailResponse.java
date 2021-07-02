@@ -19,7 +19,7 @@ public class RoleDetailResponse {
 
     private List<String> effectiveRoles;
 
-    private List<String> availablePrivileges;
+    private List<PermissionDTO> availablePrivileges;
 
     private boolean success;
 }
