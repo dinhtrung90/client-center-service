@@ -196,27 +196,19 @@ public class UserService {
             this.clearUserCaches(newUser);
         } else {
             newUser = existingUser.get();
-            if (details.get(ACCOUNT_UPDATED_AT_FLAG_FIELD) != null) {
-                Instant dbModifiedDate = existingUser.get().getLastModifiedDate();
-                String updateAtString = (String) details.get(ACCOUNT_UPDATED_AT_FLAG_FIELD);
-                Instant idpModifiedDate = dateUtil.parse(updateAtString, DATE_STANDARD_FORMAT).toInstant();
-                if (idpModifiedDate.isAfter(dbModifiedDate)) {
-                    log.debug("Updating user '{}' in local database", user.getLogin());
-                    UserRepresentation userRepresentation = mapUserRepresentationToUser(user.getId(), newUser, user.getLogin(), false, idpModifiedDate);
-                    UserProfile profile = newUser.getUserProfile();
-                    mapUserRepresentationToProfile(userRepresentation, profile);
-                    userRepository.save(newUser);
-                    this.clearUserCaches(newUser);
-                }
-            }
+            log.debug("Updating user '{}' in local database", user.getLogin());
+            UserRepresentation userRepresentation = mapUserRepresentationToUser(user.getId(), newUser, user.getLogin(), false, Instant.now());
+            UserProfile profile = newUser.getUserProfile();
+            mapUserRepresentationToProfile(userRepresentation, profile);
+
             //update  status
             AccountStatus accountStatus = handleAccountStatus(newUser);
             if (!newUser.getAccountStatus().equals(accountStatus)) {
                 newUser.setAccountStatus(accountStatus);
-                userRepository.save(newUser);
-                this.clearUserCaches(newUser);
                 keycloakFacade.updateUserStatus(accountStatus, setting.getRealmApp(), newUser.getId(), Instant.now());
             }
+            userRepository.save(newUser);
+            this.clearUserCaches(newUser);
         }
         return newUser;
     }
