@@ -294,9 +294,10 @@ public class AccountService {
     }
 
     @Transactional
-    public UserFullInfoResponse updateUser(UpdateAccountRequest userDto) {
+    public UserDTO updateUserInfo(UpdateAccountRequest userDto) {
 
         String createdBy = SecurityUtils.getCurrentUserLogin().orElse(SYSTEM_ACCOUNT);
+
         if (Objects.isNull(userDto.getUserId())) {
             throw new BadRequestAlertException("User Not Found", "USER", Constants.ID_NOT_NULL);
         }
@@ -307,100 +308,68 @@ public class AccountService {
             throw new BadRequestAlertException("User Not Found", "USER", Constants.USER_NOT_FOUND);
         }
 
-        if (CollectionUtils.isEmpty(userDto.getAuthorities())) {
-            throw new BadRequestAlertException("Role can not empty.", "USER", Constants.USER_ROLE_NOT_FOUND);
+        if (Objects.isNull(userDto.getAccountStatus())){
+            throw new BadRequestAlertException("User Status Not Null.", "USER", Constants.USER_STATUS_NOT_NULL);
         }
-        UserFullInfoResponse response = UserFullInfoResponse.builder()
-            .build();
-        UserRepresentation userRepresentation = keycloakFacade.updateUser(setting.getRealmApp(), userDto);
+
+        User user = existingUser.get();
+
+        if (!user.getAccountStatus().equals(userDto.getAccountStatus())) {
+            // handle update account status
+            switch (userDto.getAccountStatus()) {
+                case ACTIVE:
+                    userDto.setEnable(true);
+                    userDto.setVerifiedEmail(true);
+                    userDto.setApproved(true);
+                    break;
+                case PENDING:
+                    userDto.setEnable(true);
+                    userDto.setVerifiedEmail(true);
+                    userDto.setApproved(false);
+                    break;
+                case INACTIVE:
+                    userDto.setEnable(true);
+                    userDto.setVerifiedEmail(false);
+                    userDto.setApproved(false);
+                    break;
+                case BANNED:
+                    userDto.setEnable(false);
+                    userDto.setVerifiedEmail(false);
+                    userDto.setApproved(false);
+                    break;
+            }
+            //TODO: send notification email for users
+        }
+
+        keycloakFacade.updateUser(setting.getRealmApp(), userDto);
 
         // update info local
-        User user = existingUser.get();
-        mapUserRepresentationToUser(userRepresentation, user, createdBy);
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+        user.setHasVerifiedEmail(userDto.isVerifiedEmail());
+        user.setHasEnabled(userDto.isEnable());
+        user.setApproved(userDto.isApproved());
+        user.setAccountStatus(userDto.getAccountStatus());
+        user.setLastModifiedBy(createdBy);
+        user.setLastModifiedDate(Instant.now());
 
-        // update roles
-        List<AuthorityDto> effectiveRoles = keycloakFacade.findEffectiveRoleByUserId(setting.getRealmApp(), userDto.getUserId());
-        List<String> roles = effectiveRoles.stream().map(AuthorityDto::getName).collect(Collectors.toList());
-        Set<Authority> authorities = user.getAuthorities();
-        List<String> currentUserRoles = authorities.stream().map(Authority::getName).collect(Collectors.toList());
-        boolean match = currentUserRoles.containsAll(roles);
-        if (!match) {
-
-            Set<Authority> savingRoles = authorityRepository.findAllByNameIn(roles);
-
-            //remove not in list local
-            authorities.stream()
-                .filter(r -> !roles.contains(r.getName()))
-                .forEach(user::removeAuthority);
-
-            for (Authority savingRole : savingRoles) {
-                if (!currentUserRoles.contains(savingRole.getName())) {
-                    user.addAuthority(savingRole);
-                }
-            }
-        }
-
-        response.setUserDto(userMapper.userToDto(user));
+        UserProfile profile = user.getUserProfile();
+        profile.setGender(userDto.getGender());
+        profile.setPhone(userDto.getMobilePhone());
+        profile.setBirthDate(userDto.getBirthDate().toInstant());
+        profile.setHomePhone(userDto.getMobilePhone());
 
         userRepository.save(user);
-
-        // update address
-        List<UserAddress> userAddresses = userAddressMapper.toEntity(userDto.getUserAddressList());
-        Set<UserAddress> userAddressesLocal = user.getUserAddresses();
-        if (!userAddressesLocal.containsAll(userAddresses)) {
-
-            List<Long> deleteItems = userAddressesLocal.stream()
-                .filter(p -> !userAddresses.stream().map(UserAddress::getId).collect(Collectors.toList()).contains(p.getId()))
-                .map(UserAddress::getId).collect(Collectors.toList());
-
-            userAddressRepository.deleteAllByIdIn(deleteItems);
-
-            userAddressRepository.saveAll(userAddresses);
-        }
-        response.setUserProfileDto(userProfileMapper.toDto(user.getUserProfile()));
-        response.setUserAddressList(userAddressMapper.toDto(new ArrayList<>(userAddressRepository.findAllByUserId(user.getId()))));
         clearUserCaches(user);
-        return response;
-    }
-
-    private void mapUserRepresentationToUser(UserRepresentation userRepresentation, User user, String createdBy) {
-
-        user.setId(userRepresentation.getId());
-        user.setEmail(userRepresentation.getEmail());
-        user.setFirstName(userRepresentation.getFirstName());
-        user.setLastName(userRepresentation.getLastName());
-        user.setLogin(userRepresentation.getUsername());
-        user.setHasVerifiedEmail(userRepresentation.isEmailVerified());
-        user.setHasEnabled(userRepresentation.isEnabled());
-        user.setLastModifiedBy(createdBy);
-        user.setApproved(UserService.getApproveValue(userRepresentation.getAttributes()));
-        UserProfile profile = user.getUserProfile();
-        if (Objects.nonNull(userRepresentation.getAttributes())) {
-            AccountStatus accountStatus = UserService.handleAccountStatus(user);
-            user.setAccountStatus(accountStatus);
-            keycloakFacade.updateUserStatus(accountStatus, setting.getRealmApp(), user.getId(), Instant.now());
-        }
-
-        profile.setGender(UserService.getGender(userRepresentation.getAttributes()));
-
-        // phones
-        profile.setPhone(UserService.getPhone(userRepresentation.getAttributes()));
-
-        user.setLastModifiedDate(UserService.getLastUpdatedFromKeycloak(userRepresentation.getAttributes()));
+        return userMapper.userToDto(user);
     }
 
     public UserFullInfoResponse approveAccount(String userId) {
+
         String createdBy = SecurityUtils.getCurrentUserLogin().orElse(SYSTEM_ACCOUNT);
-        if (Objects.isNull(userId)) {
-            throw new BadRequestAlertException("User Not Found", "USER", Constants.ID_NOT_NULL);
-        }
 
-        Optional<User> existingUser = userRepository.findById(userId);
+        User user = validateUserId(userId);
 
-        if (!existingUser.isPresent()) {
-            throw new BadRequestAlertException("User Not Found", "USER", Constants.USER_NOT_FOUND);
-        }
-        User user = existingUser.get();
         UserFullInfoResponse response = UserFullInfoResponse.builder()
             .build();
 
@@ -431,5 +400,77 @@ public class AccountService {
         response.setUserProfileDto(userProfileMapper.toDto(user.getUserProfile()));
         response.setUserAddressList(userAddressMapper.toDto(new ArrayList<>(user.getUserAddresses())));
         return response;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<UserAddressDTO> getAddressesByUserId(String userId, Pageable pageable) {
+
+        validateUserId(userId);
+
+        return userAddressRepository.findAllByUserId(userId, pageable).map(u -> userAddressMapper.toDto(u));
+    }
+
+    private User validateUserId(String userId) {
+        if (Objects.isNull(userId)) {
+            throw new BadRequestAlertException("User Not Found", "USER", Constants.ID_NOT_NULL);
+        }
+
+        Optional<User> existingUser = userRepository.findById(userId);
+
+        if (!existingUser.isPresent()) {
+            throw new BadRequestAlertException("User Not Found", "USER", Constants.USER_NOT_FOUND);
+        }
+        return existingUser.get();
+    }
+
+
+    @Transactional
+    public UserAddressDTO createUserAddress(UserAddressDTO addressDTO) {
+
+        String createdBy = SecurityUtils.getCurrentUserLogin().orElse(SYSTEM_ACCOUNT);
+        User user = validateUserId(addressDTO.getUserId());
+        UserAddress userAddress = userAddressMapper.toEntity(addressDTO);
+        userAddress.setCreatedBy(createdBy);
+        userAddress.setCreatedDate(Instant.now());
+        userAddress.setLastModifiedDate(Instant.now());
+        userAddress.setLastModifiedBy(createdBy);
+        userAddress.setUser(user);
+        UserAddress savingAddress = userAddressRepository.save(userAddress);
+        UserAddressDTO dto = userAddressMapper.toDto(savingAddress);
+        this.clearUserCaches(user);
+        return dto;
+    }
+
+    @Transactional
+    public UserAddressDTO updateUserAddress(String userId, UserAddressDTO addressDTO) {
+
+        User user = validateUserId(userId);
+
+        Optional<UserAddress> userAddressOptional = userAddressRepository.findById(addressDTO.getId());
+
+        if (!userAddressOptional.isPresent()) {
+            throw new BadRequestAlertException("User Address Not Found", "USER", Constants.USER_ADDRESS_NOT_FOUND);
+        }
+
+        String createdBy = SecurityUtils.getCurrentUserLogin().orElse(SYSTEM_ACCOUNT);
+        UserAddress userAddress = userAddressMapper.toEntity(addressDTO);
+        userAddress.setLastModifiedDate(Instant.now());
+        userAddress.setLastModifiedBy(createdBy);
+
+        UserAddressDTO userAddressDTO = userAddressMapper.toDto(userAddressRepository.save(userAddress));
+        this.clearUserCaches(user);
+        return userAddressDTO;
+    }
+
+    public Optional<UserAddressDTO>  getUserAddress(String userId, Long addressId) {
+        validateUserId(userId);
+        return userAddressRepository.findById(addressId).map(a -> userAddressMapper.toDto(a));
+    }
+
+    @Transactional
+    public void deleteUserAddress(String userId, Long addressId) {
+        User user = validateUserId(userId);
+        userAddressRepository.deleteById(addressId);
+        this.clearUserCaches(user);
     }
 }

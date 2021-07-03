@@ -39,6 +39,8 @@ public final class Constants {
     public static final String ACCOUNT_CREATION_MESSAGE = "You just create a new account.";
     public static final String DATE_FORMAT_YYYY_MM_DD = "yyyy-MM-dd";
     public static final String DATE_STANDARD_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+    public static final String USER_STATUS_NOT_NULL = "USER_STATUS_NOT_NULL";
+    public static final String USER_ADDRESS_NOT_FOUND = "USER_ADDRESS_NOT_FOUND";
 
     private Constants() {}
 }

@@ -1,11 +1,11 @@
 package com.vts.clientcenter.web.rest.admin;
 
-import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.service.AccountService;
+import com.vts.clientcenter.service.UserAddressService;
 import com.vts.clientcenter.service.dto.*;
-import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import io.github.jhipster.web.util.HeaderUtil;
 import io.github.jhipster.web.util.PaginationUtil;
+import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,14 +15,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
+
+import static org.hibernate.id.IdentifierGenerator.ENTITY_NAME;
 
 /**
  * REST controller for managing users.
@@ -117,9 +119,9 @@ public class AdminAccountResource {
     }
 
     @PostMapping("/account/update")
-    public ResponseEntity<UserFullInfoResponse> updateUser(@RequestBody UpdateAccountRequest userDto) throws URISyntaxException {
+    public ResponseEntity<UserDTO> updateUser(@RequestBody UpdateAccountRequest userDto) throws URISyntaxException {
         log.debug("REST request to create User : {}", userDto);
-        UserFullInfoResponse response = accountService.updateUser(userDto);
+        UserDTO response = accountService.updateUserInfo(userDto);
         return ResponseEntity
            .ok(response);
     }
@@ -129,5 +131,46 @@ public class AdminAccountResource {
         log.debug("REST request to create User : {}", userId);
         UserFullInfoResponse response = accountService.approveAccount(userId);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/account/{userId}/address")
+    public ResponseEntity<List<UserAddressDTO>> getAllUserAddresses(@PathVariable String userId, Pageable pageable) {
+        log.debug("REST request to get UserAddresses by criteria: {}", userId);
+        Page<UserAddressDTO> page = accountService.getAddressesByUserId(userId, pageable);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
+
+    @PostMapping("/account/{userId}/address/create")
+    public ResponseEntity<UserAddressDTO> postAddress(@PathVariable String userId, @Valid @RequestBody UserAddressDTO addressDTO) throws URISyntaxException {
+        log.debug("REST request to create UserAddresses by criteria: {}", userId);
+        addressDTO.setUserId(userId);
+        UserAddressDTO result = accountService.createUserAddress(addressDTO);
+        return ResponseEntity.created(new URI("/api/cms/program-user-collection-progresses/" + result.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(result);
+    }
+
+    @PutMapping("/account/{userId}/address/update")
+    public ResponseEntity<UserAddressDTO> updateUserAddress(@PathVariable String userId, @Valid @RequestBody UserAddressDTO addressDTO) throws URISyntaxException {
+        log.debug("REST request to create UserAddresses by criteria: {}", userId);
+        UserAddressDTO result = accountService.updateUserAddress(userId, addressDTO);
+        return ResponseEntity.ok()
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(result);
+    }
+
+    @GetMapping("/account/{userId}/address/get/{addressId}")
+    public ResponseEntity<UserAddressDTO> getUserAddress(@PathVariable String userId, @PathVariable Long addressId) throws URISyntaxException {
+        log.debug("REST request to get UserAddresses by criteria: {}", addressId);
+        Optional<UserAddressDTO> result = accountService.getUserAddress(userId, addressId);
+        return ResponseUtil.wrapOrNotFound(result);
+    }
+
+    @DeleteMapping("/account/{userId}/address/delete/{addressId}")
+    public ResponseEntity<Void> deleteUserAddress(@PathVariable String userId, @PathVariable Long addressId) throws URISyntaxException {
+        log.debug("REST request to get UserAddresses by criteria: {}", addressId);
+        accountService.deleteUserAddress(userId, addressId);
+        return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, addressId.toString())).build();
     }
 }

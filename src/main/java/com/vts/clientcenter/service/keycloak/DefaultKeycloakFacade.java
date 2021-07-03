@@ -132,15 +132,23 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
         userRepresentation.setLastName(userDto.getLastName());
 
         Map<String, List<String>> attributes = new HashMap<>();
-        if (Objects.nonNull(userDto.getUserProfileDto())) {
-            Gender gender = userDto.getUserProfileDto().getGender();
+        if (Objects.nonNull(userDto.getGender())) {
+            Gender gender = userDto.getGender();
             Gender savingGender =  gender != null ? gender : Gender.Unknown;
             attributes.put(ACCOUNT_GENDER_FIELD, Collections.singletonList(savingGender.toString()));
-
-            String phone = userDto.getUserProfileDto().getPhone();
-            attributes.put(ACCOUNT_PHONE_FIELD, Collections.singletonList(phone !=  null ? phone : "Invalid"));
         }
+
+        String phone = userDto.getMobilePhone();
+        if (Objects.nonNull(phone)) {
+            attributes.put(ACCOUNT_PHONE_FIELD, Collections.singletonList(phone));
+        }
+
+        //update account status
+        userRepresentation.setEnabled(userDto.isEnable());
+        userRepresentation.setEmailVerified(userDto.isVerifiedEmail());
+        attributes.put(ACCOUNT_APPROVAL_FIELD,  Collections.singletonList(Boolean.toString(userDto.isApproved())));
         attributes.put(ACCOUNT_STATUS_FIELD, Collections.singletonList(userDto.getAccountStatus().toString()));
+        //update last updated
         attributes.put(ACCOUNT_UPDATED_AT_FLAG_FIELD, Collections.singletonList(Instant.now().toString()));
         userRepresentation.setAttributes(attributes);
 
@@ -151,14 +159,6 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
             password.setType(CredentialRepresentation.PASSWORD);
             password.setTemporary(userDto.isIsTempPassword());
             userRepresentation.setCredentials(Collections.singletonList(password));
-        }
-
-        //update authorities
-        if (!CollectionUtils.isEmpty(userDto.getAuthorities())) {
-            UserDTO userDTO = new UserDTO();
-            userDTO.setId(userDto.getUserId());
-            userDTO.setAuthorities(userDto.getAuthorities());
-            assignUserRole(realmId, userDTO);
         }
         userResource.update(userRepresentation);
         return userRepresentation;
