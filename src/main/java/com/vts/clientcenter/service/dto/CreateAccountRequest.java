@@ -1,12 +1,14 @@
 package com.vts.clientcenter.service.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.domain.enumeration.Gender;
 import lombok.*;
 
 import javax.validation.constraints.*;
 import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -38,24 +40,18 @@ public class CreateAccountRequest {
     @Size(min = 2, max = 10)
     private String langKey;
 
-    private String createdBy;
-
-    private Instant createdDate;
-
-    private String lastModifiedBy;
-
-    private Instant lastModifiedDate;
-
-    private Set<AuthorityDto> authorities;
-
     @NotNull
     private String tempPassword;
 
+    private Gender gender;
+
+    private String mobilePhone;
+
+    private String homePhone;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Constants.DATE_FORMAT_YYYY_MM_DD)
+    private Date birthDate;
+
     private boolean isIsTempPassword;
 
-    private boolean isIsEnable;
-
-    private List<UserAddressDTO> userAddressList;
-
-    private UserProfileDTO userProfileDto;
 }

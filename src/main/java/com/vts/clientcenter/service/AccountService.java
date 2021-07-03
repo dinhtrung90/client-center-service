@@ -1,6 +1,5 @@
 package com.vts.clientcenter.service;
 
-import com.okta.sdk.resource.user.UserActivationToken;
 import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.config.KeycloakConfig;
 import com.vts.clientcenter.domain.Authority;
@@ -9,9 +8,7 @@ import com.vts.clientcenter.domain.UserAddress;
 import com.vts.clientcenter.domain.UserProfile;
 import com.vts.clientcenter.domain.enumeration.AccountStatus;
 import com.vts.clientcenter.domain.enumeration.ActionsEmail;
-import com.vts.clientcenter.domain.enumeration.Gender;
 import com.vts.clientcenter.events.UserCreatedEvent;
-import com.vts.clientcenter.helpers.DateUtil;
 import com.vts.clientcenter.repository.AuthorityRepository;
 import com.vts.clientcenter.repository.UserAddressRepository;
 import com.vts.clientcenter.repository.UserProfileRepository;
@@ -23,8 +20,6 @@ import com.vts.clientcenter.service.mapper.UserAddressMapper;
 import com.vts.clientcenter.service.mapper.UserMapper;
 import com.vts.clientcenter.service.mapper.UserProfileMapper;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
-import org.keycloak.representations.idm.RoleRepresentation;
-import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,16 +31,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import javax.ws.rs.ClientErrorException;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.vts.clientcenter.config.Constants.*;
 
@@ -111,32 +104,36 @@ public class AccountService {
             throw new BadRequestAlertException("Can not create user.", "Users", "UserName");
         }
 
-        //insert local
-        Optional<UserDTO> userDTOOptional = keycloakFacade.searchUserByUserName(setting.getRealmApp(), request.getLogin());
+        User user =  new User();
+        user.setId(referenceDto.getUserId());
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setEmail(request.getEmail());
+        user.setLogin(request.getLogin());
+        user.setAccountStatus(AccountStatus.INACTIVE);
+        user.setHasVerifiedEmail(false);
+        user.setHasEnabled(true);
+        user.setApproved(false);
+        user.setCreatedDate(Instant.now());
+        user.setCreatedBy(userLogin);
+        user.setLastModifiedDate(Instant.now());
+        user.setLastModifiedBy(userLogin);
+        user.setLangKey(request.getLangKey() != null ? request.getLangKey() : DEFAULT_LANGUAGE);
 
-        if (!userDTOOptional.isPresent()) {
-            throw new BadRequestAlertException("Can not get user.", "Users", "UserName");
-        }
-
-        UserDTO userDTO = userDTOOptional.get();
-        userDTO.setAuthorities(request.getAuthorities());
-        userDTO.setApproved(false); // force false when create account.
-        List<RoleRepresentation> allRoles = keycloakFacade.assignUserRole(setting.getRealmApp(), userDTOOptional.get());
-
-        User user = userMapper.userDTOToUser(userDTO);
-        Set<Authority> userRoles = authorityRepository.findAllByNameIn(allRoles.stream().map(RoleRepresentation::getName).collect(Collectors.toList()));
-        user.setAuthorities(userRoles);
         applicationEventPublisher.publishEvent(new UserCreatedEvent(user));
 
         // create profile
-        UserProfile profile = Objects.nonNull(request.getUserProfileDto()) ?
-            userProfileMapper.toEntity(request.getUserProfileDto()) : new UserProfile();
-
+        UserProfile profile = new UserProfile();
+        profile.setHomePhone(request.getHomePhone());
+        profile.setPhone(request.getMobilePhone());
+        profile.setBirthDate(request.getBirthDate().toInstant());
+        profile.setGender(request.getGender());
         profile.setCreatedBy(userLogin);
         profile.setCreatedDate(Instant.now());
         profile.setLastModifiedBy(userLogin);
         profile.setLastModifiedDate(Instant.now());
         profile.setUser(user);
+        user.setUserProfile(profile);
         userProfileRepository.save(profile);
 
         List<String> requiredActions = new ArrayList<>();
@@ -144,33 +141,12 @@ public class AccountService {
         if (request.isIsTempPassword())  {
             requiredActions.add(ActionsEmail.UPDATE_PASSWORD.name());
         }
+
         keycloakFacade.executeActionEmail(
             setting.getRealmApp(),
-            userDTOOptional.get().getId(),
+            referenceDto.getUserId(),
             (requiredActions)
         );
-
-        keycloakFacade.sendVerifiedEmail(setting.getRealmApp(), user.getId());
-
-        referenceDto.setUserId(user.getId());
-
-        List<UserAddress> createObjects = request
-            .getUserAddressList()
-            .stream()
-            .filter(userAddressDTO -> Objects.isNull(userAddressDTO.getId()))
-            .flatMap(
-                dto -> {
-                    dto.setLastModifiedDate(Instant.now());
-                    dto.setLastModifiedBy(userLogin);
-                    dto.setCreatedBy(userLogin);
-                    dto.setCreatedDate(Instant.now());
-                    dto.setUserId(user.getId());
-                    return Stream.of(userAddressMapper.toEntity(dto));
-                }
-            )
-            .collect(Collectors.toList());
-
-        userAddressRepository.saveAll(createObjects.stream().peek(u -> u.setUser(user)).collect(Collectors.toList()));
 
         return referenceDto;
     }
@@ -186,27 +162,22 @@ public class AccountService {
 //        return validatorFactory.getValidator();
 //    }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public UserFullInfoResponse getAccount(String userId) {
 
-        Optional<User> userOptional = userRepository.findByUserId(userId);
-        if (!userOptional.isPresent()) {
-            throw new BadRequestAlertException("User Not Found", "USER", Constants.USER_NOT_FOUND);
-        }
+        User user = validateUserId(userId);
 
-        User user = userOptional.get();
+        UserDTO keycloakUser = keycloakFacade.findUserById(setting.getRealmApp(), userId);
 
-        UserDTO userDTO = userMapper.userToUserDTO(user);
+        getAccountStatusFromKeycloak(keycloakUser, user);
+
+        userRepository.save(user);
+        this.clearUserCaches(user);
 
         UserProfileDTO userProfileDTO = userProfileMapper.toDto(userProfileRepository.getOne(userId));
 
-        List<UserAddress> userAddresses = new ArrayList<>(user.getUserAddresses());
-
-        List<UserAddressDTO> dtoList = userAddressMapper.toDto(userAddresses);
-
         return UserFullInfoResponse.builder()
-            .userAddressList(dtoList)
-            .userDto(userDTO)
+            .userDto(userMapper.userToDto(user))
             .userProfileDto(userProfileDTO)
             .build();
     }
@@ -298,70 +269,69 @@ public class AccountService {
 
         String createdBy = SecurityUtils.getCurrentUserLogin().orElse(SYSTEM_ACCOUNT);
 
-        if (Objects.isNull(userDto.getUserId())) {
-            throw new BadRequestAlertException("User Not Found", "USER", Constants.ID_NOT_NULL);
-        }
-
-        Optional<User> existingUser = userRepository.findById(userDto.getUserId());
-
-        if (!existingUser.isPresent()) {
-            throw new BadRequestAlertException("User Not Found", "USER", Constants.USER_NOT_FOUND);
-        }
+        User user = validateUserId(userDto.getUserId());
 
         if (Objects.isNull(userDto.getAccountStatus())){
             throw new BadRequestAlertException("User Status Not Null.", "USER", Constants.USER_STATUS_NOT_NULL);
         }
 
-        User user = existingUser.get();
-
-        if (!user.getAccountStatus().equals(userDto.getAccountStatus())) {
-            // handle update account status
-            switch (userDto.getAccountStatus()) {
-                case ACTIVE:
-                    userDto.setEnable(true);
-                    userDto.setVerifiedEmail(true);
-                    userDto.setApproved(true);
-                    break;
-                case PENDING:
-                    userDto.setEnable(true);
-                    userDto.setVerifiedEmail(true);
-                    userDto.setApproved(false);
-                    break;
-                case INACTIVE:
-                    userDto.setEnable(true);
-                    userDto.setVerifiedEmail(false);
-                    userDto.setApproved(false);
-                    break;
-                case BANNED:
-                    userDto.setEnable(false);
-                    userDto.setVerifiedEmail(false);
-                    userDto.setApproved(false);
-                    break;
-            }
-            //TODO: send notification email for users
-        }
-
-        keycloakFacade.updateUser(setting.getRealmApp(), userDto);
-
         // update info local
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
-        user.setHasVerifiedEmail(userDto.isVerifiedEmail());
-        user.setHasEnabled(userDto.isEnable());
-        user.setApproved(userDto.isApproved());
-        user.setAccountStatus(userDto.getAccountStatus());
         user.setLastModifiedBy(createdBy);
         user.setLastModifiedDate(Instant.now());
+        user.setLangKey(userDto.getLangKey() != null ? userDto.getLangKey() : DEFAULT_LANGUAGE);
+        getAccountStatusByNewStatus(userDto.getAccountStatus(), user);
 
         UserProfile profile = user.getUserProfile();
         profile.setGender(userDto.getGender());
         profile.setPhone(userDto.getMobilePhone());
         profile.setBirthDate(userDto.getBirthDate().toInstant());
         profile.setHomePhone(userDto.getMobilePhone());
+        profile.setLastModifiedBy(createdBy);
+        profile.setLastModifiedDate(Instant.now());
+
+        keycloakFacade.updateUser(setting.getRealmApp(), user, userDto.getTempPassword(), userDto.isIsTempPassword());
 
         userRepository.save(user);
         clearUserCaches(user);
         return userMapper.userToDto(user);
+    }
+
+    private void getAccountStatusFromKeycloak(UserDTO keycloakUser, User user) {
+        AccountStatus targetAccountStatus = UserService.getAccountStatus(keycloakUser.isEnabled(), keycloakUser.isVerifiedEmail(), keycloakUser.isApproved());
+        getAccountStatusByNewStatus(targetAccountStatus, user);
+    }
+
+    private void getAccountStatusByNewStatus(AccountStatus targetAccountStatus, User user) {
+        if (!user.getAccountStatus().equals(targetAccountStatus)) {
+            // handle update account status
+            switch (targetAccountStatus) {
+                case ACTIVE:
+                    user.setHasEnabled(true);
+                    user.setHasVerifiedEmail(true);
+                    user.setApproved(true);
+                    break;
+                case PENDING:
+                    user.setHasEnabled(true);
+                    user.setHasVerifiedEmail(true);
+                    user.setApproved(false);
+                    break;
+                case INACTIVE:
+                    user.setHasEnabled(true);
+                    user.setHasVerifiedEmail(false);
+                    user.setApproved(false);
+                    break;
+                case BANNED:
+                    user.setHasEnabled(false);
+                    user.setHasVerifiedEmail(false);
+                    user.setApproved(false);
+                    break;
+            }
+            //TODO: send notification email for users
+            user.setAccountStatus(targetAccountStatus);
+            keycloakFacade.updateUserStatus(targetAccountStatus, setting.getRealmApp(), user.getId(), Instant.now());
+        }
     }
 
     public UserFullInfoResponse approveAccount(String userId) {
@@ -398,7 +368,6 @@ public class AccountService {
 
         response.setUserDto(userMapper.userToDto(user));
         response.setUserProfileDto(userProfileMapper.toDto(user.getUserProfile()));
-        response.setUserAddressList(userAddressMapper.toDto(new ArrayList<>(user.getUserAddresses())));
         return response;
     }
 

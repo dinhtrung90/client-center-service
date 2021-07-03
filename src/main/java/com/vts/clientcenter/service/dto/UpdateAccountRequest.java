@@ -50,5 +50,4 @@ public class UpdateAccountRequest {
 
     private boolean isApproved;
 
-
 }

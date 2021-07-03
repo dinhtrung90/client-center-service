@@ -2,9 +2,10 @@ package com.vts.clientcenter.service.keycloak;
 
 import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.domain.Authority;
+import com.vts.clientcenter.domain.User;
+import com.vts.clientcenter.domain.UserProfile;
 import com.vts.clientcenter.domain.enumeration.AccountStatus;
 import com.vts.clientcenter.domain.enumeration.Gender;
-import com.vts.clientcenter.service.UserService;
 import com.vts.clientcenter.service.dto.*;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import org.keycloak.admin.client.Keycloak;
@@ -12,9 +13,7 @@ import org.keycloak.admin.client.resource.*;
 import org.keycloak.representations.idm.*;
 import org.keycloak.util.JsonSerialization;
 import org.springframework.util.CollectionUtils;
-import org.thymeleaf.util.ListUtils;
 
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
@@ -124,40 +123,44 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
     }
 
     @Override
-    public UserRepresentation updateUser(String realmId, UpdateAccountRequest userDto) {
-        UserResource userResource = getUserResource(realmId, userDto.getUserId());
+    public UserRepresentation updateUser(String realmId, User user, String newPassword, Boolean isTempPassWord) {
+        UserResource userResource = getUserResource(realmId, user.getId());
         // user info
         UserRepresentation userRepresentation = userResource.toRepresentation();
-        userRepresentation.setFirstName(userDto.getFirstName());
-        userRepresentation.setLastName(userDto.getLastName());
-
+        userRepresentation.setFirstName(user.getFirstName());
+        userRepresentation.setLastName(user.getLastName());
+        userRepresentation.setEnabled(user.hasEnabled());
+        userRepresentation.setEmailVerified(user.hasVerifiedEmail());
+        UserProfile  profile  =  user.getUserProfile();
         Map<String, List<String>> attributes = new HashMap<>();
-        if (Objects.nonNull(userDto.getGender())) {
-            Gender gender = userDto.getGender();
-            Gender savingGender =  gender != null ? gender : Gender.Unknown;
-            attributes.put(ACCOUNT_GENDER_FIELD, Collections.singletonList(savingGender.toString()));
-        }
 
-        String phone = userDto.getMobilePhone();
-        if (Objects.nonNull(phone)) {
-            attributes.put(ACCOUNT_PHONE_FIELD, Collections.singletonList(phone));
-        }
+        Gender gender = profile.getGender();
+        Gender savingGender =  gender != null ? gender : Gender.Unknown;
+        attributes.put(ACCOUNT_GENDER_FIELD, Collections.singletonList(savingGender.toString()));
+
+        String phone = profile.getPhone();
+        attributes.put(ACCOUNT_PHONE_FIELD, Collections.singletonList(phone));
+
+        attributes.put(ACCOUNT_HOME_PHONE_FIELD, Collections.singletonList(profile.getHomePhone()));
 
         //update account status
-        userRepresentation.setEnabled(userDto.isEnable());
-        userRepresentation.setEmailVerified(userDto.isVerifiedEmail());
-        attributes.put(ACCOUNT_APPROVAL_FIELD,  Collections.singletonList(Boolean.toString(userDto.isApproved())));
-        attributes.put(ACCOUNT_STATUS_FIELD, Collections.singletonList(userDto.getAccountStatus().toString()));
+        attributes.put(ACCOUNT_STATUS_FIELD, Collections.singletonList(user.getAccountStatus().name()));
+
+        attributes.put(ACCOUNT_APPROVAL_FIELD, Collections.singletonList(Boolean.toString(user.isApproved())));
+
         //update last updated
         attributes.put(ACCOUNT_UPDATED_AT_FLAG_FIELD, Collections.singletonList(Instant.now().toString()));
+
+        attributes.put(ACCOUNT_LANG_KEY_FIELD, Collections.singletonList(user.getLangKey()));
+
         userRepresentation.setAttributes(attributes);
 
         // update password
-        if (Objects.nonNull(userDto.getTempPassword()))  {
+        if (Objects.nonNull(newPassword))  {
             CredentialRepresentation password = new CredentialRepresentation();
-            password.setValue(userDto.getTempPassword());
+            password.setValue(newPassword);
             password.setType(CredentialRepresentation.PASSWORD);
-            password.setTemporary(userDto.isIsTempPassword());
+            password.setTemporary(isTempPassWord);
             userRepresentation.setCredentials(Collections.singletonList(password));
         }
         userResource.update(userRepresentation);
@@ -181,24 +184,16 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
         ur.setEnabled(true);
         Map<String, List<String>> attributes = new HashMap<>();
         attributes.put(ACCOUNT_STATUS_FIELD, Collections.singletonList(AccountStatus.INACTIVE.name()));
-        Gender gender = Gender.Unknown;
-        String phone = "";
-        if (Objects.nonNull(userInfo.getUserProfileDto()))  {
-            UserProfileDTO userProfileDto = userInfo.getUserProfileDto();
-            if (Objects.nonNull(userProfileDto.getGender())) {
-                gender = userProfileDto.getGender();
-            }
-
-            if (Objects.nonNull(userProfileDto.getPhone())) {
-                phone = userProfileDto.getPhone();
-            }
-        }
-
+        Gender gender = userInfo.getGender();
+        String phone = userInfo.getMobilePhone();
         attributes.put(ACCOUNT_GENDER_FIELD, Collections.singletonList(gender.toString()));
         attributes.put(ACCOUNT_PHONE_FIELD, Collections.singletonList(phone));
         attributes.put(ACCOUNT_UPDATED_AT_FLAG_FIELD, Collections.singletonList(Instant.now().toString()));
         attributes.put(ACCOUNT_APPROVAL_FIELD, Collections.singletonList("false"));
+        attributes.put(ACCOUNT_HOME_PHONE_FIELD, Collections.singletonList(userInfo.getHomePhone()));
+        attributes.put(ACCOUNT_LANG_KEY_FIELD, Collections.singletonList(userInfo.getLangKey()));
         ur.setAttributes(attributes);
+
         CredentialRepresentation password = new CredentialRepresentation();
         password.setValue(userInfo.getTempPassword());
         password.setType(CredentialRepresentation.PASSWORD);
@@ -452,7 +447,6 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
         userDto.setEnabled(userRepresentation.isEnabled());
 
         List<String> accountStatus = nonNull(userRepresentation.getAttributes()) ? userRepresentation.getAttributes().get(ACCOUNT_STATUS_FIELD): new ArrayList<>();
-
         if (!CollectionUtils.isEmpty(accountStatus)) {
             userDto.setAccountStatus(AccountStatus.valueOf(accountStatus.get(0)));
         }

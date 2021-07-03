@@ -41,6 +41,8 @@ public final class Constants {
     public static final String DATE_STANDARD_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     public static final String USER_STATUS_NOT_NULL = "USER_STATUS_NOT_NULL";
     public static final String USER_ADDRESS_NOT_FOUND = "USER_ADDRESS_NOT_FOUND";
+    public static final String ACCOUNT_HOME_PHONE_FIELD = "home_phone";
+    public static final String ACCOUNT_LANG_KEY_FIELD = "lang_key";
 
     private Constants() {}
 }

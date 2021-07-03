@@ -160,15 +160,19 @@ public class UserService {
     }
 
     public static AccountStatus handleAccountStatus(User user) {
-        if (!user.hasEnabled()) {
+        return  getAccountStatus(user.hasEnabled(), user.hasVerifiedEmail(), user.isApproved());
+    }
+
+    public static AccountStatus getAccountStatus(boolean isEnabled, boolean verifiedEmail, boolean isApproved) {
+        if (!isEnabled) {
             return AccountStatus.BANNED;
         }
-        if (!user.hasVerifiedEmail())  {
+        if (!verifiedEmail)  {
             return AccountStatus.INACTIVE;
         }
         //enable and verified email
 
-        if (!user.isApproved()) {
+        if (!isApproved) {
             return AccountStatus.PENDING; // -> waiting approval
         }
         return  AccountStatus.ACTIVE;

@@ -15,5 +15,4 @@ public class UserFullInfoResponse {
 
     private UserProfileDTO userProfileDto;
 
-    private List<UserAddressDTO> userAddressList;
 }

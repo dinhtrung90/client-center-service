@@ -2,6 +2,7 @@ package com.vts.clientcenter.service.keycloak;
 
 
 import com.vts.clientcenter.domain.Authority;
+import com.vts.clientcenter.domain.User;
 import com.vts.clientcenter.domain.enumeration.AccountStatus;
 import com.vts.clientcenter.service.dto.*;
 import org.keycloak.representations.idm.RoleRepresentation;
@@ -42,7 +43,7 @@ public interface KeycloakFacade {
 
     void resetPassword(String realmId, String userId, String password);
 
-    UserRepresentation updateUser(String realmId, UpdateAccountRequest userDto);
+    UserRepresentation updateUser(String realmId, User user, String newPassword, Boolean isTempPassWord);
 
     RoleDetailResponse createWithCompositeRoles(CreateRoleRequest request, String realmName, String clientUUID);
 

@@ -70,23 +70,9 @@ public class AdminAccountResource {
         log.debug("REST request to create User : {}", userDto);
         UserReferenceDto referenceDto = accountService.createUserAccount(userDto);
         return ResponseEntity
-            .created(new URI("/api/cms/users/create" + referenceDto.getUserId()))
+            .created(new URI("/api/cms/account/get" + referenceDto.getUserId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, "ACCOUNT", referenceDto.getUserId().toString()))
             .body(referenceDto);
-    }
-
-    @PostMapping("/account/{userId}/resend-verify-email")
-    public ResponseEntity<ApiResponse> resendVerifyEmail(@PathVariable String userId) throws URISyntaxException {
-        log.debug("REST request to create User : {}", userId);
-        ApiResponse response = accountService.resendVerifyEmail(userId);
-        return ResponseEntity.status(response.getStatusCode()).body(response);
-    }
-
-    @PostMapping("/account/{userId}/reset-password-email")
-    public ResponseEntity<ApiResponse> resetPasswordUser(@PathVariable String userId) throws URISyntaxException {
-        log.debug("REST request to create User : {}", userId);
-        ApiResponse response = accountService.resetPasswordUser(userId);
-        return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
     @GetMapping("/account/get")
@@ -97,6 +83,37 @@ public class AdminAccountResource {
         return new ResponseEntity<>(response.getContent(), headers, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/account", method = RequestMethod.GET)
+    public ResponseEntity<UserFullInfoResponse> getAccount(@RequestParam(name = "userId") String userId) {
+        log.debug("REST request to get account : {}", userId);
+        UserFullInfoResponse payload = accountService.getAccount(userId);
+        return ResponseEntity.ok(payload);
+    }
+
+    @PutMapping("/account/update")
+    public ResponseEntity<UserDTO> updateUser(@RequestBody UpdateAccountRequest userDto) {
+        log.debug("REST request to create User : {}", userDto);
+        UserDTO response = accountService.updateUserInfo(userDto);
+        return ResponseEntity
+            .ok(response);
+    }
+
+    @PostMapping("/account/{userId}/resend-verify-email")
+    public ResponseEntity<ApiResponse> resendVerifyEmail(@PathVariable String userId) {
+        log.debug("REST request to create User : {}", userId);
+        ApiResponse response = accountService.resendVerifyEmail(userId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PostMapping("/account/{userId}/reset-password-email")
+    public ResponseEntity<ApiResponse> resetPasswordUser(@PathVariable String userId) {
+        log.debug("REST request to create User : {}", userId);
+        ApiResponse response = accountService.resetPasswordUser(userId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+
+
     @PostMapping("/account/{userId}/required-actions")
     public ResponseEntity<ApiResponse> createUser(@PathVariable String userId, @RequestBody List<String> actions) throws URISyntaxException {
         log.debug("REST request to set required actions : {}", actions);
@@ -105,29 +122,14 @@ public class AdminAccountResource {
     }
 
     @DeleteMapping("/account/{userId}")
-    public ResponseEntity<ApiResponse> deleteUser(@PathVariable String userId) throws URISyntaxException {
+    public ResponseEntity<ApiResponse> deleteUser(@PathVariable String userId) {
         log.debug("REST request to delete user : {}", userId);
          accountService.removeAccountFromKeycloak(userId);
         return ResponseEntity.noContent().build();
     }
 
-    @RequestMapping(value = "/account", method = RequestMethod.GET)
-    public ResponseEntity<UserFullInfoResponse> getAccount(@RequestParam(name = "userId") String userId) {
-        log.debug("REST request to get account : {}", userId);
-        UserFullInfoResponse payload = accountService.getAccount(userId);
-        return ResponseEntity.ok(payload);
-    }
-
-    @PostMapping("/account/update")
-    public ResponseEntity<UserDTO> updateUser(@RequestBody UpdateAccountRequest userDto) throws URISyntaxException {
-        log.debug("REST request to create User : {}", userDto);
-        UserDTO response = accountService.updateUserInfo(userDto);
-        return ResponseEntity
-           .ok(response);
-    }
-
     @PostMapping("/account/approve/{userId}")
-    public ResponseEntity<UserFullInfoResponse> approvalAccount(@PathVariable String userId) throws URISyntaxException {
+    public ResponseEntity<UserFullInfoResponse> approvalAccount(@PathVariable String userId) {
         log.debug("REST request to create User : {}", userId);
         UserFullInfoResponse response = accountService.approveAccount(userId);
         return ResponseEntity.ok(response);
