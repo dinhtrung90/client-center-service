@@ -92,6 +92,7 @@ public class CacheConfiguration {
             createCache(cm, com.vts.clientcenter.domain.UserProfile.class.getName(), jcacheConfiguration);
             createCache(cm, com.vts.clientcenter.domain.UserAddress.class.getName(), jcacheConfiguration);
             // jhipster-needle-redis-add-entry
+            createCache(cm, com.vts.clientcenter.domain.ClientApp.class.getName(), jcacheConfiguration);
         };
     }
 

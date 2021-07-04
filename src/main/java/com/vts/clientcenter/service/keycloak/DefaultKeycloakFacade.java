@@ -464,6 +464,20 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
         return false;
     }
 
+    @Override
+    public List<ClientRepresentation> getClientRepresentation(String realmId) {
+        ClientsResource clientsResource = findClientsResource(realmId);
+        return clientsResource.findAll().stream()
+            .filter(c -> c.getClientId().endsWith("App"))
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<RoleRepresentation> getClientRoles(String realmName, String clientId) {
+        ClientResource clientResource = getClientResource(realmName, clientId);
+        return clientResource.roles().list();
+    }
+
     public UserResource getUserResource(String realmId, String userId) {
         return findUsersResource(realmId).get(userId);
     }
