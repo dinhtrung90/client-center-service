@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.okta.sdk.resource.user.UserStatus;
 import com.vts.clientcenter.config.Constants;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
@@ -224,6 +221,11 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     public void setApproved(boolean approved) {
         isApproved = approved;
+    }
+
+    public void addAuthorities(List<Authority> assignRoles)  {
+        this.authorities.clear();
+        assignRoles.forEach(this::addAuthority);
     }
 
     @Override

@@ -177,4 +177,13 @@ public class AdminAccountResource {
     }
 
 
+    @PostMapping("/account/{userId}/role/mapping")
+    public ResponseEntity<UserRoleMappingResponse> createRoleMapping(@PathVariable String userId, @Valid @RequestBody UserRoleMappingRequest request) throws URISyntaxException {
+        log.debug("REST request to create UserMapping by criteria: {}", request);
+        UserRoleMappingResponse result = accountService.createUserRoleMapping(userId, request);
+        return ResponseEntity.ok().body(result);
+    }
+
+
+
 }

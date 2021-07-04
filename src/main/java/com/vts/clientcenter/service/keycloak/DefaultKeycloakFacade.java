@@ -2,6 +2,7 @@ package com.vts.clientcenter.service.keycloak;
 
 import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.domain.Authority;
+import com.vts.clientcenter.domain.ClientApp;
 import com.vts.clientcenter.domain.User;
 import com.vts.clientcenter.domain.UserProfile;
 import com.vts.clientcenter.domain.enumeration.AccountStatus;
@@ -476,6 +477,62 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
     public List<RoleRepresentation> getClientRoles(String realmName, String clientId) {
         ClientResource clientResource = getClientResource(realmName, clientId);
         return clientResource.roles().list();
+    }
+
+    @Override
+    public List<Authority> updateUserRoleMapping(String realmName, String userId, List<Authority> assignRoles, List<ClientApp> clientAppList) {
+
+        UserResource userResource = getUserResource(realmName, userId);
+
+        List<RoleRepresentation> existedRolesRes = userResource
+            .roles()
+            .realmLevel()
+            .listEffective()
+            .stream()
+            .filter(r -> r.getName().startsWith("ROLE_"))
+            .collect(Collectors.toList());
+
+        List<RoleRepresentation> roles = getRealmResource(realmName).roles().list();
+
+        List<Authority> notSupportedRoles = assignRoles
+            .stream()
+            .filter(au -> !roles.stream().map(RoleRepresentation::getName).collect(Collectors.toList()).contains(au.getName()))
+            .collect(Collectors.toList());
+
+        if (!CollectionUtils.isEmpty(notSupportedRoles)) {
+            throw new BadRequestAlertException("Roles not supported yet.", "Roles", Constants.ROLE_NOT_MATCH);
+        }
+
+        Set<Authority> newAuthorities = assignRoles
+            .stream()
+            .filter(r -> !existedRolesRes.stream().map(RoleRepresentation::getName).collect(Collectors.toSet()).contains(r.getName()))
+            .collect(Collectors.toSet());
+
+        List<RoleRepresentation> roleRepresentations = newAuthorities
+            .stream()
+            .map(au -> getRealmResource(realmName).roles().get(au.getName()).toRepresentation())
+            .collect(Collectors.toList());
+
+        userResource.roles().realmLevel().add(roleRepresentations);
+
+        List<Authority> effectiveRoles = userResource.roles().realmLevel().listEffective()
+            .stream()
+            .map(u -> {
+                Authority authority = new Authority();
+                authority.setName(u.getName());
+                authority.setDescription(u.getDescription());
+                return authority;
+            }).collect(Collectors.toList());
+
+        for (ClientApp clientAppDto : clientAppList) {
+            RoleScopeResource roleScopeResource = userResource.roles().clientLevel(clientAppDto.getId());
+            List<RoleRepresentation> representations = roleScopeResource.listAvailable()
+                .stream().filter(r -> clientAppDto.getAuthorities().contains(r.getName()))
+                .collect(Collectors.toList());
+            roleScopeResource.add(representations);
+        }
+
+        return effectiveRoles;
     }
 
     public UserResource getUserResource(String realmId, String userId) {

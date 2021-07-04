@@ -2,6 +2,7 @@ package com.vts.clientcenter.service.keycloak;
 
 
 import com.vts.clientcenter.domain.Authority;
+import com.vts.clientcenter.domain.ClientApp;
 import com.vts.clientcenter.domain.User;
 import com.vts.clientcenter.domain.enumeration.AccountStatus;
 import com.vts.clientcenter.service.dto.*;
@@ -57,4 +58,6 @@ public interface KeycloakFacade {
     List<ClientRepresentation> getClientRepresentation(String realmId);
 
     List<RoleRepresentation> getClientRoles(String realmName, String clientId);
+
+    List<Authority> updateUserRoleMapping(String realmName, String userId, List<Authority> assignRoles, List<ClientApp> clientAppList);
 }

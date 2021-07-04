@@ -2,24 +2,20 @@ package com.vts.clientcenter.service;
 
 import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.config.KeycloakConfig;
-import com.vts.clientcenter.domain.Authority;
-import com.vts.clientcenter.domain.User;
-import com.vts.clientcenter.domain.UserAddress;
-import com.vts.clientcenter.domain.UserProfile;
+import com.vts.clientcenter.domain.*;
 import com.vts.clientcenter.domain.enumeration.AccountStatus;
 import com.vts.clientcenter.domain.enumeration.ActionsEmail;
 import com.vts.clientcenter.events.UserCreatedEvent;
-import com.vts.clientcenter.repository.AuthorityRepository;
-import com.vts.clientcenter.repository.UserAddressRepository;
-import com.vts.clientcenter.repository.UserProfileRepository;
-import com.vts.clientcenter.repository.UserRepository;
+import com.vts.clientcenter.repository.*;
 import com.vts.clientcenter.security.SecurityUtils;
 import com.vts.clientcenter.service.dto.*;
 import com.vts.clientcenter.service.keycloak.KeycloakFacade;
+import com.vts.clientcenter.service.mapper.ClientAppMapper;
 import com.vts.clientcenter.service.mapper.UserAddressMapper;
 import com.vts.clientcenter.service.mapper.UserMapper;
 import com.vts.clientcenter.service.mapper.UserProfileMapper;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
+import org.mapstruct.ap.internal.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +27,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import javax.ws.rs.ClientErrorException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.vts.clientcenter.config.Constants.*;
@@ -86,6 +80,12 @@ public class AccountService {
 
     @Autowired
     private UserAddressRepository userAddressRepository;
+
+    @Autowired
+    private ClientAppMapper clientAppMapper;
+
+    @Autowired
+    private ClientAppRepository clientAppRepository;
 
     @Transactional
     public UserReferenceDto createUserAccount(CreateAccountRequest request) {
@@ -441,5 +441,40 @@ public class AccountService {
         User user = validateUserId(userId);
         userAddressRepository.deleteById(addressId);
         this.clearUserCaches(user);
+    }
+
+    @Transactional
+    public UserRoleMappingResponse createUserRoleMapping(String userId, UserRoleMappingRequest request) {
+
+        User user = validateUserId(userId);
+
+        List<Authority> assignRoles = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(request.getAssignRoles())) {
+            assignRoles = new ArrayList<>(authorityRepository.findAllByNameIn(request.getAssignRoles()));
+        }
+
+        List<Authority> clientRoles = new ArrayList<>();
+        List<ClientApp> clientApps = clientAppMapper.toEntity(request.getAccessibleApps());
+        if (!CollectionUtils.isEmpty(clientApps)) {
+            for (ClientApp clientApp : clientApps) {
+                ClientApp clientObject = clientAppRepository.fetchById(clientApp.getId());
+                clientRoles.addAll(clientObject.getAuthorities());
+            }
+        }
+
+        List<Authority> effectiveRoles = keycloakFacade.updateUserRoleMapping( setting.getRealmApp(), userId, assignRoles, clientApps);
+
+        List<Authority> effectiveTotal = Collections.join(effectiveRoles, clientRoles);
+
+        //local roles
+        List<Authority> authorities = effectiveTotal.stream().filter(r -> r.getName().startsWith("ROLE_")).collect(Collectors.toList());
+        user.addAuthorities(authorities);
+
+        userRepository.save(user);
+
+        return UserRoleMappingResponse.builder()
+            .userId(userId)
+            .effectiveRoles(authorities.stream().map(Authority::getName).collect(Collectors.toList()))
+            .build();
     }
 }
