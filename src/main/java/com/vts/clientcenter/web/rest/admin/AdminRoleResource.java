@@ -2,6 +2,7 @@ package com.vts.clientcenter.web.rest.admin;
 
 import com.vts.clientcenter.domain.Authority;
 import com.vts.clientcenter.service.AuthorityService;
+import com.vts.clientcenter.service.PermissionDetailDto;
 import com.vts.clientcenter.service.dto.*;
 import io.github.jhipster.web.util.HeaderUtil;
 import io.github.jhipster.web.util.PaginationUtil;
@@ -76,4 +77,9 @@ public class AdminRoleResource {
         return new ResponseEntity<>(response.getContent(), headers, HttpStatus.OK);
     }
 
+    @GetMapping("/role/permissions/get")
+    public ResponseEntity<List<PermissionDetailDto>> getPermissions() {
+        List<PermissionDetailDto> response = authorityService.getAllPermissions();
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }

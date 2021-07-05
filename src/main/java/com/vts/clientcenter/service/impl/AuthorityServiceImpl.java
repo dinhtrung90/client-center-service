@@ -2,11 +2,14 @@ package com.vts.clientcenter.service.impl;
 
 import com.vts.clientcenter.config.KeycloakConfig;
 import com.vts.clientcenter.domain.Authority;
+import com.vts.clientcenter.domain.Module;
 import com.vts.clientcenter.domain.Permission;
 import com.vts.clientcenter.repository.AuthorityRepository;
+import com.vts.clientcenter.repository.ModuleRepository;
 import com.vts.clientcenter.security.SecurityUtils;
 import com.vts.clientcenter.service.AbstractBaseService;
 import com.vts.clientcenter.service.AuthorityService;
+import com.vts.clientcenter.service.PermissionDetailDto;
 import com.vts.clientcenter.service.UserService;
 import com.vts.clientcenter.service.dto.AuthorityDto;
 import com.vts.clientcenter.service.dto.CreateRoleRequest;
@@ -21,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +54,9 @@ public class AuthorityServiceImpl extends AbstractBaseService implements Authori
 
     @Autowired
     private PermissionMapper permissionMapper;
+
+    @Autowired
+    private ModuleRepository moduleRepository;
 
     public AuthorityServiceImpl(UserService userService) {
         super(userService);
@@ -133,6 +140,33 @@ public class AuthorityServiceImpl extends AbstractBaseService implements Authori
         authority.addPermission(new HashSet<>(permissions));
         authorityRepository.save(authority);
 
-
     }
+
+    @Override
+    public List<PermissionDetailDto> getAllPermissions() {
+
+        List<Module> modules = moduleRepository.findAll();
+        List<String> operations = Arrays.asList("Read", "Update", "Delete", "Create");
+        List<PermissionDetailDto> permissions = modules.stream()
+            .flatMap(u ->
+            {
+                String permission = "ROLE_PERMISSION_" + u.getName().toUpperCase() + "_";
+                return operations.stream().map(o -> {
+                    PermissionDetailDto detailDto = new PermissionDetailDto();
+                    detailDto.setName(permission + o.toUpperCase());
+                    detailDto.setDesc(o + " " + u.getName() + " " + "Permission");
+                    return detailDto;
+                });
+            }).collect(Collectors.toList());
+
+        syncPermissionsToKeycloak(permissions);
+
+        return permissions;
+    }
+
+    @Async
+    void syncPermissionsToKeycloak(List<PermissionDetailDto> permissions) {
+        keycloakFacade.syncPermissionForClient(setting.getRealmApp(), setting.getClientUUID(), permissions);
+    }
+
 }

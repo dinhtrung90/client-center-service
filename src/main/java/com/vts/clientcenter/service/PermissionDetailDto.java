@@ -12,15 +12,9 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class PermissionDetailDto {
-    private Long id;
 
-    @NotNull
-    private String permissionName;
+    private String name;
 
-    @NotNull
-    private Long permissionId;
+    private String desc;
 
-    private String permissionDesc;
-
-    private List<OperationEnum> operations;
 }

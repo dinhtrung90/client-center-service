@@ -7,6 +7,7 @@ import com.vts.clientcenter.domain.User;
 import com.vts.clientcenter.domain.UserProfile;
 import com.vts.clientcenter.domain.enumeration.AccountStatus;
 import com.vts.clientcenter.domain.enumeration.Gender;
+import com.vts.clientcenter.service.PermissionDetailDto;
 import com.vts.clientcenter.service.dto.*;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import org.keycloak.admin.client.Keycloak;
@@ -536,6 +537,23 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
         }
 
         return effectiveRoles;
+    }
+
+    @Override
+    public void syncPermissionForClient(String realmName, String clientId, List<PermissionDetailDto> permissions) {
+        ClientResource clientResource = getClientResource(realmName, clientId);
+        boolean allMatch = clientResource.roles().list().stream()
+            .allMatch(p -> permissions.stream().map(PermissionDetailDto::getName).collect(Collectors.toList()).contains(p.getName()));
+
+        if (allMatch) {
+            return;
+        }
+        for (PermissionDetailDto permission : permissions) {
+            RoleRepresentation roleRepresentation = new RoleRepresentation();
+            roleRepresentation.setName(permission.getName());
+            roleRepresentation.setDescription(permission.getDesc());
+            clientResource.roles().create(roleRepresentation);
+        }
     }
 
     public UserResource getUserResource(String realmId, String userId) {

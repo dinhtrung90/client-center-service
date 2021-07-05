@@ -5,6 +5,7 @@ import com.vts.clientcenter.domain.Authority;
 import com.vts.clientcenter.domain.ClientApp;
 import com.vts.clientcenter.domain.User;
 import com.vts.clientcenter.domain.enumeration.AccountStatus;
+import com.vts.clientcenter.service.PermissionDetailDto;
 import com.vts.clientcenter.service.dto.*;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
@@ -60,4 +61,6 @@ public interface KeycloakFacade {
     List<RoleRepresentation> getClientRoles(String realmName, String clientId);
 
     List<Authority> updateUserRoleMapping(String realmName, String userId, List<Authority> assignRoles, List<ClientApp> clientAppList);
+
+    void syncPermissionForClient(String realmName, String clientId, List<PermissionDetailDto> permissions);
 }
