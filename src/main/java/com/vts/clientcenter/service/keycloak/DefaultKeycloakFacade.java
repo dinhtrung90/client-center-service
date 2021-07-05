@@ -542,8 +542,8 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
     @Override
     public void syncPermissionForClient(String realmName, String clientId, List<PermissionDetailDto> permissions) {
         ClientResource clientResource = getClientResource(realmName, clientId);
-        boolean allMatch = clientResource.roles().list().stream()
-            .allMatch(p -> permissions.stream().map(PermissionDetailDto::getName).collect(Collectors.toList()).contains(p.getName()));
+        boolean allMatch = permissions.stream()
+            .allMatch(p -> clientResource.roles().list().stream().map(RoleRepresentation::getName).collect(Collectors.toList()).contains(p.getName()));
 
         if (allMatch) {
             return;
