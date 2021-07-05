@@ -114,10 +114,6 @@ public class AccountService {
         user.setHasVerifiedEmail(false);
         user.setHasEnabled(true);
         user.setApproved(false);
-        user.setCreatedDate(Instant.now());
-        user.setCreatedBy(userLogin);
-        user.setLastModifiedDate(Instant.now());
-        user.setLastModifiedBy(userLogin);
         user.setLangKey(request.getLangKey() != null ? request.getLangKey() : DEFAULT_LANGUAGE);
 
         applicationEventPublisher.publishEvent(new UserCreatedEvent(user));
@@ -128,10 +124,6 @@ public class AccountService {
         profile.setPhone(request.getMobilePhone());
         profile.setBirthDate(request.getBirthDate().toInstant());
         profile.setGender(request.getGender());
-        profile.setCreatedBy(userLogin);
-        profile.setCreatedDate(Instant.now());
-        profile.setLastModifiedBy(userLogin);
-        profile.setLastModifiedDate(Instant.now());
         profile.setUser(user);
         user.setUserProfile(profile);
         userProfileRepository.save(profile);
@@ -471,10 +463,22 @@ public class AccountService {
         user.addAuthorities(authorities);
 
         userRepository.save(user);
-
+        this.clearUserCaches(user);
         return UserRoleMappingResponse.builder()
             .userId(userId)
             .effectiveRoles(authorities.stream().map(Authority::getName).collect(Collectors.toList()))
             .build();
+    }
+
+    public void terminateAccount(String userId, boolean isTerminated) {
+        User user = validateUserId(userId);
+        user.setTerminated(isTerminated);
+        user.setHasEnabled(!isTerminated);
+        AccountStatus accountStatus = UserService.handleAccountStatus(user);
+        user.setAccountStatus(accountStatus);
+        keycloakFacade.updateUser(setting.getRealmApp(), user, null, false);
+        userRepository.save(user);
+        this.clearUserCaches(user);
+        //TODO: send notifications
     }
 }

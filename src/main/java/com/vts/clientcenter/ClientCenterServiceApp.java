@@ -1,6 +1,7 @@
 package com.vts.clientcenter;
 
 import com.vts.clientcenter.config.ApplicationProperties;
+import com.vts.clientcenter.security.SpringSecurityAuditorAware;
 import io.github.jhipster.config.DefaultProfileUtil;
 import io.github.jhipster.config.JHipsterConstants;
 import java.net.InetAddress;
@@ -16,7 +17,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -62,6 +65,8 @@ public class ClientCenterServiceApp {
             );
         }
     }
+
+
 
     /**
      * Main method, used to run the application.

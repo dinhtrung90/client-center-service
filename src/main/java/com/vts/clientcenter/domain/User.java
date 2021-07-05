@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
  * A user.
@@ -23,7 +24,8 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 @Entity
 @Table(name = "jhi_user")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class User extends AbstractAuditingEntity implements Serializable {
+@EntityListeners(AuditingEntityListener.class)
+public class User extends AbstractAuditingEntity {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -81,6 +83,9 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     @Column(name = "is_approved")
     private boolean isApproved;
+
+    @Column(name = "is_terminated")
+    private boolean isTerminated;
 
     public String getId() {
         return id;
@@ -226,6 +231,14 @@ public class User extends AbstractAuditingEntity implements Serializable {
     public void addAuthorities(List<Authority> assignRoles)  {
         this.authorities.clear();
         assignRoles.forEach(this::addAuthority);
+    }
+
+    public boolean isTerminated() {
+        return isTerminated;
+    }
+
+    public void setTerminated(boolean terminated) {
+        isTerminated = terminated;
     }
 
     @Override

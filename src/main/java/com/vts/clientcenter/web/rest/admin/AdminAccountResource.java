@@ -184,6 +184,12 @@ public class AdminAccountResource {
         return ResponseEntity.ok().body(result);
     }
 
+    @PostMapping("/account/{userId}/terminated/{isTerminated}")
+    public ResponseEntity<Void> terminateAccount(@PathVariable String userId, @PathVariable String isTerminated) throws URISyntaxException {
+        log.debug("REST request to terminate account by userId : {}", userId);
+        accountService.terminateAccount(userId, Boolean.parseBoolean(isTerminated));
+        return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, userId)).build();
+    }
 
 
 }

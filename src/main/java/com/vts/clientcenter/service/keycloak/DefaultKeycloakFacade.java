@@ -154,6 +154,8 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
 
         attributes.put(ACCOUNT_LANG_KEY_FIELD, Collections.singletonList(user.getLangKey()));
 
+        attributes.put(ACCOUNT_IS_TERMINATED_FIELD, Collections.singletonList(Boolean.toString(user.isTerminated())));
+
         userRepresentation.setAttributes(attributes);
 
         // update password
@@ -193,6 +195,7 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
         attributes.put(ACCOUNT_APPROVAL_FIELD, Collections.singletonList("false"));
         attributes.put(ACCOUNT_HOME_PHONE_FIELD, Collections.singletonList(userInfo.getHomePhone()));
         attributes.put(ACCOUNT_LANG_KEY_FIELD, Collections.singletonList(userInfo.getLangKey()));
+        attributes.put(ACCOUNT_IS_TERMINATED_FIELD, Collections.singletonList(Boolean.toString(false)));
         ur.setAttributes(attributes);
 
         CredentialRepresentation password = new CredentialRepresentation();

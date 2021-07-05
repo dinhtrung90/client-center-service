@@ -43,6 +43,7 @@ public final class Constants {
     public static final String USER_ADDRESS_NOT_FOUND = "USER_ADDRESS_NOT_FOUND";
     public static final String ACCOUNT_HOME_PHONE_FIELD = "home_phone";
     public static final String ACCOUNT_LANG_KEY_FIELD = "lang_key";
+    public static final String ACCOUNT_IS_TERMINATED_FIELD = "is_terminated";
 
     private Constants() {}
 }
