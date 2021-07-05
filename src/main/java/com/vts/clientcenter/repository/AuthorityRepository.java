@@ -4,6 +4,9 @@ import com.vts.clientcenter.domain.Authority;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
@@ -15,4 +18,6 @@ public interface AuthorityRepository extends JpaRepository<Authority, String>, J
     Optional<Authority> findByName(String roleName);
 
     Set<Authority> findAllByNameIn(List<String> roleNames);
+
+    Page<Authority> getAllByNameIsNotContainingAndNameStartingWith(String access, String role, Pageable pageable);
 }
