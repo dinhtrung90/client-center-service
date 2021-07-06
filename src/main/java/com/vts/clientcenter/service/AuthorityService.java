@@ -15,4 +15,6 @@ public interface AuthorityService {
     RoleDetailResponse save(CreateRoleRequest dto);
 
     List<PermissionDetailDto> getAllPermissions();
+
+    RoleDetailResponse getByRoleName(String roleName);
 }

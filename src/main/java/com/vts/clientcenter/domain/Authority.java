@@ -3,9 +3,7 @@ package com.vts.clientcenter.domain;
 import java.awt.print.Book;
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -44,14 +42,14 @@ public class Authority extends AbstractAuditingEntity {
         return name;
     }
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "tv_role_permission",
         joinColumns = { @JoinColumn(name = "role_name") },
         inverseJoinColumns = { @JoinColumn(name = "permission_id") })
     public Set<Permission> permissions = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {})
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "tv_composite_role", joinColumns = @JoinColumn(name = "composite"), inverseJoinColumns = @JoinColumn(name = "child_role"))
     private Set<Authority> compositeRoles = new HashSet<>();
 
@@ -70,15 +68,26 @@ public class Authority extends AbstractAuditingEntity {
     }
 
     public void addPermission(Set<Permission> permissions) {
-        if (!CollectionUtils.isEmpty(permissions)) {
-            this.permissions.clear();
-        }
-        permissions.forEach(u  -> addPermission(u));
+        this.permissions.clear();
+        permissions.forEach(this::addPermission);
     }
 
     public void addPermission(Permission permission) {
         this.permissions.add(permission);
+        if (CollectionUtils.isEmpty(permission.getAuthorities())) {
+            permission.setAuthorities(new HashSet<>());
+        }
         permission.getAuthorities().add(this);
+    }
+
+    public void removePermissions() {
+        Iterator<Permission> iterator = this.permissions.iterator();
+
+        while (iterator.hasNext()) {
+            Permission permission = iterator.next();
+            permission.getAuthorities().remove(this);
+            iterator.remove();
+        }
     }
 
 

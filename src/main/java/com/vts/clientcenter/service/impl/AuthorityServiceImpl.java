@@ -1,5 +1,6 @@
 package com.vts.clientcenter.service.impl;
 
+import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.config.KeycloakConfig;
 import com.vts.clientcenter.domain.Authority;
 import com.vts.clientcenter.domain.Module;
@@ -19,6 +20,7 @@ import com.vts.clientcenter.service.keycloak.KeycloakFacade;
 import com.vts.clientcenter.service.mapper.AuthorityMapper;
 import com.vts.clientcenter.service.mapper.PermissionMapper;
 import com.vts.clientcenter.service.mapper.PermissionMapperImpl;
+import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import org.mapstruct.ap.internal.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -27,6 +29,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
 import java.util.*;
@@ -75,42 +78,43 @@ public class AuthorityServiceImpl extends AbstractBaseService implements Authori
     @Override
     public RoleDetailResponse save(CreateRoleRequest dto) {
 
-        String currentUserLogin = SecurityUtils.getCurrentUserLogin().orElse(SYSTEM_ACCOUNT);
-
         Optional<Authority> authorityOptional = authorityRepository.findById(dto.getRoleName());
 
         if (!authorityOptional.isPresent()) {
-            handleCreateRole(dto, currentUserLogin);
+            handleCreateRole(dto);
         } else {
-            handleUpdateRole(dto, currentUserLogin, authorityOptional.get());
+            handleUpdateRole(dto, authorityOptional.get());
         }
+
+        Authority newAuthority = authorityRepository.getOne(dto.getRoleName());
+
+        List<PermissionDetailDto> permissionDetailDto = getPermissionDetailDto(newAuthority);
 
         return RoleDetailResponse
             .builder()
+            .success(true)
+            .isCompositeRole(!CollectionUtils.isEmpty(newAuthority.getCompositeRoles()))
+            .roleName(newAuthority.getName())
+            .description(newAuthority.getDescription())
             .effectiveRoles(dto.getEffectiveRoles())
-            .availablePrivileges(permissionMapper.toDto(new ArrayList<>(authorityRepository.getOne(dto.getRoleName()).getPermissions())))
+            .availablePrivileges(permissionDetailDto)
             .build();
     }
 
-    private void handleCreateRole(CreateRoleRequest dto, String createdBy) {
+    private void handleCreateRole(CreateRoleRequest dto) {
 
         Authority authority = new Authority();
         authority.setName(dto.getRoleName());
         authority.setDescription(dto.getDescription());
-        authority.setCreatedBy(createdBy);
-        authority.setLastModifiedBy(createdBy);
-        authority.setLastModifiedDate(Instant.now());
 
         Set<Authority> authorities = dto.getEffectiveRoles()
             .stream()
             .map(u -> authorityRepository.getOne(u))
             .collect(Collectors.toSet());
 
-        authority.setCompositeRoles(authorities);
+        authority.addCompositeRoles(authorities);
 
-        List<PermissionDTO> availablePrivileges = dto.getAvailablePrivileges();
-
-        List<Permission> permissions = permissionMapper.toEntity(availablePrivileges);
+        List<Permission> permissions = getPermissionFromCreateRequest(dto);
 
         authority.setPermissions(new HashSet<>(permissions));
 
@@ -120,13 +124,13 @@ public class AuthorityServiceImpl extends AbstractBaseService implements Authori
 
     }
 
-    private void handleUpdateRole(CreateRoleRequest dto, String updateBy, Authority authority) {
+    private void handleUpdateRole(CreateRoleRequest dto, Authority authority) {
 
-        authority.setDescription(dto.getDescription());
-        authority.setLastModifiedBy(updateBy);
-        authority.setLastModifiedDate(Instant.now());
+        validateAuthority(dto.getRoleName());
 
         keycloakFacade.updateRole(authority.getName(), setting.getRealmApp(), authority);
+
+        authority.setDescription(dto.getDescription());
 
         Set<Authority> authorities = dto.getEffectiveRoles().stream()
             .map(u -> authorityRepository.getOne(u))
@@ -135,11 +139,23 @@ public class AuthorityServiceImpl extends AbstractBaseService implements Authori
 
         keycloakFacade.updateWithCompositeRoles(dto, setting.getRealmApp(), setting.getClientUUID());
 
-        List<PermissionDTO> availablePrivileges = dto.getAvailablePrivileges();
-        List<Permission> permissions = permissionMapper.toEntity(availablePrivileges);
-        authority.addPermission(new HashSet<>(permissions));
-        authorityRepository.save(authority);
+        List<Permission> permissions = getPermissionFromCreateRequest(dto);
 
+        authority.addPermission(new HashSet<>(permissions));
+
+        authorityRepository.save(authority);
+    }
+
+    private List<Permission> getPermissionFromCreateRequest(CreateRoleRequest dto) {
+        List<PermissionDTO> availablePrivileges = dto.getAvailablePrivileges().stream()
+            .filter(PermissionDetailDto::isSelected).map(u ->  {
+                PermissionDTO permissionDTO = new PermissionDTO();
+                permissionDTO.setName(u.getName());
+                permissionDTO.setDescription(u.getDesc());
+                return permissionDTO;
+            }).collect(Collectors.toList());
+
+        return permissionMapper.toEntity(availablePrivileges);
     }
 
     @Override
@@ -169,4 +185,45 @@ public class AuthorityServiceImpl extends AbstractBaseService implements Authori
         keycloakFacade.syncPermissionForClient(setting.getRealmApp(), setting.getClientUUID(), permissions);
     }
 
+    private Authority validateAuthority(String roleName) {
+        Optional<Authority> authorityOptional = authorityRepository.findByName(roleName);
+        if (Objects.isNull(roleName)) {
+            throw new BadRequestAlertException("RoleName is not null.", "RoleName", Constants.ROLE_NAME_NOT_NULL);
+        }
+        if (!authorityOptional.isPresent()) {
+            throw new BadRequestAlertException("Role not found", "Role", Constants.USER_ROLE_NOT_FOUND);
+        }
+
+        return authorityOptional.get();
+    }
+
+    @Override
+    public RoleDetailResponse getByRoleName(String roleName) {
+
+        Authority authority = validateAuthority(roleName);
+
+        Set<Authority> compositeRoles = authority.getCompositeRoles();
+
+        List<PermissionDetailDto> detailDtoList = getPermissionDetailDto(authority);
+
+        return RoleDetailResponse.builder()
+            .roleName(roleName)
+            .description(authority.getDescription())
+            .success(true)
+            .isCompositeRole(!compositeRoles.isEmpty())
+            .availablePrivileges(detailDtoList)
+            .effectiveRoles(compositeRoles.stream().map(Authority::getName).collect(Collectors.toList()))
+            .build();
+    }
+
+    private List<PermissionDetailDto> getPermissionDetailDto(Authority authority) {
+        Set<String> permissions = authority.getPermissions()
+            .stream().map(Permission::getName).collect(Collectors.toSet());
+
+        List<PermissionDetailDto> allPermissions = getAllPermissions();
+
+        return allPermissions.stream().peek(permissionDetailDto -> {
+            permissionDetailDto.setSelected(permissions.contains(permissionDetailDto.getName()));
+        }).collect(Collectors.toList());
+    }
 }

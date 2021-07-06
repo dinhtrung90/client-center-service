@@ -1,5 +1,6 @@
 package com.vts.clientcenter.service.dto;
 
+import com.vts.clientcenter.service.PermissionDetailDto;
 import lombok.*;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class RoleDetailResponse {
 
     private List<String> effectiveRoles;
 
-    private List<PermissionDTO> availablePrivileges;
+    private List<PermissionDetailDto> availablePrivileges;
 
     private boolean success;
 }

@@ -17,4 +17,5 @@ public class PermissionDetailDto {
 
     private String desc;
 
+    private boolean isSelected;
 }

@@ -82,4 +82,18 @@ public class AdminRoleResource {
         List<PermissionDetailDto> response = authorityService.getAllPermissions();
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+    @GetMapping("/role/getBy")
+    public ResponseEntity<RoleDetailResponse> getRoleDetail(@RequestParam("name") String roleName) {
+        RoleDetailResponse response = authorityService.getByRoleName(roleName);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PutMapping("/role/update")
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN')")
+    public ResponseEntity<RoleDetailResponse> updateRole(@Valid @RequestBody CreateRoleRequest dto) throws URISyntaxException {
+        log.debug("REST request to update RoleRequest : {}", dto);
+        RoleDetailResponse authorityDto = authorityService.save(dto);
+        return ResponseEntity.ok(authorityDto);
+    }
 }

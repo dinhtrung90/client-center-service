@@ -13,14 +13,6 @@ public class PermissionDTO implements Serializable {
     @NotNull
     private String name;
 
-    private Instant createdDate;
-
-    private Instant lastModifiedDate;
-
-    private String createdBy;
-
-    private String lastModifiedBy;
-
     private String description;
 
     public Long getId() {
@@ -37,38 +29,6 @@ public class PermissionDTO implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Instant getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(Instant createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public Instant getLastModifiedDate() {
-        return lastModifiedDate;
-    }
-
-    public void setLastModifiedDate(Instant lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public String getLastModifiedBy() {
-        return lastModifiedBy;
-    }
-
-    public void setLastModifiedBy(String lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
     }
 
     public String getDescription() {
@@ -102,10 +62,7 @@ public class PermissionDTO implements Serializable {
         return "PermissionDTO{" +
             "id=" + getId() +
             ", name='" + getName() + "'" +
-            ", createdDate='" + getCreatedDate() + "'" +
-            ", lastModifiedDate='" + getLastModifiedDate() + "'" +
-            ", createdBy='" + getCreatedBy() + "'" +
-            ", lastModifiedBy='" + getLastModifiedBy() + "'" +
+            ", description='" + getDescription() + "'" +
             "}";
     }
 }
