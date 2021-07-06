@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 
 /**
  * Spring Data JPA repository for the {@link Authority} entity.
@@ -19,5 +20,5 @@ public interface AuthorityRepository extends JpaRepository<Authority, String>, J
 
     Set<Authority> findAllByNameIn(List<String> roleNames);
 
-    Page<Authority> getAllByNameIsNotContainingAndNameStartingWith(String access, String role, Pageable pageable);
+    Page<Authority> getAllByNameStartingWithAndNameIsNotContainingAndNameIsNotContaining(String role, String access, String permission ,Pageable pageable);
 }

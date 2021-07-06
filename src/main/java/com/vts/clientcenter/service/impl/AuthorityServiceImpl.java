@@ -66,7 +66,7 @@ public class AuthorityServiceImpl extends AbstractBaseService implements Authori
     @Override
     public Page<AuthorityDto> getAuthorities(Pageable pageable) {
 
-        Page<Authority> allAuthorities = authorityRepository.getAllByNameIsNotContainingAndNameStartingWith("_ACCESS", "ROLE_", pageable);
+        Page<Authority> allAuthorities = authorityRepository.getAllByNameStartingWithAndNameIsNotContainingAndNameIsNotContaining(   "ROLE_", "_ACCESS", "ROLE_PERMISSION_", pageable);
 
         return allAuthorities.map(u -> authorityMapper.authorityToDto(u));
     }
