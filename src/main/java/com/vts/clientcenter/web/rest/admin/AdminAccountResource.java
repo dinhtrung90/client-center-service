@@ -52,7 +52,7 @@ import static org.hibernate.id.IdentifierGenerator.ENTITY_NAME;
  */
 @RestController
 @RequestMapping("/api/cms")
-@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
+@PreAuthorize("denyAll()")
 public class AdminAccountResource {
     private final Logger log = LoggerFactory.getLogger(AdminAccountResource.class);
 
