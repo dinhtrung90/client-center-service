@@ -66,6 +66,7 @@ public class AdminAccountResource {
     }
 
     @PostMapping("/account/create")
+    @PreAuthorize("hasPermission('Account', 'Create')")
     public ResponseEntity<UserReferenceDto> createUser(@RequestBody CreateAccountRequest userDto) throws URISyntaxException {
         log.debug("REST request to create User : {}", userDto);
         UserReferenceDto referenceDto = accountService.createUserAccount(userDto);
@@ -76,6 +77,7 @@ public class AdminAccountResource {
     }
 
     @GetMapping("/account/get")
+    @PreAuthorize("hasPermission('Account', 'Read')")
     public ResponseEntity<List<UserDTO>> getAllAccountInSystem(UserCriteria criteria, Pageable pageable) {
         log.debug("REST request to get accounts by criteria: {}", criteria);
         Page<UserDTO> response = accountService.getAccounts(criteria, pageable);
@@ -84,6 +86,7 @@ public class AdminAccountResource {
     }
 
     @RequestMapping(value = "/account", method = RequestMethod.GET)
+    @PreAuthorize("hasPermission('Account', 'Read')")
     public ResponseEntity<UserFullInfoResponse> getAccount(@RequestParam(name = "userId") String userId) {
         log.debug("REST request to get account : {}", userId);
         UserFullInfoResponse payload = accountService.getAccount(userId);
@@ -91,6 +94,7 @@ public class AdminAccountResource {
     }
 
     @PutMapping("/account/update")
+    @PreAuthorize("hasPermission('Account', 'Update')")
     public ResponseEntity<UserDTO> updateUser(@RequestBody UpdateAccountRequest userDto) {
         log.debug("REST request to create User : {}", userDto);
         UserDTO response = accountService.updateUserInfo(userDto);
@@ -99,6 +103,7 @@ public class AdminAccountResource {
     }
 
     @PostMapping("/account/{userId}/resend-verify-email")
+    @PreAuthorize("hasPermission('Account', 'Update')")
     public ResponseEntity<ApiResponse> resendVerifyEmail(@PathVariable String userId) {
         log.debug("REST request to create User : {}", userId);
         ApiResponse response = accountService.resendVerifyEmail(userId);
@@ -106,6 +111,7 @@ public class AdminAccountResource {
     }
 
     @PostMapping("/account/{userId}/reset-password-email")
+    @PreAuthorize("hasPermission('Account', 'Update')")
     public ResponseEntity<ApiResponse> resetPasswordUser(@PathVariable String userId) {
         log.debug("REST request to create User : {}", userId);
         ApiResponse response = accountService.resetPasswordUser(userId);
@@ -115,6 +121,7 @@ public class AdminAccountResource {
 
 
     @PostMapping("/account/{userId}/required-actions")
+    @PreAuthorize("hasPermission('Account', 'Update')")
     public ResponseEntity<ApiResponse> createUser(@PathVariable String userId, @RequestBody List<String> actions) throws URISyntaxException {
         log.debug("REST request to set required actions : {}", actions);
         ApiResponse response = accountService.setRequiredActions(userId, actions);
@@ -122,6 +129,7 @@ public class AdminAccountResource {
     }
 
     @DeleteMapping("/account/{userId}")
+    @PreAuthorize("hasPermission('Account', 'Delete')")
     public ResponseEntity<ApiResponse> deleteUser(@PathVariable String userId) {
         log.debug("REST request to delete user : {}", userId);
          accountService.removeAccountFromKeycloak(userId);
@@ -136,6 +144,7 @@ public class AdminAccountResource {
     }
 
     @GetMapping("/account/{userId}/address")
+    @PreAuthorize("hasPermission('Account', 'Read')")
     public ResponseEntity<List<UserAddressDTO>> getAllUserAddresses(@PathVariable String userId, Pageable pageable) {
         log.debug("REST request to get UserAddresses by criteria: {}", userId);
         Page<UserAddressDTO> page = accountService.getAddressesByUserId(userId, pageable);
@@ -144,6 +153,7 @@ public class AdminAccountResource {
     }
 
     @PostMapping("/account/{userId}/address/create")
+    @PreAuthorize("hasPermission('Account', 'Create')")
     public ResponseEntity<UserAddressDTO> postAddress(@PathVariable String userId, @Valid @RequestBody UserAddressDTO addressDTO) throws URISyntaxException {
         log.debug("REST request to create UserAddresses by criteria: {}", userId);
         addressDTO.setUserId(userId);
@@ -154,6 +164,7 @@ public class AdminAccountResource {
     }
 
     @PutMapping("/account/{userId}/address/update")
+    @PreAuthorize("hasPermission('Account', 'Update')")
     public ResponseEntity<UserAddressDTO> updateUserAddress(@PathVariable String userId, @Valid @RequestBody UserAddressDTO addressDTO) throws URISyntaxException {
         log.debug("REST request to create UserAddresses by criteria: {}", userId);
         UserAddressDTO result = accountService.updateUserAddress(userId, addressDTO);
@@ -163,6 +174,7 @@ public class AdminAccountResource {
     }
 
     @GetMapping("/account/{userId}/address/get/{addressId}")
+    @PreAuthorize("hasPermission('Account', 'Read')")
     public ResponseEntity<UserAddressDTO> getUserAddress(@PathVariable String userId, @PathVariable Long addressId) throws URISyntaxException {
         log.debug("REST request to get UserAddresses by criteria: {}", addressId);
         Optional<UserAddressDTO> result = accountService.getUserAddress(userId, addressId);
@@ -170,6 +182,7 @@ public class AdminAccountResource {
     }
 
     @DeleteMapping("/account/{userId}/address/delete/{addressId}")
+    @PreAuthorize("hasPermission('Account', 'Delete')")
     public ResponseEntity<Void> deleteUserAddress(@PathVariable String userId, @PathVariable Long addressId) throws URISyntaxException {
         log.debug("REST request to get UserAddresses by criteria: {}", addressId);
         accountService.deleteUserAddress(userId, addressId);
@@ -178,6 +191,7 @@ public class AdminAccountResource {
 
 
     @PostMapping("/account/{userId}/role/mapping")
+    @PreAuthorize("hasPermission('Account', 'Update')")
     public ResponseEntity<UserRoleMappingResponse> createRoleMapping(@PathVariable String userId, @Valid @RequestBody UserRoleMappingRequest request) throws URISyntaxException {
         log.debug("REST request to create UserMapping by criteria: {}", request);
         UserRoleMappingResponse result = accountService.createUserRoleMapping(userId, request);
@@ -185,6 +199,7 @@ public class AdminAccountResource {
     }
 
     @PostMapping("/account/{userId}/terminated/{isTerminated}")
+    @PreAuthorize("hasPermission('Account', 'Update')")
     public ResponseEntity<Void> terminateAccount(@PathVariable String userId, @PathVariable String isTerminated) throws URISyntaxException {
         log.debug("REST request to terminate account by userId : {}", userId);
         accountService.terminateAccount(userId, Boolean.parseBoolean(isTerminated));

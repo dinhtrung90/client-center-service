@@ -3,6 +3,7 @@ package com.vts.clientcenter.security.oauth2;
 import com.vts.clientcenter.repository.UserRepository;
 import com.vts.clientcenter.security.SecurityUtils;
 import java.util.Collection;
+import java.util.List;
 
 import com.vts.clientcenter.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,9 @@ public class JwtGrantedAuthorityConverter implements Converter<Jwt, Collection<G
     @Override
     public Collection<GrantedAuthority> convert(Jwt jwt) {
 
-        return SecurityUtils.extractAuthorityFromClaims(jwt.getClaims());
+
+        List<GrantedAuthority> grantedAuthorities = SecurityUtils.extractAuthorityFromClaims(jwt.getClaims());
+
+        return grantedAuthorities;
     }
 }

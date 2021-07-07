@@ -21,7 +21,6 @@ import org.springframework.security.core.GrantedAuthority;
 @Setter
 @Getter
 @EqualsAndHashCode(callSuper = false)
-@ToString
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

@@ -88,6 +88,7 @@ public class AccountService {
     private ClientAppRepository clientAppRepository;
 
     @Transactional
+
     public UserReferenceDto createUserAccount(CreateAccountRequest request) {
 
         String userLogin = SecurityUtils.getCurrentUserLogin().orElse(Constants.SYSTEM_ACCOUNT);

@@ -24,7 +24,6 @@ import org.springframework.util.CollectionUtils;
 @Table(name = "jhi_authority")
 @Setter
 @Getter
-@ToString
 
 public class Authority extends AbstractAuditingEntity {
     private static final long serialVersionUID = 1L;
