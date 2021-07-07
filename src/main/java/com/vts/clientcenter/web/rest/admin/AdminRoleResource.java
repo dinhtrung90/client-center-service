@@ -49,6 +49,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/cms")
+@PreAuthorize("denyAll()")
 public class AdminRoleResource {
     private final Logger log = LoggerFactory.getLogger(AdminRoleResource.class);
 
@@ -62,7 +63,7 @@ public class AdminRoleResource {
     }
 
     @PostMapping("/role/create")
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasPermission('Role', 'Create')")
     public ResponseEntity<RoleDetailResponse> createRole(@Valid @RequestBody CreateRoleRequest dto) throws URISyntaxException {
         log.debug("REST request to create authorityDto : {}", dto);
         RoleDetailResponse authorityDto = authorityService.save(dto);
@@ -70,7 +71,7 @@ public class AdminRoleResource {
     }
 
     @GetMapping("/role/get")
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasPermission('Role', 'Read')")
     public ResponseEntity<List<AuthorityDto>> getAllRoles(Pageable pageable) {
         Page<AuthorityDto> response = authorityService.getAuthorities(pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), response);
@@ -84,13 +85,14 @@ public class AdminRoleResource {
     }
 
     @GetMapping("/role/getBy")
+    @PreAuthorize("hasPermission('Role', 'Read')")
     public ResponseEntity<RoleDetailResponse> getRoleDetail(@RequestParam("name") String roleName) {
         RoleDetailResponse response = authorityService.getByRoleName(roleName);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PutMapping("/role/update")
-    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasPermission('Role', 'Update')")
     public ResponseEntity<RoleDetailResponse> updateRole(@Valid @RequestBody CreateRoleRequest dto) throws URISyntaxException {
         log.debug("REST request to update RoleRequest : {}", dto);
         RoleDetailResponse authorityDto = authorityService.save(dto);
