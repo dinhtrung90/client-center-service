@@ -45,6 +45,8 @@ public final class Constants {
     public static final String ACCOUNT_LANG_KEY_FIELD = "lang_key";
     public static final String ACCOUNT_IS_TERMINATED_FIELD = "is_terminated";
     public static final String ROLE_NAME_NOT_NULL = "ROLE_NAME_NOT_NULL";
+    public static final String ORGANIZATION_NAME_EXISTED = "ORGANIZATION_NAME_EXISTED";
+    public static final String ORGANIZATION_NOT_FOUND = "ORGANIZATION_NOT_FOUND";
 
     private Constants() {}
 }

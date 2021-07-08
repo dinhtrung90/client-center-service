@@ -66,6 +66,10 @@ public class UserAddress implements Serializable {
     @Column(name = "is_primary")
     private boolean isIsPrimary;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id")
+    private Organization organization;
+
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
         return id;
@@ -235,6 +239,14 @@ public class UserAddress implements Serializable {
 
     public void setIsPrimary(boolean isPrimary) {
         isIsPrimary = isPrimary;
+    }
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
     }
 
     @Override

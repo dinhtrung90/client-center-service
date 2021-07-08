@@ -1,0 +1,63 @@
+{
+  "fluentMethods": true,
+  "clientRootFolder": "ClientCenterService",
+  "relationships": [
+    {
+      "relationshipName": "userAddress",
+      "otherEntityName": "userAddress",
+      "relationshipType": "one-to-many",
+      "otherEntityRelationshipName": "organization"
+    },
+    {
+      "relationshipName": "organizationBrand",
+      "otherEntityName": "organizationBrand",
+      "relationshipType": "one-to-many",
+      "otherEntityRelationshipName": "organization"
+    },
+    {
+      "relationshipName": "organizationGroup",
+      "otherEntityName": "organizationGroup",
+      "relationshipType": "one-to-many",
+      "otherEntityRelationshipName": "organization"
+    }
+  ],
+  "fields": [
+    {
+      "fieldName": "organizationUUID",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "unique", "maxlength"],
+      "fieldValidateRulesMaxlength": "50"
+    },
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "displayName",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "description",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "email",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "phone",
+      "fieldType": "String"
+    }
+  ],
+  "changelogDate": "20210708020553",
+  "dto": "mapstruct",
+  "searchEngine": false,
+  "service": "serviceImpl",
+  "entityTableName": "organization",
+  "databaseType": "sql",
+  "readOnly": true,
+  "jpaMetamodelFiltering": true,
+  "pagination": "infinite-scroll",
+  "microserviceName": "ClientCenterService"
+}

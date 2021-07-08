@@ -1,0 +1,37 @@
+{
+  "fluentMethods": true,
+  "clientRootFolder": "ClientCenterService",
+  "relationships": [
+    {
+      "relationshipName": "organization",
+      "otherEntityName": "organization",
+      "relationshipType": "many-to-one",
+      "otherEntityField": "id",
+      "otherEntityRelationshipName": "organizationBrand"
+    }
+  ],
+  "fields": [
+    {
+      "fieldName": "logoUrl",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "primaryColor",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "backgroundColor",
+      "fieldType": "String"
+    }
+  ],
+  "changelogDate": "20210708022606",
+  "dto": "mapstruct",
+  "searchEngine": false,
+  "service": "serviceImpl",
+  "entityTableName": "organization_brand",
+  "databaseType": "sql",
+  "readOnly": true,
+  "jpaMetamodelFiltering": true,
+  "pagination": "infinite-scroll",
+  "microserviceName": "ClientCenterService"
+}

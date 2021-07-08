@@ -84,6 +84,12 @@ public class CacheConfiguration {
             createCache(cm, com.vts.clientcenter.domain.Authority.class.getName() + ".permissions", jcacheConfiguration);
             createCache(cm, com.vts.clientcenter.domain.UserProfile.class.getName(), jcacheConfiguration);
             createCache(cm, com.vts.clientcenter.domain.UserAddress.class.getName(), jcacheConfiguration);
+            createCache(cm, com.vts.clientcenter.domain.Organization.class.getName(), jcacheConfiguration);
+            createCache(cm, com.vts.clientcenter.domain.Organization.class.getName() + ".userAddresses", jcacheConfiguration);
+            createCache(cm, com.vts.clientcenter.domain.OrganizationBrand.class.getName(), jcacheConfiguration);
+            createCache(cm, com.vts.clientcenter.domain.OrganizationGroup.class.getName(), jcacheConfiguration);
+            createCache(cm, com.vts.clientcenter.domain.Organization.class.getName() + ".organizationBrands", jcacheConfiguration);
+            createCache(cm, com.vts.clientcenter.domain.Organization.class.getName() + ".organizationGroups", jcacheConfiguration);
             // jhipster-needle-redis-add-entry
             createCache(cm, com.vts.clientcenter.domain.ClientApp.class.getName(), jcacheConfiguration);
             createCache(cm, com.vts.clientcenter.domain.Module.class.getName(), jcacheConfiguration);
