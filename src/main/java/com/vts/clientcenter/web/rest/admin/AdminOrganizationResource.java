@@ -30,6 +30,7 @@ import static org.hibernate.id.IdentifierGenerator.ENTITY_NAME;
  */
 @RestController
 @RequestMapping("/api/cms")
+@PreAuthorize("denyAll()")
 public class AdminOrganizationResource {
 
     private final Logger log = LoggerFactory.getLogger(AdminOrganizationResource.class);
