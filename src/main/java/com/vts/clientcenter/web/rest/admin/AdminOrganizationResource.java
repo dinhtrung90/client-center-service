@@ -105,7 +105,7 @@ public class AdminOrganizationResource {
     }
 
 
-    @GetMapping("/organization/{id}")
+    @GetMapping("/organization/{uuid}")
     @PreAuthorize("hasPermission('Organization', 'Read')")
     public ResponseEntity<OrganizationUpdateResponse> getFullOrganization(@PathVariable String uuid) {
         log.debug("REST request to get Organization : {}", uuid);
