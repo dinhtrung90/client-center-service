@@ -1,8 +1,6 @@
 package com.vts.clientcenter.service.dto;
 
-import com.vts.clientcenter.domain.OrganizationGroup;
 import lombok.*;
-import org.w3c.dom.stylesheets.LinkStyle;
 
 import java.util.List;
 
