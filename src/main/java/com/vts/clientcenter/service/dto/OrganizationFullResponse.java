@@ -10,15 +10,20 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrganizationUpdateResponse {
+public class OrganizationFullResponse {
 
-    private String organizationId;
+    private String id;
 
     private String displayName;
+
+    private String name;
 
     private String description;
 
     private List<OrganizationBrandDTO> brands;
 
     private List<OrganizationGroupDTO> groups;
+
+    private List<AuthorityDto> roles;
+
 }

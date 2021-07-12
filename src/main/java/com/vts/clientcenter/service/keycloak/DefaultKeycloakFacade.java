@@ -559,7 +559,7 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
     }
 
     @Override
-    public String createClientWithConfig(String realmName, String clientName, OrganizationConfig organizationConfig) {
+    public ClientApp createClientWithConfig(String realmName, String clientName, OrganizationConfig organizationConfig) {
 
         ClientsResource clientsResource = findClientsResource(realmName);
         ClientRepresentation clientRepresentation = new ClientRepresentation();
@@ -571,9 +571,8 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
 
         clientRepresentation.setAccess(organizationConfig.getAccessAttributes());
         clientRepresentation.setBaseUrl(buildClientUrl(clientName));
-
+        clientRepresentation.setRootUrl(buildClientUrl(clientName));
         clientRepresentation.setAttributes(organizationConfig.getCommonAttributes());
-
         List<String> redirectUrls = new ArrayList<>();
         redirectUrls.add(buildClientUrl(clientName) + "/*");
         clientRepresentation.setRedirectUris(redirectUrls);
@@ -582,17 +581,53 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
 
         clientRepresentation.setDefaultClientScopes(organizationConfig.getDefaultClientScopes());
 
+        RoleRepresentation defaultRoleAccess = new RoleRepresentation();
+        defaultRoleAccess.setName(buildDefaultRole(clientName));
+        defaultRoleAccess.setDescription(buildClientRoleAccessDesc(clientName));
 
         try (ClosableResponseWrapper wrapper = new ClosableResponseWrapper(clientsResource.create(clientRepresentation))) {
             if (Response.Status.fromStatusCode(wrapper.getResponse().getStatus()) == Response.Status.CREATED) {
-                return findClientUuid(realmName, clientName);
+
+                String clientUuid = findClientUuid(realmName, clientName);
+
+                ClientResource clientResource = findClientResource(realmName, clientName);
+                clientResource.roles().create(defaultRoleAccess);
+
+                ClientApp clientApp = new ClientApp();
+                clientApp.setId(clientUuid);
+                clientApp.setName(clientName);
+                clientApp.setDesc(clientName);
+
+                Authority clientRole = new Authority();
+                clientRole.setName(buildDefaultRole(clientName));
+                clientRole.setDescription(buildClientRoleAccessDesc(clientName));
+
+                Set<Authority> authorities = new HashSet<>();
+                authorities.add(clientRole);
+                clientApp.setAuthorities(authorities);
+
+                return clientApp;
             }
             return null;
         }
     }
 
+    private String buildClientRoleAccessDesc(String clientName) {
+        return "Role Access " + clientName;
+    }
+
+    private String buildDefaultRole(String clientName) {
+        return PREFIX_ROLE_ACCESS + clientName.toUpperCase() + "_CMS_APP";
+    }
+
+    @Override
+    public void removeOrganizationFromKeycloak(String realmName, String clientUUID, String clientName) {
+        ClientResource clientResource = findClientResource(realmName, clientUUID);
+        clientResource.remove();
+    }
+
     private String buildClientUrl(String clientName) {
-        return SERVER_PROTOCOL + clientName +  '.' + SERVER_DOMAIN;
+        return SERVER_PROTOCOL + clientName.toLowerCase() +  '.' + SERVER_DOMAIN;
     }
 
     public UserResource getUserResource(String realmId, String userId) {

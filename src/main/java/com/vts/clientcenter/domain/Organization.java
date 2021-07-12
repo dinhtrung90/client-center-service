@@ -1,6 +1,8 @@
 package com.vts.clientcenter.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vts.clientcenter.config.Constants;
+import lombok.ToString;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -27,6 +29,7 @@ public class Organization extends AbstractAuditingEntity {
 
     @NotNull
     @Column(name = "name", nullable = false)
+    @Pattern(regexp = Constants.LOGIN_REGEX)
     private String name;
 
     @Column(name = "display_name")

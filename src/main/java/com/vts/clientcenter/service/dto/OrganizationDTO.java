@@ -1,5 +1,7 @@
 package com.vts.clientcenter.service.dto;
 
+import com.vts.clientcenter.config.Constants;
+
 import javax.validation.constraints.*;
 import java.io.Serializable;
 
@@ -8,11 +10,11 @@ import java.io.Serializable;
  */
 public class OrganizationDTO implements Serializable {
 
-    @NotNull
     @Size(max = 50)
     private String id;
 
     @NotNull
+    @Pattern(regexp = Constants.LOGIN_REGEX)
     private String name;
 
     private String displayName;

@@ -90,9 +90,9 @@ public class AdminOrganizationResource {
 
     @PutMapping("/organization/update")
     @PreAuthorize("hasPermission('Organization', 'Update')")
-    public ResponseEntity<OrganizationUpdateResponse> updateOrganization(@Valid @RequestBody OrganizationUpdateRequest request) {
+    public ResponseEntity<OrganizationFullResponse> updateOrganization(@Valid @RequestBody OrganizationUpdateRequest request) {
         log.debug("REST request to create CreateOrganizationRequest : {}", request);
-        OrganizationUpdateResponse res = organizationService.updateByRequest(request);
+        OrganizationFullResponse res = organizationService.updateByRequest(request);
         return ResponseEntity.ok(res);
     }
 
@@ -107,9 +107,9 @@ public class AdminOrganizationResource {
 
     @GetMapping("/organization/{uuid}")
     @PreAuthorize("hasPermission('Organization', 'Read')")
-    public ResponseEntity<OrganizationUpdateResponse> getFullOrganization(@PathVariable String uuid) {
+    public ResponseEntity<OrganizationFullResponse> getFullOrganization(@PathVariable String uuid) {
         log.debug("REST request to get Organization : {}", uuid);
-        Optional<OrganizationUpdateResponse> organizationDTO = organizationService.findByUUID(uuid);
+        Optional<OrganizationFullResponse> organizationDTO = organizationService.findByUUID(uuid);
         return ResponseUtil.wrapOrNotFound(organizationDTO);
     }
 

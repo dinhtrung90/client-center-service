@@ -3,15 +3,18 @@ package com.vts.clientcenter.service.impl;
 import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.config.KeycloakConfig;
 import com.vts.clientcenter.config.OrganizationConfig;
+import com.vts.clientcenter.domain.ClientApp;
 import com.vts.clientcenter.domain.OrganizationBrand;
 import com.vts.clientcenter.domain.OrganizationGroup;
+import com.vts.clientcenter.events.OrganizationCreatedEvent;
+import com.vts.clientcenter.repository.ClientAppRepository;
 import com.vts.clientcenter.service.OrganizationService;
 import com.vts.clientcenter.domain.Organization;
 import com.vts.clientcenter.repository.OrganizationRepository;
 import com.vts.clientcenter.service.dto.OrganizationBrandDTO;
 import com.vts.clientcenter.service.dto.OrganizationDTO;
 import com.vts.clientcenter.service.dto.OrganizationUpdateRequest;
-import com.vts.clientcenter.service.dto.OrganizationUpdateResponse;
+import com.vts.clientcenter.service.dto.OrganizationFullResponse;
 import com.vts.clientcenter.service.keycloak.KeycloakFacade;
 import com.vts.clientcenter.service.mapper.OrganizationBrandMapper;
 import com.vts.clientcenter.service.mapper.OrganizationGroupMapper;
@@ -22,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -50,6 +54,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     private final OrganizationGroupMapper organizationGroupMapper;
 
+    private final ClientAppRepository clientAppRepository;
+
     @Autowired
     private KeycloakConfig setting;
 
@@ -60,11 +66,15 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Autowired
     private OrganizationConfig organizationConfig;
 
-    public OrganizationServiceImpl(OrganizationRepository organizationRepository, OrganizationMapper organizationMapper, OrganizationBrandMapper organizationBrandMapper, OrganizationGroupMapper organizationGroupMapper) {
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
+
+    public OrganizationServiceImpl(OrganizationRepository organizationRepository, OrganizationMapper organizationMapper, OrganizationBrandMapper organizationBrandMapper, OrganizationGroupMapper organizationGroupMapper, ClientAppRepository clientAppRepository) {
         this.organizationRepository = organizationRepository;
         this.organizationMapper = organizationMapper;
         this.organizationBrandMapper = organizationBrandMapper;
         this.organizationGroupMapper = organizationGroupMapper;
+        this.clientAppRepository = clientAppRepository;
     }
 
     @Override
@@ -108,23 +118,31 @@ public class OrganizationServiceImpl implements OrganizationService {
         Organization organization = organizationMapper.toEntity(request);
 
         //create keycloak
-        String clientId = keycloakFacade.createClientWithConfig(setting.getRealmApp(), organization.getName(), organizationConfig);
-        organization.setId(clientId);
+        ClientApp clientApp = keycloakFacade.createClientWithConfig(setting.getRealmApp(), organization.getName(), organizationConfig);
+        if (Objects.isNull(clientApp)){
+            throw new BadRequestAlertException("Can not Create client.", "KClient", request.getName());
+        }
+        organization.setId(clientApp.getId());
+
+        log.info("Create organization in local database : {}", organization);
+
+        applicationEventPublisher.publishEvent(OrganizationCreatedEvent.builder().organization(organization).build());
 
         // create default brand
         OrganizationBrand defaultBrand =  new OrganizationBrand();
         defaultBrand.setOrganization(organization);
         defaultBrand.setBackgroundColor(BACKGROUND_COLOR);
         defaultBrand.setLogoUrl(null);
+        defaultBrand.setPrimary(true);
         defaultBrand.setPrimaryColor(PRIMARY_COLOR);
         defaultBrand.setSubDomain(organization.getName());
         Set<OrganizationBrand> organizationBrands = new HashSet<>();
         organizationBrands.add(defaultBrand);
         organization.setOrganizationBrands(organizationBrands);
-
         organization = organizationRepository.save(organization);
 
-        // create client in keycloak
+        //save client app
+        clientAppRepository.save(clientApp);
 
         return organizationMapper.toDto(organization);
     }
@@ -143,7 +161,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 
     @Override
-    public OrganizationUpdateResponse updateByRequest(OrganizationUpdateRequest request) {
+    public OrganizationFullResponse updateByRequest(OrganizationUpdateRequest request) {
 
         Organization organization = getValidatedOrganization(request.getUuid());
 
@@ -170,7 +188,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         Organization result = organizationRepository.save(organization);
 
-        return OrganizationUpdateResponse.builder()
+        return OrganizationFullResponse.builder()
             .brands(organizationBrandMapper.toDto(new ArrayList<>(result.getOrganizationBrands())))
             .groups(organizationGroupMapper.toDto(new ArrayList<>(result.getOrganizationGroups())))
             .build();
@@ -199,7 +217,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public Optional<OrganizationUpdateResponse> findByUUID(String uuid) {
+    public Optional<OrganizationFullResponse> findByUUID(String uuid) {
 
         if (Objects.isNull(uuid)) {
             throw new BadRequestAlertException("Id can not be null.", "Organization", Constants.ID_NOT_NULL);
@@ -208,10 +226,18 @@ public class OrganizationServiceImpl implements OrganizationService {
         Organization organization = organizationRepository.getByUUID(uuid);
 
         return Optional.of(
-         OrganizationUpdateResponse.builder()
+         OrganizationFullResponse.builder()
+             .displayName(organization.getDisplayName())
+             .description(organization.getDescription())
+             .name(organization.getName())
             .brands(organizationBrandMapper.toDto(new ArrayList<>(organization.getOrganizationBrands())))
             .groups(organizationGroupMapper.toDto(new ArrayList<>(organization.getOrganizationGroups())))
             .build()
         );
+    }
+
+    @Override
+    public void removeOrganizationFromKeycloak(String clientUUID, String clientName) {
+        keycloakFacade.removeOrganizationFromKeycloak(setting.getRealmApp(), clientUUID, clientName);
     }
 }

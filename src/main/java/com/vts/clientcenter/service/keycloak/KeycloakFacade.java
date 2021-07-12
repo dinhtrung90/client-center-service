@@ -66,5 +66,7 @@ public interface KeycloakFacade {
 
     void syncPermissionForClient(String realmName, String clientId, List<PermissionDetailDto> permissions);
 
-    String createClientWithConfig(String realmName, String clientName, OrganizationConfig organizationConfig);
+    ClientApp createClientWithConfig(String realmName, String clientName, OrganizationConfig organizationConfig);
+
+    void removeOrganizationFromKeycloak(String realmName, String clientUUID, String clientName);
 }

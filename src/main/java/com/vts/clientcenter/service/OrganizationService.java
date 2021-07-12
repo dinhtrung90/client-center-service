@@ -3,7 +3,7 @@ package com.vts.clientcenter.service;
 import com.vts.clientcenter.service.dto.OrganizationDTO;
 
 import com.vts.clientcenter.service.dto.OrganizationUpdateRequest;
-import com.vts.clientcenter.service.dto.OrganizationUpdateResponse;
+import com.vts.clientcenter.service.dto.OrganizationFullResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -48,9 +48,12 @@ public interface OrganizationService {
 
     OrganizationDTO saveByRequest(OrganizationDTO request);
 
-    OrganizationUpdateResponse updateByRequest(OrganizationUpdateRequest request);
+    OrganizationFullResponse updateByRequest(OrganizationUpdateRequest request);
 
     void deleteByUUID(String uuid);
 
-    Optional<OrganizationUpdateResponse> findByUUID(String uuid);
+    Optional<OrganizationFullResponse> findByUUID(String uuid);
+
+    void removeOrganizationFromKeycloak(String id, String name);
+
 }

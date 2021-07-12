@@ -52,7 +52,7 @@ public final class Constants {
     public static final String OPENID_CONNECT = "openid-connect";
     public static final String SERVER_DOMAIN = "fingmeup.com";
     public static final String SERVER_PROTOCOL = "https://";
-    public static final String LIFE_SPAN = "86400";
+    public static final String PREFIX_ROLE_ACCESS = "ROLE_ACCESS_";
 
     private Constants() {
 
