@@ -1,6 +1,8 @@
 package com.vts.clientcenter.service.impl;
 
 import com.vts.clientcenter.config.Constants;
+import com.vts.clientcenter.config.KeycloakConfig;
+import com.vts.clientcenter.config.OrganizationConfig;
 import com.vts.clientcenter.domain.OrganizationBrand;
 import com.vts.clientcenter.domain.OrganizationGroup;
 import com.vts.clientcenter.service.OrganizationService;
@@ -10,6 +12,7 @@ import com.vts.clientcenter.service.dto.OrganizationBrandDTO;
 import com.vts.clientcenter.service.dto.OrganizationDTO;
 import com.vts.clientcenter.service.dto.OrganizationUpdateRequest;
 import com.vts.clientcenter.service.dto.OrganizationUpdateResponse;
+import com.vts.clientcenter.service.keycloak.KeycloakFacade;
 import com.vts.clientcenter.service.mapper.OrganizationBrandMapper;
 import com.vts.clientcenter.service.mapper.OrganizationGroupMapper;
 import com.vts.clientcenter.service.mapper.OrganizationMapper;
@@ -17,6 +20,8 @@ import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,6 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+
+import static com.vts.clientcenter.config.Constants.BACKGROUND_COLOR;
+import static com.vts.clientcenter.config.Constants.PRIMARY_COLOR;
 
 /**
  * Service Implementation for managing {@link Organization}.
@@ -41,6 +49,16 @@ public class OrganizationServiceImpl implements OrganizationService {
     private final OrganizationBrandMapper organizationBrandMapper;
 
     private final OrganizationGroupMapper organizationGroupMapper;
+
+    @Autowired
+    private KeycloakConfig setting;
+
+    @Autowired
+    @Qualifier("keycloakFacade")
+    private KeycloakFacade keycloakFacade;
+
+    @Autowired
+    private OrganizationConfig organizationConfig;
 
     public OrganizationServiceImpl(OrganizationRepository organizationRepository, OrganizationMapper organizationMapper, OrganizationBrandMapper organizationBrandMapper, OrganizationGroupMapper organizationGroupMapper) {
         this.organizationRepository = organizationRepository;
@@ -68,14 +86,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<OrganizationDTO> findOne(Long id) {
+    public Optional<OrganizationDTO> findOne(String id) {
         log.debug("Request to get Organization : {}", id);
         return organizationRepository.findById(id)
             .map(organizationMapper::toDto);
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(String id) {
         log.debug("Request to delete Organization : {}", id);
         organizationRepository.deleteById(id);
     }
@@ -85,9 +103,28 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         log.debug("Request to create Organization with new request : {}", request);
 
-        validateCreateOrg(request.getOrganizationUUID(), request.getName());
+        validateCreateOrg(request.getId(), request.getName());
 
-        Organization organization = organizationRepository.save(organizationMapper.toEntity(request));
+        Organization organization = organizationMapper.toEntity(request);
+
+        //create keycloak
+        String clientId = keycloakFacade.createClientWithConfig(setting.getRealmApp(), organization.getName(), organizationConfig);
+        organization.setId(clientId);
+
+        // create default brand
+        OrganizationBrand defaultBrand =  new OrganizationBrand();
+        defaultBrand.setOrganization(organization);
+        defaultBrand.setBackgroundColor(BACKGROUND_COLOR);
+        defaultBrand.setLogoUrl(null);
+        defaultBrand.setPrimaryColor(PRIMARY_COLOR);
+        defaultBrand.setSubDomain(organization.getName());
+        Set<OrganizationBrand> organizationBrands = new HashSet<>();
+        organizationBrands.add(defaultBrand);
+        organization.setOrganizationBrands(organizationBrands);
+
+        organization = organizationRepository.save(organization);
+
+        // create client in keycloak
 
         return organizationMapper.toDto(organization);
     }
@@ -144,7 +181,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             throw new BadRequestAlertException("Id can not be null.", "Organization", Constants.ID_NOT_NULL);
         }
 
-        Optional<Organization> organizationOptional = organizationRepository.findByOrganizationUUID(uuid);
+        Optional<Organization> organizationOptional = organizationRepository.findById(uuid);
 
         if (!organizationOptional.isPresent()) {
             throw new BadRequestAlertException("Not found any organization.", "Organization", Constants.ORGANIZATION_NOT_FOUND);

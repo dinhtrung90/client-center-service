@@ -24,9 +24,7 @@ public class OrganizationCriteria implements Serializable, Criteria {
 
     private static final long serialVersionUID = 1L;
 
-    private LongFilter id;
-
-    private StringFilter organizationUUID;
+    private StringFilter id;
 
     private StringFilter name;
 
@@ -49,7 +47,6 @@ public class OrganizationCriteria implements Serializable, Criteria {
 
     public OrganizationCriteria(OrganizationCriteria other) {
         this.id = other.id == null ? null : other.id.copy();
-        this.organizationUUID = other.organizationUUID == null ? null : other.organizationUUID.copy();
         this.name = other.name == null ? null : other.name.copy();
         this.displayName = other.displayName == null ? null : other.displayName.copy();
         this.description = other.description == null ? null : other.description.copy();
@@ -65,20 +62,12 @@ public class OrganizationCriteria implements Serializable, Criteria {
         return new OrganizationCriteria(this);
     }
 
-    public LongFilter getId() {
+    public StringFilter getId() {
         return id;
     }
 
-    public void setId(LongFilter id) {
+    public void setId(StringFilter id) {
         this.id = id;
-    }
-
-    public StringFilter getOrganizationUUID() {
-        return organizationUUID;
-    }
-
-    public void setOrganizationUUID(StringFilter organizationUUID) {
-        this.organizationUUID = organizationUUID;
     }
 
     public StringFilter getName() {
@@ -157,7 +146,6 @@ public class OrganizationCriteria implements Serializable, Criteria {
         final OrganizationCriteria that = (OrganizationCriteria) o;
         return
             Objects.equals(id, that.id) &&
-            Objects.equals(organizationUUID, that.organizationUUID) &&
             Objects.equals(name, that.name) &&
             Objects.equals(displayName, that.displayName) &&
             Objects.equals(description, that.description) &&
@@ -172,7 +160,6 @@ public class OrganizationCriteria implements Serializable, Criteria {
     public int hashCode() {
         return Objects.hash(
         id,
-        organizationUUID,
         name,
         displayName,
         description,
@@ -189,7 +176,6 @@ public class OrganizationCriteria implements Serializable, Criteria {
     public String toString() {
         return "OrganizationCriteria{" +
                 (id != null ? "id=" + id + ", " : "") +
-                (organizationUUID != null ? "organizationUUID=" + organizationUUID + ", " : "") +
                 (name != null ? "name=" + name + ", " : "") +
                 (displayName != null ? "displayName=" + displayName + ", " : "") +
                 (description != null ? "description=" + description + ", " : "") +

@@ -37,14 +37,14 @@ public interface OrganizationService {
      * @param id the id of the entity.
      * @return the entity.
      */
-    Optional<OrganizationDTO> findOne(Long id);
+    Optional<OrganizationDTO> findOne(String id);
 
     /**
      * Delete the "id" organization.
      *
      * @param id the id of the entity.
      */
-    void delete(Long id);
+    void delete(String id);
 
     OrganizationDTO saveByRequest(OrganizationDTO request);
 

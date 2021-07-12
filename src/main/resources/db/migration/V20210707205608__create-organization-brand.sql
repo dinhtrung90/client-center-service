@@ -1,6 +1,6 @@
 create table tv_organization_brand(
                                   id bigint auto_increment primary key,
-                                  organization_id bigint not null ,
+                                  organization_id varchar(100) not null ,
                                   logo_url varchar(1000) default null,
                                   primary_color varchar(100) default null,
                                   background_color varchar(100) default null,

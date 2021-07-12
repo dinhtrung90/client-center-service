@@ -1,6 +1,5 @@
 create table tv_organization(
-                            id bigint auto_increment primary key,
-                            organization_uuid varchar(100) unique not null,
+                            id varchar(100) primary key,
                             name varchar(255) not null,
                             display_name varchar(255) null,
                             description varchar(1000) null,
@@ -12,4 +11,4 @@ create table tv_organization(
                             last_modified_by varchar(255)
 );
 
-create index tv_organization_uuid_index  on tv_organization(organization_uuid);
+create index tv_organization_name_index  on tv_organization(name);

@@ -75,8 +75,9 @@ public class User extends AbstractAuditingEntity {
     @BatchSize(size = 20)
     private Set<Authority> authorities = new HashSet<>();
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
     private Set<UserAddress> userAddresses= new HashSet<>();
+
 
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "user")
     private UserProfile userProfile;
@@ -86,6 +87,9 @@ public class User extends AbstractAuditingEntity {
 
     @Column(name = "is_terminated")
     private boolean isTerminated;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = { CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    private Set<UserOrganizationMembership> userOrganizationMappings = new HashSet<>();
 
     public String getId() {
         return id;
@@ -239,6 +243,14 @@ public class User extends AbstractAuditingEntity {
 
     public void setTerminated(boolean terminated) {
         isTerminated = terminated;
+    }
+
+    public Set<UserOrganizationMembership> getUserOrganizationMappings() {
+        return userOrganizationMappings;
+    }
+
+    public void setUserOrganizationMappings(Set<UserOrganizationMembership> userOrganizationMappings) {
+        this.userOrganizationMappings = userOrganizationMappings;
     }
 
     @Override

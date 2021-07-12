@@ -32,7 +32,7 @@ public class OrganizationBrandCriteria implements Serializable, Criteria {
 
     private StringFilter backgroundColor;
 
-    private LongFilter organizationId;
+    private StringFilter organizationId;
 
     public OrganizationBrandCriteria() {
     }
@@ -82,11 +82,11 @@ public class OrganizationBrandCriteria implements Serializable, Criteria {
         this.backgroundColor = backgroundColor;
     }
 
-    public LongFilter getOrganizationId() {
+    public StringFilter getOrganizationId() {
         return organizationId;
     }
 
-    public void setOrganizationId(LongFilter organizationId) {
+    public void setOrganizationId(StringFilter organizationId) {
         this.organizationId = organizationId;
     }
 

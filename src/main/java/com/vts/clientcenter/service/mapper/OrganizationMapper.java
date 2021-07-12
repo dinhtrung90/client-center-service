@@ -21,7 +21,7 @@ public interface OrganizationMapper extends EntityMapper<OrganizationDTO, Organi
     @Mapping(target = "removeOrganizationGroup", ignore = true)
     Organization toEntity(OrganizationDTO organizationDTO);
 
-    default Organization fromId(Long id) {
+    default Organization fromId(String id) {
         if (id == null) {
             return null;
         }

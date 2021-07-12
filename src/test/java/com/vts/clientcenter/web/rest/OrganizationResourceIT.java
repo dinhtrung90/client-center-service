@@ -90,7 +90,6 @@ public class OrganizationResourceIT {
      */
     public static Organization createEntity(EntityManager em) {
         Organization organization = new Organization()
-            .organizationUUID(DEFAULT_ORGANIZATION_UUID)
             .name(DEFAULT_NAME)
             .displayName(DEFAULT_DISPLAY_NAME)
             .description(DEFAULT_DESCRIPTION)
@@ -106,7 +105,6 @@ public class OrganizationResourceIT {
      */
     public static Organization createUpdatedEntity(EntityManager em) {
         Organization organization = new Organization()
-            .organizationUUID(UPDATED_ORGANIZATION_UUID)
             .name(UPDATED_NAME)
             .displayName(UPDATED_DISPLAY_NAME)
             .description(UPDATED_DESCRIPTION)
@@ -130,7 +128,7 @@ public class OrganizationResourceIT {
         restOrganizationMockMvc.perform(get("/api/organizations?sort=id,desc"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(organization.getId().intValue())))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(organization.getId())))
             .andExpect(jsonPath("$.[*].organizationUUID").value(hasItem(DEFAULT_ORGANIZATION_UUID)))
             .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
             .andExpect(jsonPath("$.[*].displayName").value(hasItem(DEFAULT_DISPLAY_NAME)))
@@ -138,7 +136,7 @@ public class OrganizationResourceIT {
             .andExpect(jsonPath("$.[*].email").value(hasItem(DEFAULT_EMAIL)))
             .andExpect(jsonPath("$.[*].phone").value(hasItem(DEFAULT_PHONE)));
     }
-    
+
     @Test
     @Transactional
     public void getOrganization() throws Exception {
@@ -149,7 +147,7 @@ public class OrganizationResourceIT {
         restOrganizationMockMvc.perform(get("/api/organizations/{id}", organization.getId()))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.id").value(organization.getId().intValue()))
+            .andExpect(jsonPath("$.id").value(organization.getId()))
             .andExpect(jsonPath("$.organizationUUID").value(DEFAULT_ORGANIZATION_UUID))
             .andExpect(jsonPath("$.name").value(DEFAULT_NAME))
             .andExpect(jsonPath("$.displayName").value(DEFAULT_DISPLAY_NAME))
@@ -165,7 +163,7 @@ public class OrganizationResourceIT {
         // Initialize the database
         organizationRepository.saveAndFlush(organization);
 
-        Long id = organization.getId();
+        String id = organization.getId();
 
         defaultOrganizationShouldBeFound("id.equals=" + id);
         defaultOrganizationShouldNotBeFound("id.notEquals=" + id);
@@ -712,7 +710,7 @@ public class OrganizationResourceIT {
         restOrganizationMockMvc.perform(get("/api/organizations?sort=id,desc&" + filter))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(organization.getId().intValue())))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(organization.getId())))
             .andExpect(jsonPath("$.[*].organizationUUID").value(hasItem(DEFAULT_ORGANIZATION_UUID)))
             .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
             .andExpect(jsonPath("$.[*].displayName").value(hasItem(DEFAULT_DISPLAY_NAME)))

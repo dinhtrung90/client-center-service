@@ -47,6 +47,15 @@ public final class Constants {
     public static final String ROLE_NAME_NOT_NULL = "ROLE_NAME_NOT_NULL";
     public static final String ORGANIZATION_NAME_EXISTED = "ORGANIZATION_NAME_EXISTED";
     public static final String ORGANIZATION_NOT_FOUND = "ORGANIZATION_NOT_FOUND";
+    public static final String PRIMARY_COLOR = "#f23f23";
+    public static final String BACKGROUND_COLOR = "#1d1d1d";
+    public static final String OPENID_CONNECT = "openid-connect";
+    public static final String SERVER_DOMAIN = "fingmeup.com";
+    public static final String SERVER_PROTOCOL = "https://";
+    public static final String LIFE_SPAN = "86400";
 
-    private Constants() {}
+    private Constants() {
+
+
+    }
 }

@@ -1,6 +1,7 @@
 package com.vts.clientcenter.service.keycloak;
 
 
+import com.vts.clientcenter.config.OrganizationConfig;
 import com.vts.clientcenter.domain.Authority;
 import com.vts.clientcenter.domain.ClientApp;
 import com.vts.clientcenter.domain.User;
@@ -11,6 +12,7 @@ import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
+import java.net.URI;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -63,4 +65,6 @@ public interface KeycloakFacade {
     List<Authority> updateUserRoleMapping(String realmName, String userId, List<Authority> assignRoles, List<ClientApp> clientAppList);
 
     void syncPermissionForClient(String realmName, String clientId, List<PermissionDetailDto> permissions);
+
+    String createClientWithConfig(String realmName, String clientName, OrganizationConfig organizationConfig);
 }

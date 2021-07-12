@@ -112,7 +112,7 @@ public class OrganizationGroupResourceIT {
             .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
             .andExpect(jsonPath("$.[*].description").value(hasItem(DEFAULT_DESCRIPTION)));
     }
-    
+
     @Test
     @Transactional
     public void getOrganizationGroup() throws Exception {
@@ -314,7 +314,7 @@ public class OrganizationGroupResourceIT {
         em.flush();
         organizationGroup.setOrganization(organization);
         organizationGroupRepository.saveAndFlush(organizationGroup);
-        Long organizationId = organization.getId();
+        String organizationId = organization.getId();
 
         // Get all the organizationGroupList where organization equals to organizationId
         defaultOrganizationGroupShouldBeFound("organizationId.equals=" + organizationId);

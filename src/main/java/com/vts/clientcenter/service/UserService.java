@@ -178,13 +178,14 @@ public class UserService {
         return  AccountStatus.ACTIVE;
     }
 
-    private User syncUserFromKeycloak(Map<String, Object> details, User user) {
-        Optional<User> existingUser = userRepository.findOneByLogin(user.getLogin());
+    @Transactional
+    public User syncUserFromKeycloak(Map<String, Object> details, User user) {
+        Optional<User> existingUser = userRepository.findByUserIdEagerAuthority(user.getLogin());
         User newUser = new User();
         if (!existingUser.isPresent()) {
             // save account in to sync users between IdP and JHipster's local database
             log.debug("Saving user '{}' in local database", user.getLogin());
-            UserRepresentation userRepresentation = mapUserRepresentationToUser(user.getId(), newUser, user.getLogin(), false, Instant.now());
+            UserRepresentation userRepresentation = mapUserRepresentationToUser(user.getId(), newUser, user.getLogin());
 
             //sync roles
             Set<Authority> userRoles = syncRolesByUserId(user.getId());
@@ -194,23 +195,20 @@ public class UserService {
             // sync profile
             UserProfile profile = UserProfile.builder()
                 .build();
+
             mapUserRepresentationToProfile(userRepresentation, profile);
+
             profile.setUser(newUser);
-            userProfileRepository.save(profile);
+
+            userRepository.save(user);
+
             this.clearUserCaches(newUser);
         } else {
             newUser = existingUser.get();
             log.debug("Updating user '{}' in local database", user.getLogin());
-            UserRepresentation userRepresentation = mapUserRepresentationToUser(user.getId(), newUser, user.getLogin(), false, Instant.now());
+            UserRepresentation userRepresentation = mapUserRepresentationToUser(user.getId(), newUser, user.getLogin());
             UserProfile profile = newUser.getUserProfile();
             mapUserRepresentationToProfile(userRepresentation, profile);
-
-            //update  status
-            AccountStatus accountStatus = handleAccountStatus(newUser);
-            if (!newUser.getAccountStatus().equals(accountStatus)) {
-                newUser.setAccountStatus(accountStatus);
-                keycloakFacade.updateUserStatus(accountStatus, setting.getRealmApp(), newUser.getId(), Instant.now());
-            }
             userRepository.save(newUser);
             this.clearUserCaches(newUser);
         }
@@ -241,7 +239,7 @@ public class UserService {
         }
     }
 
-    private UserRepresentation mapUserRepresentationToUser(String userId, User newUser,  String createdBy, boolean isUpdated, Instant updateAt) {
+    private UserRepresentation mapUserRepresentationToUser(String userId, User newUser,  String createdBy) {
         UserRepresentation userRepresentation = keycloakFacade.getUserRepresentationById(setting.getRealmApp(), userId);
         newUser.setId(userRepresentation.getId());
         newUser.setEmail(userRepresentation.getEmail());
@@ -251,19 +249,9 @@ public class UserService {
         newUser.setLangKey(Constants.DEFAULT_LANGUAGE);
         newUser.setHasVerifiedEmail(userRepresentation.isEmailVerified());
         newUser.setHasEnabled(userRepresentation.isEnabled());
-        if (!isUpdated) {
-            newUser.setCreatedBy(createdBy);
-            newUser.setCreatedDate(Instant.now());
-        }
-        newUser.setLastModifiedDate(updateAt);
-        newUser.setLastModifiedBy(createdBy);
-
-        AccountStatus accountStatus = handleAccountStatus(newUser);
-        keycloakFacade.updateUserStatus(accountStatus, setting.getRealmApp(), userId, updateAt);
-        newUser.setAccountStatus(accountStatus);
-
         newUser.setApproved(getApproveValue(userRepresentation.getAttributes()));
-
+        newUser.setAccountStatus(handleAccountStatus(newUser));
+        newUser.setApproved(getApproveValue(userRepresentation.getAttributes()));
         return userRepresentation;
     }
 

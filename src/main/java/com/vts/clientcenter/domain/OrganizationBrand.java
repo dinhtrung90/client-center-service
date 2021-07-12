@@ -34,6 +34,9 @@ public class OrganizationBrand extends AbstractAuditingEntity {
     @Column(name = "is_primary")
     private boolean isPrimary;
 
+    @Column(name = "sub_domain", unique = true)
+    private String subDomain;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnoreProperties(value = "organizationBrands", allowSetters = true)
     private Organization organization;
@@ -107,6 +110,14 @@ public class OrganizationBrand extends AbstractAuditingEntity {
 
     public void setPrimary(boolean primary) {
         isPrimary = primary;
+    }
+
+    public String getSubDomain() {
+        return subDomain;
+    }
+
+    public void setSubDomain(String subDomain) {
+        this.subDomain = subDomain;
     }
 
     @Override

@@ -76,9 +76,12 @@ public class CacheConfiguration {
         return cm -> {
             createCache(cm, com.vts.clientcenter.repository.UserRepository.USERS_BY_LOGIN_CACHE, jcacheConfiguration);
             createCache(cm, com.vts.clientcenter.repository.UserRepository.USERS_BY_EMAIL_CACHE, jcacheConfiguration);
-            createCache(cm, com.vts.clientcenter.domain.User.class.getName(), jcacheConfiguration);
+
+
             createCache(cm, com.vts.clientcenter.domain.Authority.class.getName(), jcacheConfiguration);
+            createCache(cm, com.vts.clientcenter.domain.User.class.getName(), jcacheConfiguration);
             createCache(cm, com.vts.clientcenter.domain.User.class.getName() + ".authorities", jcacheConfiguration);
+            createCache(cm, com.vts.clientcenter.domain.User.class.getName() + ".organizations", jcacheConfiguration);
             createCache(cm, com.vts.clientcenter.domain.Eligibility.class.getName(), jcacheConfiguration);
             createCache(cm, com.vts.clientcenter.domain.Permission.class.getName(), jcacheConfiguration);
             createCache(cm, com.vts.clientcenter.domain.Authority.class.getName() + ".permissions", jcacheConfiguration);

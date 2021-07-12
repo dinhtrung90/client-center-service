@@ -1,6 +1,7 @@
 package com.vts.clientcenter.service.keycloak;
 
 import com.vts.clientcenter.config.Constants;
+import com.vts.clientcenter.config.OrganizationConfig;
 import com.vts.clientcenter.domain.Authority;
 import com.vts.clientcenter.domain.ClientApp;
 import com.vts.clientcenter.domain.User;
@@ -21,6 +22,7 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -554,6 +556,43 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
             roleRepresentation.setDescription(permission.getDesc());
             clientResource.roles().create(roleRepresentation);
         }
+    }
+
+    @Override
+    public String createClientWithConfig(String realmName, String clientName, OrganizationConfig organizationConfig) {
+
+        ClientsResource clientsResource = findClientsResource(realmName);
+        ClientRepresentation clientRepresentation = new ClientRepresentation();
+        clientRepresentation.setClientId(clientName);
+        clientRepresentation.setDescription(clientName);
+        clientRepresentation.setEnabled(true);
+        clientRepresentation.setName(clientName);
+        clientRepresentation.setProtocol(OPENID_CONNECT);
+
+        clientRepresentation.setAccess(organizationConfig.getAccessAttributes());
+        clientRepresentation.setBaseUrl(buildClientUrl(clientName));
+
+        clientRepresentation.setAttributes(organizationConfig.getCommonAttributes());
+
+        List<String> redirectUrls = new ArrayList<>();
+        redirectUrls.add(buildClientUrl(clientName) + "/*");
+        clientRepresentation.setRedirectUris(redirectUrls);
+
+        clientRepresentation.setAuthenticationFlowBindingOverrides(organizationConfig.getAuthenticationFlowBindingOverrides());
+
+        clientRepresentation.setDefaultClientScopes(organizationConfig.getDefaultClientScopes());
+
+
+        try (ClosableResponseWrapper wrapper = new ClosableResponseWrapper(clientsResource.create(clientRepresentation))) {
+            if (Response.Status.fromStatusCode(wrapper.getResponse().getStatus()) == Response.Status.CREATED) {
+                return findClientUuid(realmName, clientName);
+            }
+            return null;
+        }
+    }
+
+    private String buildClientUrl(String clientName) {
+        return SERVER_PROTOCOL + clientName +  '.' + SERVER_DOMAIN;
     }
 
     public UserResource getUserResource(String realmId, String userId) {

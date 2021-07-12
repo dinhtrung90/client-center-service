@@ -30,7 +30,7 @@ public class OrganizationGroupCriteria implements Serializable, Criteria {
 
     private StringFilter description;
 
-    private LongFilter organizationId;
+    private StringFilter organizationId;
 
     public OrganizationGroupCriteria() {
     }
@@ -71,11 +71,11 @@ public class OrganizationGroupCriteria implements Serializable, Criteria {
         this.description = description;
     }
 
-    public LongFilter getOrganizationId() {
+    public StringFilter getOrganizationId() {
         return organizationId;
     }
 
-    public void setOrganizationId(LongFilter organizationId) {
+    public void setOrganizationId(StringFilter organizationId) {
         this.organizationId = organizationId;
     }
 

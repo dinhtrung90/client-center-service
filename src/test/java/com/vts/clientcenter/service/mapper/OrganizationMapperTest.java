@@ -15,7 +15,7 @@ public class OrganizationMapperTest {
 
     @Test
     public void testEntityFromId() {
-        Long id = 1L;
+        String id = "1L";
         assertThat(organizationMapper.fromId(id).getId()).isEqualTo(id);
         assertThat(organizationMapper.fromId(null)).isNull();
     }

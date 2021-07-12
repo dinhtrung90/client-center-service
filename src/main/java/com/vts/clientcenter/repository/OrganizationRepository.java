@@ -13,12 +13,12 @@ import java.util.Optional;
  */
 @SuppressWarnings("unused")
 @Repository
-public interface OrganizationRepository extends JpaRepository<Organization, Long>, JpaSpecificationExecutor<Organization> {
+public interface OrganizationRepository extends JpaRepository<Organization, String>, JpaSpecificationExecutor<Organization> {
 
     boolean existsByName(String name);
 
-    Optional<Organization> findByOrganizationUUID(String uuid);
-
-    @Query("select o from Organization o left join fetch o.organizationBrands left join fetch o.organizationGroups where o.organizationUUID = :uuid")
+    @Query("select o from Organization o left join fetch o.organizationBrands left join fetch o.organizationGroups where o.id = :uuid")
     Organization  getByUUID(@Param("uuid") String uuid);
+
+    Optional<Organization> findByName(String name);
 }

@@ -7,12 +7,10 @@ import java.io.Serializable;
  * A DTO for the {@link com.vts.clientcenter.domain.Organization} entity.
  */
 public class OrganizationDTO implements Serializable {
-    
-    private Long id;
 
     @NotNull
     @Size(max = 50)
-    private String organizationUUID;
+    private String id;
 
     @NotNull
     private String name;
@@ -25,21 +23,13 @@ public class OrganizationDTO implements Serializable {
 
     private String phone;
 
-    
-    public Long getId() {
+
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
-    }
-
-    public String getOrganizationUUID() {
-        return organizationUUID;
-    }
-
-    public void setOrganizationUUID(String organizationUUID) {
-        this.organizationUUID = organizationUUID;
     }
 
     public String getName() {
@@ -104,7 +94,6 @@ public class OrganizationDTO implements Serializable {
     public String toString() {
         return "OrganizationDTO{" +
             "id=" + getId() +
-            ", organizationUUID='" + getOrganizationUUID() + "'" +
             ", name='" + getName() + "'" +
             ", displayName='" + getDisplayName() + "'" +
             ", description='" + getDescription() + "'" +

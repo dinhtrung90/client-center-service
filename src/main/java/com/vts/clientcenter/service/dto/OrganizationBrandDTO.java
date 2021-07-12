@@ -17,6 +17,8 @@ public class OrganizationBrandDTO implements Serializable {
 
     private boolean isPrimary;
 
+    private String subDomain;
+
     private Long organizationId;
 
     public Long getId() {
@@ -57,6 +59,22 @@ public class OrganizationBrandDTO implements Serializable {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public boolean isPrimary() {
+        return isPrimary;
+    }
+
+    public void setPrimary(boolean primary) {
+        isPrimary = primary;
+    }
+
+    public String getSubDomain() {
+        return subDomain;
+    }
+
+    public void setSubDomain(String subDomain) {
+        this.subDomain = subDomain;
     }
 
     @Override

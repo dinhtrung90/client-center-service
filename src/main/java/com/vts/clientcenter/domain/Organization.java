@@ -1,5 +1,7 @@
 package com.vts.clientcenter.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -21,13 +23,7 @@ public class Organization extends AbstractAuditingEntity {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @NotNull
-    @Size(max = 50)
-    @Column(name = "organization_uuid", length = 50, nullable = false, unique = true)
-    private String organizationUUID;
+    private String id;
 
     @NotNull
     @Column(name = "name", nullable = false)
@@ -57,26 +53,17 @@ public class Organization extends AbstractAuditingEntity {
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     private Set<OrganizationGroup> organizationGroups = new HashSet<>();
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "organization", cascade = { CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    private Set<UserOrganizationMembership> organizationUserMappings = new HashSet<>();
+
     // jhipster-needle-entity-add-field - JHipster will add fields here
-    public Long getId() {
+
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
-    }
-
-    public String getOrganizationUUID() {
-        return organizationUUID;
-    }
-
-    public Organization organizationUUID(String organizationUUID) {
-        this.organizationUUID = organizationUUID;
-        return this;
-    }
-
-    public void setOrganizationUUID(String organizationUUID) {
-        this.organizationUUID = organizationUUID;
     }
 
     public String getName() {
@@ -220,6 +207,15 @@ public class Organization extends AbstractAuditingEntity {
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
+
+    public Set<UserOrganizationMembership> getOrganizationUserMappings() {
+        return organizationUserMappings;
+    }
+
+    public void setOrganizationUserMappings(Set<UserOrganizationMembership> organizationUserMappings) {
+        this.organizationUserMappings = organizationUserMappings;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -241,7 +237,6 @@ public class Organization extends AbstractAuditingEntity {
     public String toString() {
         return "Organization{" +
             "id=" + getId() +
-            ", organizationUUID='" + getOrganizationUUID() + "'" +
             ", name='" + getName() + "'" +
             ", displayName='" + getDisplayName() + "'" +
             ", description='" + getDescription() + "'" +

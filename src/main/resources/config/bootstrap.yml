@@ -28,6 +28,10 @@ app:
     admin:
       username: admin
       password: Pa55w0rd
+    client:
+      lifespan: 86400
+      browser:
+        id: b62317e3-1bb4-44ce-a0a7-a026ff7f0f47
 
   kafka:
     retryPeriod: 5
@@ -42,6 +46,8 @@ app:
       notification:
         internal:
           client-center: ${app.kafka-prefix}-cc-internal-topic
+
+
 
 
 

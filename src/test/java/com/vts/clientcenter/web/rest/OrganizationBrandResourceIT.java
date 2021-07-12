@@ -118,7 +118,7 @@ public class OrganizationBrandResourceIT {
             .andExpect(jsonPath("$.[*].primaryColor").value(hasItem(DEFAULT_PRIMARY_COLOR)))
             .andExpect(jsonPath("$.[*].backgroundColor").value(hasItem(DEFAULT_BACKGROUND_COLOR)));
     }
-    
+
     @Test
     @Transactional
     public void getOrganizationBrand() throws Exception {
@@ -399,7 +399,7 @@ public class OrganizationBrandResourceIT {
         em.flush();
         organizationBrand.setOrganization(organization);
         organizationBrandRepository.saveAndFlush(organizationBrand);
-        Long organizationId = organization.getId();
+        String organizationId = organization.getId();
 
         // Get all the organizationBrandList where organization equals to organizationId
         defaultOrganizationBrandShouldBeFound("organizationId.equals=" + organizationId);

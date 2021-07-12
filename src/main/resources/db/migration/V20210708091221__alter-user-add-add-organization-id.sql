@@ -1,1 +1,1 @@
-alter table tv_user_address add column organization_id bigint not null;
+alter table tv_user_address add column organization_id varchar(100) not null;

@@ -71,7 +71,7 @@ public class AdminOrganizationResource {
      */
     @GetMapping("/organization/{id}")
     @PreAuthorize("hasPermission('Organization', 'Read')")
-    public ResponseEntity<OrganizationDTO> getOrganization(@PathVariable Long id) {
+    public ResponseEntity<OrganizationDTO> getOrganization(@PathVariable String id) {
         log.debug("REST request to get Organization : {}", id);
         Optional<OrganizationDTO> organizationDTO = organizationService.findOne(id);
         return ResponseUtil.wrapOrNotFound(organizationDTO);
