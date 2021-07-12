@@ -207,8 +207,15 @@ public class UserService {
             newUser = existingUser.get();
             log.debug("Updating user '{}' in local database", user.getLogin());
             UserRepresentation userRepresentation = mapUserRepresentationToUser(user.getId(), newUser, user.getLogin());
+
             UserProfile profile = newUser.getUserProfile();
+
             mapUserRepresentationToProfile(userRepresentation, profile);
+
+            Set<Authority> userRoles = syncRolesByUserId(user.getId());
+
+            newUser.addAuthorities(new ArrayList<>(userRoles));
+
             userRepository.save(newUser);
             this.clearUserCaches(newUser);
         }
