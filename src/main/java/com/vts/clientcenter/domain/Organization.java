@@ -44,6 +44,9 @@ public class Organization extends AbstractAuditingEntity {
     @Column(name = "phone")
     private String phone;
 
+    @Column(name = "is_enabled")
+    private boolean isEnabled;
+
     @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     private Set<UserAddress> userAddresses = new HashSet<>();
@@ -217,6 +220,14 @@ public class Organization extends AbstractAuditingEntity {
 
     public void setOrganizationUserMappings(Set<UserOrganizationMembership> organizationUserMappings) {
         this.organizationUserMappings = organizationUserMappings;
+    }
+
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        isEnabled = enabled;
     }
 
     @Override

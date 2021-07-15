@@ -17,7 +17,7 @@ public interface OrganizationRepository extends JpaRepository<Organization, Stri
 
     boolean existsByName(String name);
 
-    @Query("select o from Organization o left join fetch o.organizationBrands left join fetch o.organizationGroups where o.id = :uuid")
+        @Query("select o from Organization o left join fetch o.organizationBrands left join fetch o.organizationGroups where o.id = :uuid")
     Organization  getByUUID(@Param("uuid") String uuid);
 
     Optional<Organization> findByName(String name);

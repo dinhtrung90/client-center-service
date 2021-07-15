@@ -622,7 +622,7 @@ public class DefaultKeycloakFacade implements KeycloakFacade {
 
     @Override
     public void removeOrganizationFromKeycloak(String realmName, String clientUUID, String clientName) {
-        ClientResource clientResource = findClientResource(realmName, clientUUID);
+        ClientResource clientResource = findClientResource(realmName, clientName);
         clientResource.remove();
     }
 

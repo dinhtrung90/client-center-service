@@ -107,6 +107,9 @@ public class OrganizationQueryService extends QueryService<Organization> {
             if (criteria.getPhone() != null) {
                 specification = specification.and(buildStringSpecification(criteria.getPhone(), Organization_.phone));
             }
+            if (criteria.getIsEnabled() != null) {
+                specification = specification.and(buildSpecification(criteria.getIsEnabled(), Organization_.isEnabled));
+            }
             if (criteria.getUserAddressId() != null) {
                 specification = specification.and(buildSpecification(criteria.getUserAddressId(),
                     root -> root.join(Organization_.userAddresses, JoinType.LEFT).get(UserAddress_.id)));

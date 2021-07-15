@@ -42,6 +42,8 @@ public class OrganizationCriteria implements Serializable, Criteria {
 
     private LongFilter organizationGroupId;
 
+    private BooleanFilter isEnabled;
+
     public OrganizationCriteria() {
     }
 
@@ -55,6 +57,7 @@ public class OrganizationCriteria implements Serializable, Criteria {
         this.userAddressId = other.userAddressId == null ? null : other.userAddressId.copy();
         this.organizationBrandId = other.organizationBrandId == null ? null : other.organizationBrandId.copy();
         this.organizationGroupId = other.organizationGroupId == null ? null : other.organizationGroupId.copy();
+        this.isEnabled = other.isEnabled == null ? null : other.isEnabled.copy();
     }
 
     @Override
@@ -134,6 +137,13 @@ public class OrganizationCriteria implements Serializable, Criteria {
         this.organizationGroupId = organizationGroupId;
     }
 
+    public BooleanFilter getIsEnabled() {
+        return isEnabled;
+    }
+
+    public void setIsEnabled(BooleanFilter isEnabled) {
+        this.isEnabled = isEnabled;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -153,6 +163,7 @@ public class OrganizationCriteria implements Serializable, Criteria {
             Objects.equals(phone, that.phone) &&
             Objects.equals(userAddressId, that.userAddressId) &&
             Objects.equals(organizationBrandId, that.organizationBrandId) &&
+            Objects.equals(isEnabled, that.isEnabled) &&
             Objects.equals(organizationGroupId, that.organizationGroupId);
     }
 

@@ -6,7 +6,7 @@ import java.io.Serializable;
  * A DTO for the {@link com.vts.clientcenter.domain.OrganizationGroup} entity.
  */
 public class OrganizationGroupDTO implements Serializable {
-    
+
     private Long id;
 
     private String name;
@@ -14,8 +14,8 @@ public class OrganizationGroupDTO implements Serializable {
     private String description;
 
 
-    private Long organizationId;
-    
+    private String organizationId;
+
     public Long getId() {
         return id;
     }
@@ -40,11 +40,11 @@ public class OrganizationGroupDTO implements Serializable {
         this.description = description;
     }
 
-    public Long getOrganizationId() {
+    public String getOrganizationId() {
         return organizationId;
     }
 
-    public void setOrganizationId(Long organizationId) {
+    public void setOrganizationId(String organizationId) {
         this.organizationId = organizationId;
     }
 

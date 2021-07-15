@@ -44,6 +44,6 @@ public interface UserRepository extends JpaRepository<User, String>, JpaSpecific
     @Query("select u from User u " +
         "left join fetch u.authorities " +
         "where u.id =:userId")
-    Optional<User> findByUserIdEagerAuthority(@Param("userId") String id);
+    Optional<User> findByUserIdEagerAuthority(@Param("userId") String userId);
 
 }

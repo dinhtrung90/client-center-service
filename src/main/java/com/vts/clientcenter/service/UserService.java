@@ -200,7 +200,7 @@ public class UserService {
 
             profile.setUser(newUser);
 
-            userRepository.save(user);
+            userRepository.save(newUser);
 
             this.clearUserCaches(newUser);
         } else {

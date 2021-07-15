@@ -52,7 +52,7 @@ public class Authority extends AbstractAuditingEntity {
     @JoinTable(name = "tv_composite_role", joinColumns = @JoinColumn(name = "composite"), inverseJoinColumns = @JoinColumn(name = "child_role"))
     private Set<Authority> compositeRoles = new HashSet<>();
 
-    @ManyToMany(mappedBy = "authorities")
+    @ManyToMany(mappedBy = "authorities", fetch = FetchType.LAZY)
     private Set<User> users = new HashSet<>();
 
     public Set<Authority> getCompositeRoles() {

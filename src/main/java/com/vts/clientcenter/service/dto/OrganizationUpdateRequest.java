@@ -17,6 +17,12 @@ public class OrganizationUpdateRequest {
 
     private String description;
 
+    private String email;
+
+    private String phone;
+
+    private Boolean isEnabled;
+
     private List<OrganizationBrandDTO> brands;
 
     private List<OrganizationGroupDTO> groups;

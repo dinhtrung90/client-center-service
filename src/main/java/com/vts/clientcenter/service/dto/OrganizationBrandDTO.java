@@ -19,7 +19,9 @@ public class OrganizationBrandDTO implements Serializable {
 
     private String subDomain;
 
-    private Long organizationId;
+    private String organizationId;
+
+    private String isEnabled;
 
     public Long getId() {
         return id;
@@ -53,11 +55,11 @@ public class OrganizationBrandDTO implements Serializable {
         this.backgroundColor = backgroundColor;
     }
 
-    public Long getOrganizationId() {
+    public String getOrganizationId() {
         return organizationId;
     }
 
-    public void setOrganizationId(Long organizationId) {
+    public void setOrganizationId(String organizationId) {
         this.organizationId = organizationId;
     }
 
@@ -75,6 +77,14 @@ public class OrganizationBrandDTO implements Serializable {
 
     public void setSubDomain(String subDomain) {
         this.subDomain = subDomain;
+    }
+
+    public String getIsEnabled() {
+        return isEnabled;
+    }
+
+    public void setIsEnabled(String isEnabled) {
+        this.isEnabled = isEnabled;
     }
 
     @Override

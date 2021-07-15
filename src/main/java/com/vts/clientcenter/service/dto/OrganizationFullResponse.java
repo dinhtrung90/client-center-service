@@ -20,6 +20,12 @@ public class OrganizationFullResponse {
 
     private String description;
 
+    private String email;
+
+    private String phone;
+
+    private boolean isEnabled;
+
     private List<OrganizationBrandDTO> brands;
 
     private List<OrganizationGroupDTO> groups;

@@ -63,20 +63,6 @@ public class AdminOrganizationResource {
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
-    /**
-     * {@code GET  /organizations/:id} : get the "id" organization.
-     *
-     * @param id the id of the organizationDTO to retrieve.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the organizationDTO, or with status {@code 404 (Not Found)}.
-     */
-    @GetMapping("/organization/{id}")
-    @PreAuthorize("hasPermission('Organization', 'Read')")
-    public ResponseEntity<OrganizationDTO> getOrganization(@PathVariable String id) {
-        log.debug("REST request to get Organization : {}", id);
-        Optional<OrganizationDTO> organizationDTO = organizationService.findOne(id);
-        return ResponseUtil.wrapOrNotFound(organizationDTO);
-    }
-
     @PostMapping("/organization/create")
     @PreAuthorize("hasPermission('Organization', 'Create')")
     public ResponseEntity<OrganizationDTO> createOrganization(@Valid @RequestBody OrganizationDTO request) throws URISyntaxException {

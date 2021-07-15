@@ -3,19 +3,14 @@ package com.vts.clientcenter.service.impl;
 import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.config.KeycloakConfig;
 import com.vts.clientcenter.config.OrganizationConfig;
-import com.vts.clientcenter.domain.ClientApp;
-import com.vts.clientcenter.domain.OrganizationBrand;
-import com.vts.clientcenter.domain.OrganizationGroup;
+import com.vts.clientcenter.domain.*;
 import com.vts.clientcenter.events.OrganizationCreatedEvent;
 import com.vts.clientcenter.repository.ClientAppRepository;
 import com.vts.clientcenter.service.OrganizationService;
-import com.vts.clientcenter.domain.Organization;
 import com.vts.clientcenter.repository.OrganizationRepository;
-import com.vts.clientcenter.service.dto.OrganizationBrandDTO;
-import com.vts.clientcenter.service.dto.OrganizationDTO;
-import com.vts.clientcenter.service.dto.OrganizationUpdateRequest;
-import com.vts.clientcenter.service.dto.OrganizationFullResponse;
+import com.vts.clientcenter.service.dto.*;
 import com.vts.clientcenter.service.keycloak.KeycloakFacade;
+import com.vts.clientcenter.service.mapper.AuthorityMapper;
 import com.vts.clientcenter.service.mapper.OrganizationBrandMapper;
 import com.vts.clientcenter.service.mapper.OrganizationGroupMapper;
 import com.vts.clientcenter.service.mapper.OrganizationMapper;
@@ -56,6 +51,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     private final ClientAppRepository clientAppRepository;
 
+    private final AuthorityMapper authorityMapper;
+
     @Autowired
     private KeycloakConfig setting;
 
@@ -69,12 +66,13 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
-    public OrganizationServiceImpl(OrganizationRepository organizationRepository, OrganizationMapper organizationMapper, OrganizationBrandMapper organizationBrandMapper, OrganizationGroupMapper organizationGroupMapper, ClientAppRepository clientAppRepository) {
+    public OrganizationServiceImpl(OrganizationRepository organizationRepository, OrganizationMapper organizationMapper, OrganizationBrandMapper organizationBrandMapper, OrganizationGroupMapper organizationGroupMapper, ClientAppRepository clientAppRepository, AuthorityMapper authorityMapper) {
         this.organizationRepository = organizationRepository;
         this.organizationMapper = organizationMapper;
         this.organizationBrandMapper = organizationBrandMapper;
         this.organizationGroupMapper = organizationGroupMapper;
         this.clientAppRepository = clientAppRepository;
+        this.authorityMapper = authorityMapper;
     }
 
     @Override
@@ -116,6 +114,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         validateCreateOrg(request.getId(), request.getName());
 
         Organization organization = organizationMapper.toEntity(request);
+        organization.setEnabled(true); //default enabled = true
 
         //create keycloak
         ClientApp clientApp = keycloakFacade.createClientWithConfig(setting.getRealmApp(), organization.getName(), organizationConfig);
@@ -169,6 +168,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         organization.setDescription(request.getDescription());
 
+        organization.setEmail(request.getEmail());
+
+        organization.setPhone(request.getPhone());
+
+        organization.setEnabled(request.getIsEnabled());
+
         if (!CollectionUtils.isEmpty(request.getBrands())) {
 
             List<OrganizationBrandDTO> brands = request.getBrands();
@@ -187,8 +192,15 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         Organization result = organizationRepository.save(organization);
+        List<AuthorityDto> authorities = getAuthoritiesOfClientApp(organization);
 
         return OrganizationFullResponse.builder()
+            .displayName(result.getDisplayName())
+            .name(result.getName())
+            .email(result.getEmail())
+            .phone(result.getPhone())
+            .isEnabled(result.isEnabled())
+            .roles(authorities)
             .brands(organizationBrandMapper.toDto(new ArrayList<>(result.getOrganizationBrands())))
             .groups(organizationGroupMapper.toDto(new ArrayList<>(result.getOrganizationGroups())))
             .build();
@@ -213,7 +225,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         Organization organization = getValidatedOrganization(uuid);
 
-        organizationRepository.delete(organization);
+        organizationRepository.deleteById(organization.getId());
+
+        removeOrganizationFromKeycloak(organization.getId(), organization.getName());
     }
 
     @Override
@@ -225,6 +239,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         Organization organization = organizationRepository.getByUUID(uuid);
 
+        List<AuthorityDto> authorities = getAuthoritiesOfClientApp(organization);
         return Optional.of(
          OrganizationFullResponse.builder()
              .displayName(organization.getDisplayName())
@@ -232,8 +247,19 @@ public class OrganizationServiceImpl implements OrganizationService {
              .name(organization.getName())
             .brands(organizationBrandMapper.toDto(new ArrayList<>(organization.getOrganizationBrands())))
             .groups(organizationGroupMapper.toDto(new ArrayList<>(organization.getOrganizationGroups())))
+             .roles(authorities)
             .build()
         );
+    }
+
+    private List<AuthorityDto> getAuthoritiesOfClientApp(Organization organization) {
+        Optional<ClientApp> clientAppOptional = clientAppRepository.findById(organization.getId());
+        List<AuthorityDto> authorities = new ArrayList<>();
+        if (clientAppOptional.isPresent()) {
+            Set<Authority> clientAuthorities = clientAppOptional.get().getAuthorities();
+            authorities = authorityMapper.authorityToDtos(new ArrayList<>(clientAuthorities));
+        }
+        return authorities;
     }
 
     @Override
