@@ -50,7 +50,7 @@ public class Permission  extends AbstractAuditingEntity implements GrantedAuthor
         return (getAuthority().equals(ga.getAuthority()));
     }
 
-    @ManyToMany(mappedBy = "permissions")
+    @ManyToMany(mappedBy = "permissions", fetch = FetchType.LAZY)
     private Set<Authority> authorities = new HashSet<>();
 
     @Override

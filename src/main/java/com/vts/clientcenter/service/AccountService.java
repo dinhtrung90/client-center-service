@@ -457,7 +457,9 @@ public class AccountService {
 
         List<Authority> effectiveRoles = keycloakFacade.updateUserRoleMapping( setting.getRealmApp(), userId, assignRoles, clientApps);
 
-        List<Authority> effectiveTotal = Collections.join(effectiveRoles, clientRoles);
+        Set<Authority> authorityEntities = authorityRepository.getAllByNameIn(effectiveRoles.stream().map(Authority::getName).collect(Collectors.toList()));
+
+        List<Authority> effectiveTotal = Collections.join(new ArrayList<>(authorityEntities), clientRoles);
 
         //local roles
         List<Authority> authorities = effectiveTotal.stream().filter(r -> r.getName().startsWith("ROLE_")).collect(Collectors.toList());
