@@ -258,7 +258,7 @@ public class AccountService {
     }
 
     @Transactional
-    public UserDTO updateUserInfo(UpdateAccountRequest userDto) {
+    public UserFullInfoResponse updateUserInfo(UpdateAccountRequest userDto) {
 
         String createdBy = SecurityUtils.getCurrentUserLogin().orElse(SYSTEM_ACCOUNT);
 
@@ -288,7 +288,11 @@ public class AccountService {
 
         userRepository.save(user);
         clearUserCaches(user);
-        return userMapper.userToDto(user);
+
+        return UserFullInfoResponse.builder()
+            .userDto(userMapper.userToDto(user))
+            .userProfileDto(userProfileMapper.toDto(profile))
+            .build();
     }
 
     private void getAccountStatusFromKeycloak(UserDTO keycloakUser, User user) {

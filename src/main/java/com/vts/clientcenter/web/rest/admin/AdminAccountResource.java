@@ -95,9 +95,9 @@ public class AdminAccountResource {
 
     @PutMapping("/account/update")
     @PreAuthorize("hasPermission('Account', 'Update')")
-    public ResponseEntity<UserDTO> updateUser(@RequestBody UpdateAccountRequest userDto) {
+    public ResponseEntity<UserFullInfoResponse> updateUser(@RequestBody UpdateAccountRequest userDto) {
         log.debug("REST request to create User : {}", userDto);
-        UserDTO response = accountService.updateUserInfo(userDto);
+        UserFullInfoResponse response = accountService.updateUserInfo(userDto);
         return ResponseEntity
             .ok(response);
     }
