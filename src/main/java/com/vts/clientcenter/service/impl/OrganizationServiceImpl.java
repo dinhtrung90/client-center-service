@@ -6,6 +6,7 @@ import com.vts.clientcenter.config.OrganizationConfig;
 import com.vts.clientcenter.domain.*;
 import com.vts.clientcenter.events.OrganizationCreatedEvent;
 import com.vts.clientcenter.repository.ClientAppRepository;
+import com.vts.clientcenter.repository.UserRepository;
 import com.vts.clientcenter.service.OrganizationService;
 import com.vts.clientcenter.repository.OrganizationRepository;
 import com.vts.clientcenter.service.dto.*;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -51,6 +53,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     private final ClientAppRepository clientAppRepository;
 
+    private final UserRepository userRepository;
+
     private final AuthorityMapper authorityMapper;
 
     @Autowired
@@ -66,14 +70,16 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
-    public OrganizationServiceImpl(OrganizationRepository organizationRepository, OrganizationMapper organizationMapper, OrganizationBrandMapper organizationBrandMapper, OrganizationGroupMapper organizationGroupMapper, ClientAppRepository clientAppRepository, AuthorityMapper authorityMapper) {
+    public OrganizationServiceImpl(OrganizationRepository organizationRepository, OrganizationMapper organizationMapper, OrganizationBrandMapper organizationBrandMapper, OrganizationGroupMapper organizationGroupMapper, ClientAppRepository clientAppRepository, UserRepository userRepository, AuthorityMapper authorityMapper) {
         this.organizationRepository = organizationRepository;
         this.organizationMapper = organizationMapper;
         this.organizationBrandMapper = organizationBrandMapper;
         this.organizationGroupMapper = organizationGroupMapper;
         this.clientAppRepository = clientAppRepository;
+        this.userRepository = userRepository;
         this.authorityMapper = authorityMapper;
     }
+
 
     @Override
     public OrganizationDTO save(OrganizationDTO organizationDTO) {
@@ -225,7 +231,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         Organization organization = getValidatedOrganization(uuid);
 
-        organizationRepository.deleteById(organization.getId());
+        // bulk delete
+        userRepository.deleteBulkByOrganizationIdentifier(organization.getId());
+
+        organizationRepository.deleteByIdentifier(organization.getId());
 
         removeOrganizationFromKeycloak(organization.getId(), organization.getName());
     }
@@ -263,6 +272,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
+    @Async
     public void removeOrganizationFromKeycloak(String clientUUID, String clientName) {
         keycloakFacade.removeOrganizationFromKeycloak(setting.getRealmApp(), clientUUID, clientName);
     }

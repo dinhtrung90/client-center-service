@@ -7,6 +7,7 @@ import com.vts.clientcenter.domain.Module;
 import com.vts.clientcenter.domain.Permission;
 import com.vts.clientcenter.repository.AuthorityRepository;
 import com.vts.clientcenter.repository.ModuleRepository;
+import com.vts.clientcenter.repository.PermissionRepository;
 import com.vts.clientcenter.security.SecurityUtils;
 import com.vts.clientcenter.service.AbstractBaseService;
 import com.vts.clientcenter.service.AuthorityService;
@@ -60,6 +61,9 @@ public class AuthorityServiceImpl extends AbstractBaseService implements Authori
 
     @Autowired
     private ModuleRepository moduleRepository;
+
+    @Autowired
+    private PermissionRepository permissionRepository;
 
     public AuthorityServiceImpl(UserService userService) {
         super(userService);
@@ -148,14 +152,16 @@ public class AuthorityServiceImpl extends AbstractBaseService implements Authori
 
     private List<Permission> getPermissionFromCreateRequest(CreateRoleRequest dto) {
         List<PermissionDTO> availablePrivileges = dto.getAvailablePrivileges().stream()
-            .filter(PermissionDetailDto::isSelected).map(u ->  {
+            .filter(PermissionDetailDto::isSelected)
+            .map(u ->  {
                 PermissionDTO permissionDTO = new PermissionDTO();
                 permissionDTO.setName(u.getName());
                 permissionDTO.setDescription(u.getDesc());
                 return permissionDTO;
             }).collect(Collectors.toList());
 
-        return permissionMapper.toEntity(availablePrivileges);
+        return permissionRepository.findAllByNameIn(availablePrivileges.stream()
+            .map(PermissionDTO::getName).collect(Collectors.toList()));
     }
 
     @Override

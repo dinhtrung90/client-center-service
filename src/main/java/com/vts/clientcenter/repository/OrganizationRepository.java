@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import javax.transaction.Transactional;
 import java.util.Optional;
 
 /**
@@ -21,4 +22,9 @@ public interface OrganizationRepository extends JpaRepository<Organization, Stri
     Organization  getByUUID(@Param("uuid") String uuid);
 
     Optional<Organization> findByName(String name);
+
+    @Transactional
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("DELETE FROM Organization a WHERE a.id = ?1")
+    int deleteByIdentifier(String organizationId);
 }

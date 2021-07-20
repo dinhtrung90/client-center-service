@@ -6,6 +6,7 @@ import lombok.ToString;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.springframework.data.jpa.repository.EntityGraph;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
@@ -20,6 +21,12 @@ import java.util.Set;
 @Entity
 @Table(name = "tv_organization")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+
+@NamedEntityGraph(name = "organization_userAddresses_graph",
+    attributeNodes = {
+        @NamedAttributeNode("userAddresses")
+    }
+)
 public class Organization extends AbstractAuditingEntity {
 
     private static final long serialVersionUID = 1L;

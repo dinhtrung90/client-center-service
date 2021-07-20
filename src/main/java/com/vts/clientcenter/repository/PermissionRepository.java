@@ -14,5 +14,5 @@ import java.util.List;
 @Repository
 public interface PermissionRepository extends JpaRepository<Permission, Long>, JpaSpecificationExecutor<Permission> {
 
-
+    List<Permission> findAllByNameIn(List<String> names);
 }
