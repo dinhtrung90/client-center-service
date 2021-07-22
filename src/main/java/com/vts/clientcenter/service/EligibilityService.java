@@ -1,5 +1,6 @@
 package com.vts.clientcenter.service;
 
+import com.vts.clientcenter.service.dto.EligibilityCreationRequest;
 import com.vts.clientcenter.service.dto.EligibilityDTO;
 
 import org.springframework.data.domain.Page;
@@ -35,12 +36,14 @@ public interface EligibilityService {
      * @param id the id of the entity.
      * @return the entity.
      */
-    Optional<EligibilityDTO> findOne(Long id);
+    Optional<EligibilityDTO> findOne(String id);
 
     /**
      * Delete the "id" eligibility.
      *
      * @param id the id of the entity.
      */
-    void delete(Long id);
+    void delete(String id);
+
+    EligibilityDTO createEligibility(EligibilityCreationRequest dto);
 }

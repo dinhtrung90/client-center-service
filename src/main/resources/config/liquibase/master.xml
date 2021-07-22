@@ -32,6 +32,7 @@
     <include file="config/liquibase/changelog/20210708020553_added_entity_Organization.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210708022606_added_entity_OrganizationBrand.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210708023101_added_entity_OrganizationGroup.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20210112093134_added_entity_EligibilityMetadata.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <include file="config/liquibase/changelog/20210419071900_added_entity_constraints_EmployerDepartment.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210111071536_added_entity_constraints_Employee.xml" relativeToChangelogFile="false"/>

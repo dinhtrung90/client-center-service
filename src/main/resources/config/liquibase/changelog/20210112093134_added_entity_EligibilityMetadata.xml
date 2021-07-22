@@ -9,31 +9,18 @@
         <property name="autoIncrement" value="true"/>
 
     <!--
-        Added the entity Eligibility.
+        Added the entity EligibilityMetadata.
     -->
     <changeSet id="20210112093134-1" author="jhipster">
         <createTable tableName="eligibility">
             <column name="id" type="bigint" autoIncrement="${autoIncrement}">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="email" type="varchar(50)">
-                <constraints nullable="true" unique="true" uniqueConstraintName="ux_eligibility_email" />
-            </column>
-            <column name="phone" type="varchar(30)">
-                <constraints nullable="false" unique="true" uniqueConstraintName="ux_eligibility_phone" />
-            </column>
-            <column name="full_name" type="varchar(50)">
-                <constraints nullable="true" />
-            </column>
-            <column name="ssn" type="varchar(20)">
-                <constraints nullable="false" unique="true" uniqueConstraintName="ux_eligibility_ssn" />
-            </column>
-            <column name="birth_day" type="datetime">
+            <column name="thumb_url" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
         </createTable>
-        <dropDefaultValue tableName="eligibility" columnName="birth_day" columnDataType="datetime"/>
     </changeSet>
 
     <changeSet id="20210112093134-1-relations" author="jhipster">
@@ -55,11 +42,7 @@
                   separator=";"
                   tableName="eligibility">
             <column name="id" type="numeric"/>
-            <column name="email" type="string"/>
-            <column name="phone" type="string"/>
-            <column name="full_name" type="string"/>
-            <column name="ssn" type="string"/>
-            <column name="birth_day" type="datetime"/>
+            <column name="thumb_url" type="string"/>
             <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
         </loadData>
     </changeSet>

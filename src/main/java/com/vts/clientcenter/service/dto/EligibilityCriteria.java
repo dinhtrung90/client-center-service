@@ -25,34 +25,28 @@ public class EligibilityCriteria implements Serializable, Criteria {
 
     private static final long serialVersionUID = 1L;
 
-    private LongFilter id;
+    private StringFilter id;
 
-    private StringFilter fileName;
+    private StringFilter email;
 
-    private StringFilter refId;
+    private StringFilter phone;
 
-    private StringFilter fileUrl;
+    private StringFilter fullName;
 
-    private StringFilter createdBy;
+    private StringFilter ssn;
 
-    private InstantFilter createdDate;
-
-    private StringFilter lastModifiedBy;
-
-    private InstantFilter lastModifiedDate;
+    private InstantFilter birthDay;
 
     public EligibilityCriteria() {
     }
 
     public EligibilityCriteria(EligibilityCriteria other) {
         this.id = other.id == null ? null : other.id.copy();
-        this.fileName = other.fileName == null ? null : other.fileName.copy();
-        this.refId = other.refId == null ? null : other.refId.copy();
-        this.fileUrl = other.fileUrl == null ? null : other.fileUrl.copy();
-        this.createdBy = other.createdBy == null ? null : other.createdBy.copy();
-        this.createdDate = other.createdDate == null ? null : other.createdDate.copy();
-        this.lastModifiedBy = other.lastModifiedBy == null ? null : other.lastModifiedBy.copy();
-        this.lastModifiedDate = other.lastModifiedDate == null ? null : other.lastModifiedDate.copy();
+        this.email = other.email == null ? null : other.email.copy();
+        this.phone = other.phone == null ? null : other.phone.copy();
+        this.fullName = other.fullName == null ? null : other.fullName.copy();
+        this.ssn = other.ssn == null ? null : other.ssn.copy();
+        this.birthDay = other.birthDay == null ? null : other.birthDay.copy();
     }
 
     @Override
@@ -60,68 +54,53 @@ public class EligibilityCriteria implements Serializable, Criteria {
         return new EligibilityCriteria(this);
     }
 
-    public LongFilter getId() {
+
+    public StringFilter getId() {
         return id;
     }
 
-    public void setId(LongFilter id) {
+    public void setId(StringFilter id) {
         this.id = id;
     }
 
-    public StringFilter getFileName() {
-        return fileName;
+    public StringFilter getEmail() {
+        return email;
     }
 
-    public void setFileName(StringFilter fileName) {
-        this.fileName = fileName;
+    public void setEmail(StringFilter email) {
+        this.email = email;
     }
 
-    public StringFilter getRefId() {
-        return refId;
+    public StringFilter getPhone() {
+        return phone;
     }
 
-    public void setRefId(StringFilter refId) {
-        this.refId = refId;
+    public void setPhone(StringFilter phone) {
+        this.phone = phone;
     }
 
-    public StringFilter getFileUrl() {
-        return fileUrl;
+    public StringFilter getFullName() {
+        return fullName;
     }
 
-    public void setFileUrl(StringFilter fileUrl) {
-        this.fileUrl = fileUrl;
+    public void setFullName(StringFilter fullName) {
+        this.fullName = fullName;
     }
 
-    public StringFilter getCreatedBy() {
-        return createdBy;
+    public StringFilter getSsn() {
+        return ssn;
     }
 
-    public void setCreatedBy(StringFilter createdBy) {
-        this.createdBy = createdBy;
+    public void setSsn(StringFilter ssn) {
+        this.ssn = ssn;
     }
 
-    public InstantFilter getCreatedDate() {
-        return createdDate;
+    public InstantFilter getBirthDay() {
+        return birthDay;
     }
 
-    public void setCreatedDate(InstantFilter createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public StringFilter getLastModifiedBy() {
-        return lastModifiedBy;
-    }
-
-    public void setLastModifiedBy(StringFilter lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
-    }
-
-    public InstantFilter getLastModifiedDate() {
-        return lastModifiedDate;
-    }
-
-    public void setLastModifiedDate(InstantFilter lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
+    public void setBirthDay(InstantFilter birthDay) {
+        this.birthDay = birthDay;
     }
 
 
@@ -136,26 +115,22 @@ public class EligibilityCriteria implements Serializable, Criteria {
         final EligibilityCriteria that = (EligibilityCriteria) o;
         return
             Objects.equals(id, that.id) &&
-            Objects.equals(fileName, that.fileName) &&
-            Objects.equals(refId, that.refId) &&
-            Objects.equals(fileUrl, that.fileUrl) &&
-            Objects.equals(createdBy, that.createdBy) &&
-            Objects.equals(createdDate, that.createdDate) &&
-            Objects.equals(lastModifiedBy, that.lastModifiedBy) &&
-            Objects.equals(lastModifiedDate, that.lastModifiedDate);
+            Objects.equals(email, that.email) &&
+            Objects.equals(phone, that.phone) &&
+            Objects.equals(fullName, that.fullName) &&
+            Objects.equals(ssn, that.ssn) &&
+            Objects.equals(birthDay, that.birthDay);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(
         id,
-        fileName,
-        refId,
-        fileUrl,
-        createdBy,
-        createdDate,
-        lastModifiedBy,
-        lastModifiedDate
+        email,
+        phone,
+        fullName,
+        ssn,
+        birthDay
         );
     }
 
@@ -164,13 +139,11 @@ public class EligibilityCriteria implements Serializable, Criteria {
     public String toString() {
         return "EligibilityCriteria{" +
                 (id != null ? "id=" + id + ", " : "") +
-                (fileName != null ? "fileName=" + fileName + ", " : "") +
-                (refId != null ? "refId=" + refId + ", " : "") +
-                (fileUrl != null ? "fileUrl=" + fileUrl + ", " : "") +
-                (createdBy != null ? "createdBy=" + createdBy + ", " : "") +
-                (createdDate != null ? "createdDate=" + createdDate + ", " : "") +
-                (lastModifiedBy != null ? "lastModifiedBy=" + lastModifiedBy + ", " : "") +
-                (lastModifiedDate != null ? "lastModifiedDate=" + lastModifiedDate + ", " : "") +
+                (email != null ? "email=" + email + ", " : "") +
+                (phone != null ? "phone=" + phone + ", " : "") +
+                (fullName != null ? "fullName=" + fullName + ", " : "") +
+                (ssn != null ? "ssn=" + ssn + ", " : "") +
+                (birthDay != null ? "birthDay=" + birthDay + ", " : "") +
             "}";
     }
 

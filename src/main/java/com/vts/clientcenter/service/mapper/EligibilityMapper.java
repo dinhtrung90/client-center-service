@@ -14,7 +14,7 @@ public interface EligibilityMapper extends EntityMapper<EligibilityDTO, Eligibil
 
 
 
-    default Eligibility fromId(Long id) {
+    default Eligibility fromId(String id) {
         if (id == null) {
             return null;
         }

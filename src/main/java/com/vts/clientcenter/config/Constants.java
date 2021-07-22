@@ -53,6 +53,8 @@ public final class Constants {
     public static final String SERVER_DOMAIN = "fingmeup.com";
     public static final String SERVER_PROTOCOL = "https://";
     public static final String PREFIX_ROLE_ACCESS = "ROLE_ACCESS_";
+    public static final String EMAIL_HAS_EXISTED = "EMAIL_HAS_EXISTED";
+    public static final String PHONE_HAS_EXISTED = "PHONE_HAS_EXISTED";
 
     private Constants() {
 

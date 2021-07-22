@@ -2,147 +2,153 @@ package com.vts.clientcenter.domain;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import javax.validation.constraints.*;
 
-import java.io.Serializable;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A Eligibility.
  */
 @Entity
-@Table(name = "tvs_eligibility")
+@Table(name = "tv_eligibility")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class Eligibility implements Serializable {
+public class Eligibility extends AbstractAuditingEntity {
 
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+        name = "UUID",
+        strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    @Column(name = "id", updatable = false, nullable = false)
+    private String id;
 
-    @Column(name = "file_name")
-    private String fileName;
+    @Size(max = 50)
+    @Column(name = "email", length = 50, unique = true)
+    private String email;
 
-    @Column(name = "ref_id")
-    private String refId;
+    @NotNull
+    @Size(max = 30)
+    @Column(name = "phone", length = 30, nullable = false, unique = true)
+    private String phone;
 
-    @Column(name = "file_url")
-    private String fileUrl;
+    @Size(max = 50)
+    @Column(name = "full_name", length = 50)
+    private String fullName;
 
-    @Column(name = "created_by")
-    private String createdBy;
+    @NotNull
+    @Size(max = 20)
+    @Column(name = "ssn", length = 20, nullable = false, unique = true)
+    private String ssn;
 
-    @Column(name = "created_date")
-    private Instant createdDate;
+    @Column(name = "birth_day")
+    private Instant birthDay;
 
-    @Column(name = "last_modified_by")
-    private String lastModifiedBy;
 
-    @Column(name = "last_modified_date")
-    private Instant lastModifiedDate;
+    @OneToMany(mappedBy = "eligibility", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    Set<EligibilityMetadata> eligibilityMetadata = new HashSet<>();
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
-    public Long getId() {
+
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public String getFileName() {
-        return fileName;
+    public String getEmail() {
+        return email;
     }
 
-    public Eligibility fileName(String fileName) {
-        this.fileName = fileName;
+    public Eligibility email(String email) {
+        this.email = email;
         return this;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public String getRefId() {
-        return refId;
+    public String getPhone() {
+        return phone;
     }
 
-    public Eligibility refId(String refId) {
-        this.refId = refId;
+    public Eligibility phone(String phone) {
+        this.phone = phone;
         return this;
     }
 
-    public void setRefId(String refId) {
-        this.refId = refId;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
-    public String getFileUrl() {
-        return fileUrl;
+    public String getFullName() {
+        return fullName;
     }
 
-    public Eligibility fileUrl(String fileUrl) {
-        this.fileUrl = fileUrl;
+    public Eligibility fullName(String fullName) {
+        this.fullName = fullName;
         return this;
     }
 
-    public void setFileUrl(String fileUrl) {
-        this.fileUrl = fileUrl;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
-    public String getCreatedBy() {
-        return createdBy;
+    public String getSsn() {
+        return ssn;
     }
 
-    public Eligibility createdBy(String createdBy) {
-        this.createdBy = createdBy;
+    public Eligibility ssn(String ssn) {
+        this.ssn = ssn;
         return this;
     }
 
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
+    public void setSsn(String ssn) {
+        this.ssn = ssn;
     }
 
-    public Instant getCreatedDate() {
-        return createdDate;
+    public Instant getBirthDay() {
+        return birthDay;
     }
 
-    public Eligibility createdDate(Instant createdDate) {
-        this.createdDate = createdDate;
+    public Eligibility birthDay(Instant birthDay) {
+        this.birthDay = birthDay;
         return this;
     }
 
-    public void setCreatedDate(Instant createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public String getLastModifiedBy() {
-        return lastModifiedBy;
-    }
-
-    public Eligibility lastModifiedBy(String lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
-        return this;
-    }
-
-    public void setLastModifiedBy(String lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
-    }
-
-    public Instant getLastModifiedDate() {
-        return lastModifiedDate;
-    }
-
-    public Eligibility lastModifiedDate(Instant lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
-        return this;
-    }
-
-    public void setLastModifiedDate(Instant lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
+    public void setBirthDay(Instant birthDay) {
+        this.birthDay = birthDay;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
+
+    public void addEligibilityMetadata(EligibilityMetadata eligibility) {
+        this.eligibilityMetadata.add(eligibility);
+        eligibility.setEligibility(this);
+    }
+
+    public Eligibility removeEligibilityMetadata(EligibilityMetadata eligibility) {
+        this.eligibilityMetadata.remove(eligibility);
+        eligibility.setEligibility(null);
+        return this;
+    }
+
+    public Set<EligibilityMetadata> getEligibilityMetadata() {
+        return eligibilityMetadata;
+    }
+
+    public void setEligibilityMetadata(Set<EligibilityMetadata> eligibilityMetadata) {
+        this.eligibilityMetadata = eligibilityMetadata;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -165,13 +171,11 @@ public class Eligibility implements Serializable {
     public String toString() {
         return "Eligibility{" +
             "id=" + getId() +
-            ", fileName='" + getFileName() + "'" +
-            ", refId='" + getRefId() + "'" +
-            ", fileUrl='" + getFileUrl() + "'" +
-            ", createdBy='" + getCreatedBy() + "'" +
-            ", createdDate='" + getCreatedDate() + "'" +
-            ", lastModifiedBy='" + getLastModifiedBy() + "'" +
-            ", lastModifiedDate='" + getLastModifiedDate() + "'" +
+            ", email='" + getEmail() + "'" +
+            ", phone='" + getPhone() + "'" +
+            ", fullName='" + getFullName() + "'" +
+            ", ssn='" + getSsn() + "'" +
+            ", birthDay='" + getBirthDay() + "'" +
             "}";
     }
 }

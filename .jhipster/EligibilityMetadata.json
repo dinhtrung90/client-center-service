@@ -1,0 +1,21 @@
+{
+  "fluentMethods": true,
+  "clientRootFolder": "ClientCenterService",
+  "relationships": [],
+  "fields": [
+    {
+      "fieldName": "thumbUrl",
+      "fieldType": "String"
+    }
+  ],
+  "changelogDate": "20210112093134",
+  "dto": "mapstruct",
+  "searchEngine": false,
+  "service": "serviceImpl",
+  "entityTableName": "eligibility",
+  "databaseType": "sql",
+  "readOnly": true,
+  "jpaMetamodelFiltering": true,
+  "pagination": "infinite-scroll",
+  "microserviceName": "ClientCenterService"
+}

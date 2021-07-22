@@ -43,26 +43,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WithMockUser
 public class EligibilityResourceIT {
 
-    private static final String DEFAULT_FILE_NAME = "AAAAAAAAAA";
-    private static final String UPDATED_FILE_NAME = "BBBBBBBBBB";
+    private static final String DEFAULT_EMAIL = "AAAAAAAAAA";
+    private static final String UPDATED_EMAIL = "BBBBBBBBBB";
 
-    private static final String DEFAULT_REF_ID = "AAAAAAAAAA";
-    private static final String UPDATED_REF_ID = "BBBBBBBBBB";
+    private static final String DEFAULT_PHONE = "AAAAAAAAAA";
+    private static final String UPDATED_PHONE = "BBBBBBBBBB";
 
-    private static final String DEFAULT_FILE_URL = "AAAAAAAAAA";
-    private static final String UPDATED_FILE_URL = "BBBBBBBBBB";
+    private static final String DEFAULT_FULL_NAME = "AAAAAAAAAA";
+    private static final String UPDATED_FULL_NAME = "BBBBBBBBBB";
 
-    private static final String DEFAULT_CREATED_BY = "AAAAAAAAAA";
-    private static final String UPDATED_CREATED_BY = "BBBBBBBBBB";
+    private static final String DEFAULT_SSN = "AAAAAAAAAA";
+    private static final String UPDATED_SSN = "BBBBBBBBBB";
 
-    private static final Instant DEFAULT_CREATED_DATE = Instant.ofEpochMilli(0L);
-    private static final Instant UPDATED_CREATED_DATE = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-
-    private static final String DEFAULT_LAST_MODIFIED_BY = "AAAAAAAAAA";
-    private static final String UPDATED_LAST_MODIFIED_BY = "BBBBBBBBBB";
-
-    private static final Instant DEFAULT_LAST_MODIFIED_DATE = Instant.ofEpochMilli(0L);
-    private static final Instant UPDATED_LAST_MODIFIED_DATE = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+    private static final Instant DEFAULT_BIRTH_DAY = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_BIRTH_DAY = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
     @Autowired
     private EligibilityRepository eligibilityRepository;
@@ -92,13 +86,11 @@ public class EligibilityResourceIT {
      */
     public static Eligibility createEntity(EntityManager em) {
         Eligibility eligibility = new Eligibility()
-            .fileName(DEFAULT_FILE_NAME)
-            .refId(DEFAULT_REF_ID)
-            .fileUrl(DEFAULT_FILE_URL)
-            .createdBy(DEFAULT_CREATED_BY)
-            .createdDate(DEFAULT_CREATED_DATE)
-            .lastModifiedBy(DEFAULT_LAST_MODIFIED_BY)
-            .lastModifiedDate(DEFAULT_LAST_MODIFIED_DATE);
+            .email(DEFAULT_EMAIL)
+            .phone(DEFAULT_PHONE)
+            .fullName(DEFAULT_FULL_NAME)
+            .ssn(DEFAULT_SSN)
+            .birthDay(DEFAULT_BIRTH_DAY);
         return eligibility;
     }
     /**
@@ -109,13 +101,11 @@ public class EligibilityResourceIT {
      */
     public static Eligibility createUpdatedEntity(EntityManager em) {
         Eligibility eligibility = new Eligibility()
-            .fileName(UPDATED_FILE_NAME)
-            .refId(UPDATED_REF_ID)
-            .fileUrl(UPDATED_FILE_URL)
-            .createdBy(UPDATED_CREATED_BY)
-            .createdDate(UPDATED_CREATED_DATE)
-            .lastModifiedBy(UPDATED_LAST_MODIFIED_BY)
-            .lastModifiedDate(UPDATED_LAST_MODIFIED_DATE);
+            .email(UPDATED_EMAIL)
+            .phone(UPDATED_PHONE)
+            .fullName(UPDATED_FULL_NAME)
+            .ssn(UPDATED_SSN)
+            .birthDay(UPDATED_BIRTH_DAY);
         return eligibility;
     }
 
@@ -134,16 +124,14 @@ public class EligibilityResourceIT {
         restEligibilityMockMvc.perform(get("/api/eligibilities?sort=id,desc"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(eligibility.getId().intValue())))
-            .andExpect(jsonPath("$.[*].fileName").value(hasItem(DEFAULT_FILE_NAME)))
-            .andExpect(jsonPath("$.[*].refId").value(hasItem(DEFAULT_REF_ID)))
-            .andExpect(jsonPath("$.[*].fileUrl").value(hasItem(DEFAULT_FILE_URL)))
-            .andExpect(jsonPath("$.[*].createdBy").value(hasItem(DEFAULT_CREATED_BY)))
-            .andExpect(jsonPath("$.[*].createdDate").value(hasItem(DEFAULT_CREATED_DATE.toString())))
-            .andExpect(jsonPath("$.[*].lastModifiedBy").value(hasItem(DEFAULT_LAST_MODIFIED_BY)))
-            .andExpect(jsonPath("$.[*].lastModifiedDate").value(hasItem(DEFAULT_LAST_MODIFIED_DATE.toString())));
+            .andExpect(jsonPath("$.[*].id").value(hasItem(eligibility.getId())))
+            .andExpect(jsonPath("$.[*].email").value(hasItem(DEFAULT_EMAIL)))
+            .andExpect(jsonPath("$.[*].phone").value(hasItem(DEFAULT_PHONE)))
+            .andExpect(jsonPath("$.[*].fullName").value(hasItem(DEFAULT_FULL_NAME)))
+            .andExpect(jsonPath("$.[*].ssn").value(hasItem(DEFAULT_SSN)))
+            .andExpect(jsonPath("$.[*].birthDay").value(hasItem(DEFAULT_BIRTH_DAY.toString())));
     }
-    
+
     @Test
     @Transactional
     public void getEligibility() throws Exception {
@@ -154,14 +142,12 @@ public class EligibilityResourceIT {
         restEligibilityMockMvc.perform(get("/api/eligibilities/{id}", eligibility.getId()))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.id").value(eligibility.getId().intValue()))
-            .andExpect(jsonPath("$.fileName").value(DEFAULT_FILE_NAME))
-            .andExpect(jsonPath("$.refId").value(DEFAULT_REF_ID))
-            .andExpect(jsonPath("$.fileUrl").value(DEFAULT_FILE_URL))
-            .andExpect(jsonPath("$.createdBy").value(DEFAULT_CREATED_BY))
-            .andExpect(jsonPath("$.createdDate").value(DEFAULT_CREATED_DATE.toString()))
-            .andExpect(jsonPath("$.lastModifiedBy").value(DEFAULT_LAST_MODIFIED_BY))
-            .andExpect(jsonPath("$.lastModifiedDate").value(DEFAULT_LAST_MODIFIED_DATE.toString()));
+            .andExpect(jsonPath("$.id").value(eligibility.getId()))
+            .andExpect(jsonPath("$.email").value(DEFAULT_EMAIL))
+            .andExpect(jsonPath("$.phone").value(DEFAULT_PHONE))
+            .andExpect(jsonPath("$.fullName").value(DEFAULT_FULL_NAME))
+            .andExpect(jsonPath("$.ssn").value(DEFAULT_SSN))
+            .andExpect(jsonPath("$.birthDay").value(DEFAULT_BIRTH_DAY.toString()));
     }
 
 
@@ -171,7 +157,7 @@ public class EligibilityResourceIT {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        Long id = eligibility.getId();
+        String id = eligibility.getId();
 
         defaultEligibilityShouldBeFound("id.equals=" + id);
         defaultEligibilityShouldNotBeFound("id.notEquals=" + id);
@@ -186,496 +172,366 @@ public class EligibilityResourceIT {
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByFileNameIsEqualToSomething() throws Exception {
+    public void getAllEligibilitiesByEmailIsEqualToSomething() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where fileName equals to DEFAULT_FILE_NAME
-        defaultEligibilityShouldBeFound("fileName.equals=" + DEFAULT_FILE_NAME);
+        // Get all the eligibilityList where email equals to DEFAULT_EMAIL
+        defaultEligibilityShouldBeFound("email.equals=" + DEFAULT_EMAIL);
 
-        // Get all the eligibilityList where fileName equals to UPDATED_FILE_NAME
-        defaultEligibilityShouldNotBeFound("fileName.equals=" + UPDATED_FILE_NAME);
+        // Get all the eligibilityList where email equals to UPDATED_EMAIL
+        defaultEligibilityShouldNotBeFound("email.equals=" + UPDATED_EMAIL);
     }
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByFileNameIsNotEqualToSomething() throws Exception {
+    public void getAllEligibilitiesByEmailIsNotEqualToSomething() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where fileName not equals to DEFAULT_FILE_NAME
-        defaultEligibilityShouldNotBeFound("fileName.notEquals=" + DEFAULT_FILE_NAME);
+        // Get all the eligibilityList where email not equals to DEFAULT_EMAIL
+        defaultEligibilityShouldNotBeFound("email.notEquals=" + DEFAULT_EMAIL);
 
-        // Get all the eligibilityList where fileName not equals to UPDATED_FILE_NAME
-        defaultEligibilityShouldBeFound("fileName.notEquals=" + UPDATED_FILE_NAME);
+        // Get all the eligibilityList where email not equals to UPDATED_EMAIL
+        defaultEligibilityShouldBeFound("email.notEquals=" + UPDATED_EMAIL);
     }
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByFileNameIsInShouldWork() throws Exception {
+    public void getAllEligibilitiesByEmailIsInShouldWork() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where fileName in DEFAULT_FILE_NAME or UPDATED_FILE_NAME
-        defaultEligibilityShouldBeFound("fileName.in=" + DEFAULT_FILE_NAME + "," + UPDATED_FILE_NAME);
+        // Get all the eligibilityList where email in DEFAULT_EMAIL or UPDATED_EMAIL
+        defaultEligibilityShouldBeFound("email.in=" + DEFAULT_EMAIL + "," + UPDATED_EMAIL);
 
-        // Get all the eligibilityList where fileName equals to UPDATED_FILE_NAME
-        defaultEligibilityShouldNotBeFound("fileName.in=" + UPDATED_FILE_NAME);
+        // Get all the eligibilityList where email equals to UPDATED_EMAIL
+        defaultEligibilityShouldNotBeFound("email.in=" + UPDATED_EMAIL);
     }
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByFileNameIsNullOrNotNull() throws Exception {
+    public void getAllEligibilitiesByEmailIsNullOrNotNull() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where fileName is not null
-        defaultEligibilityShouldBeFound("fileName.specified=true");
+        // Get all the eligibilityList where email is not null
+        defaultEligibilityShouldBeFound("email.specified=true");
 
-        // Get all the eligibilityList where fileName is null
-        defaultEligibilityShouldNotBeFound("fileName.specified=false");
+        // Get all the eligibilityList where email is null
+        defaultEligibilityShouldNotBeFound("email.specified=false");
     }
                 @Test
     @Transactional
-    public void getAllEligibilitiesByFileNameContainsSomething() throws Exception {
+    public void getAllEligibilitiesByEmailContainsSomething() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where fileName contains DEFAULT_FILE_NAME
-        defaultEligibilityShouldBeFound("fileName.contains=" + DEFAULT_FILE_NAME);
+        // Get all the eligibilityList where email contains DEFAULT_EMAIL
+        defaultEligibilityShouldBeFound("email.contains=" + DEFAULT_EMAIL);
 
-        // Get all the eligibilityList where fileName contains UPDATED_FILE_NAME
-        defaultEligibilityShouldNotBeFound("fileName.contains=" + UPDATED_FILE_NAME);
+        // Get all the eligibilityList where email contains UPDATED_EMAIL
+        defaultEligibilityShouldNotBeFound("email.contains=" + UPDATED_EMAIL);
     }
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByFileNameNotContainsSomething() throws Exception {
+    public void getAllEligibilitiesByEmailNotContainsSomething() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where fileName does not contain DEFAULT_FILE_NAME
-        defaultEligibilityShouldNotBeFound("fileName.doesNotContain=" + DEFAULT_FILE_NAME);
+        // Get all the eligibilityList where email does not contain DEFAULT_EMAIL
+        defaultEligibilityShouldNotBeFound("email.doesNotContain=" + DEFAULT_EMAIL);
 
-        // Get all the eligibilityList where fileName does not contain UPDATED_FILE_NAME
-        defaultEligibilityShouldBeFound("fileName.doesNotContain=" + UPDATED_FILE_NAME);
+        // Get all the eligibilityList where email does not contain UPDATED_EMAIL
+        defaultEligibilityShouldBeFound("email.doesNotContain=" + UPDATED_EMAIL);
     }
 
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByRefIdIsEqualToSomething() throws Exception {
+    public void getAllEligibilitiesByPhoneIsEqualToSomething() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where refId equals to DEFAULT_REF_ID
-        defaultEligibilityShouldBeFound("refId.equals=" + DEFAULT_REF_ID);
+        // Get all the eligibilityList where phone equals to DEFAULT_PHONE
+        defaultEligibilityShouldBeFound("phone.equals=" + DEFAULT_PHONE);
 
-        // Get all the eligibilityList where refId equals to UPDATED_REF_ID
-        defaultEligibilityShouldNotBeFound("refId.equals=" + UPDATED_REF_ID);
+        // Get all the eligibilityList where phone equals to UPDATED_PHONE
+        defaultEligibilityShouldNotBeFound("phone.equals=" + UPDATED_PHONE);
     }
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByRefIdIsNotEqualToSomething() throws Exception {
+    public void getAllEligibilitiesByPhoneIsNotEqualToSomething() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where refId not equals to DEFAULT_REF_ID
-        defaultEligibilityShouldNotBeFound("refId.notEquals=" + DEFAULT_REF_ID);
+        // Get all the eligibilityList where phone not equals to DEFAULT_PHONE
+        defaultEligibilityShouldNotBeFound("phone.notEquals=" + DEFAULT_PHONE);
 
-        // Get all the eligibilityList where refId not equals to UPDATED_REF_ID
-        defaultEligibilityShouldBeFound("refId.notEquals=" + UPDATED_REF_ID);
+        // Get all the eligibilityList where phone not equals to UPDATED_PHONE
+        defaultEligibilityShouldBeFound("phone.notEquals=" + UPDATED_PHONE);
     }
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByRefIdIsInShouldWork() throws Exception {
+    public void getAllEligibilitiesByPhoneIsInShouldWork() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where refId in DEFAULT_REF_ID or UPDATED_REF_ID
-        defaultEligibilityShouldBeFound("refId.in=" + DEFAULT_REF_ID + "," + UPDATED_REF_ID);
+        // Get all the eligibilityList where phone in DEFAULT_PHONE or UPDATED_PHONE
+        defaultEligibilityShouldBeFound("phone.in=" + DEFAULT_PHONE + "," + UPDATED_PHONE);
 
-        // Get all the eligibilityList where refId equals to UPDATED_REF_ID
-        defaultEligibilityShouldNotBeFound("refId.in=" + UPDATED_REF_ID);
+        // Get all the eligibilityList where phone equals to UPDATED_PHONE
+        defaultEligibilityShouldNotBeFound("phone.in=" + UPDATED_PHONE);
     }
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByRefIdIsNullOrNotNull() throws Exception {
+    public void getAllEligibilitiesByPhoneIsNullOrNotNull() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where refId is not null
-        defaultEligibilityShouldBeFound("refId.specified=true");
+        // Get all the eligibilityList where phone is not null
+        defaultEligibilityShouldBeFound("phone.specified=true");
 
-        // Get all the eligibilityList where refId is null
-        defaultEligibilityShouldNotBeFound("refId.specified=false");
+        // Get all the eligibilityList where phone is null
+        defaultEligibilityShouldNotBeFound("phone.specified=false");
     }
                 @Test
     @Transactional
-    public void getAllEligibilitiesByRefIdContainsSomething() throws Exception {
+    public void getAllEligibilitiesByPhoneContainsSomething() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where refId contains DEFAULT_REF_ID
-        defaultEligibilityShouldBeFound("refId.contains=" + DEFAULT_REF_ID);
+        // Get all the eligibilityList where phone contains DEFAULT_PHONE
+        defaultEligibilityShouldBeFound("phone.contains=" + DEFAULT_PHONE);
 
-        // Get all the eligibilityList where refId contains UPDATED_REF_ID
-        defaultEligibilityShouldNotBeFound("refId.contains=" + UPDATED_REF_ID);
+        // Get all the eligibilityList where phone contains UPDATED_PHONE
+        defaultEligibilityShouldNotBeFound("phone.contains=" + UPDATED_PHONE);
     }
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByRefIdNotContainsSomething() throws Exception {
+    public void getAllEligibilitiesByPhoneNotContainsSomething() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where refId does not contain DEFAULT_REF_ID
-        defaultEligibilityShouldNotBeFound("refId.doesNotContain=" + DEFAULT_REF_ID);
+        // Get all the eligibilityList where phone does not contain DEFAULT_PHONE
+        defaultEligibilityShouldNotBeFound("phone.doesNotContain=" + DEFAULT_PHONE);
 
-        // Get all the eligibilityList where refId does not contain UPDATED_REF_ID
-        defaultEligibilityShouldBeFound("refId.doesNotContain=" + UPDATED_REF_ID);
+        // Get all the eligibilityList where phone does not contain UPDATED_PHONE
+        defaultEligibilityShouldBeFound("phone.doesNotContain=" + UPDATED_PHONE);
     }
 
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByFileUrlIsEqualToSomething() throws Exception {
+    public void getAllEligibilitiesByFullNameIsEqualToSomething() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where fileUrl equals to DEFAULT_FILE_URL
-        defaultEligibilityShouldBeFound("fileUrl.equals=" + DEFAULT_FILE_URL);
+        // Get all the eligibilityList where fullName equals to DEFAULT_FULL_NAME
+        defaultEligibilityShouldBeFound("fullName.equals=" + DEFAULT_FULL_NAME);
 
-        // Get all the eligibilityList where fileUrl equals to UPDATED_FILE_URL
-        defaultEligibilityShouldNotBeFound("fileUrl.equals=" + UPDATED_FILE_URL);
+        // Get all the eligibilityList where fullName equals to UPDATED_FULL_NAME
+        defaultEligibilityShouldNotBeFound("fullName.equals=" + UPDATED_FULL_NAME);
     }
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByFileUrlIsNotEqualToSomething() throws Exception {
+    public void getAllEligibilitiesByFullNameIsNotEqualToSomething() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where fileUrl not equals to DEFAULT_FILE_URL
-        defaultEligibilityShouldNotBeFound("fileUrl.notEquals=" + DEFAULT_FILE_URL);
+        // Get all the eligibilityList where fullName not equals to DEFAULT_FULL_NAME
+        defaultEligibilityShouldNotBeFound("fullName.notEquals=" + DEFAULT_FULL_NAME);
 
-        // Get all the eligibilityList where fileUrl not equals to UPDATED_FILE_URL
-        defaultEligibilityShouldBeFound("fileUrl.notEquals=" + UPDATED_FILE_URL);
+        // Get all the eligibilityList where fullName not equals to UPDATED_FULL_NAME
+        defaultEligibilityShouldBeFound("fullName.notEquals=" + UPDATED_FULL_NAME);
     }
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByFileUrlIsInShouldWork() throws Exception {
+    public void getAllEligibilitiesByFullNameIsInShouldWork() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where fileUrl in DEFAULT_FILE_URL or UPDATED_FILE_URL
-        defaultEligibilityShouldBeFound("fileUrl.in=" + DEFAULT_FILE_URL + "," + UPDATED_FILE_URL);
+        // Get all the eligibilityList where fullName in DEFAULT_FULL_NAME or UPDATED_FULL_NAME
+        defaultEligibilityShouldBeFound("fullName.in=" + DEFAULT_FULL_NAME + "," + UPDATED_FULL_NAME);
 
-        // Get all the eligibilityList where fileUrl equals to UPDATED_FILE_URL
-        defaultEligibilityShouldNotBeFound("fileUrl.in=" + UPDATED_FILE_URL);
+        // Get all the eligibilityList where fullName equals to UPDATED_FULL_NAME
+        defaultEligibilityShouldNotBeFound("fullName.in=" + UPDATED_FULL_NAME);
     }
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByFileUrlIsNullOrNotNull() throws Exception {
+    public void getAllEligibilitiesByFullNameIsNullOrNotNull() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where fileUrl is not null
-        defaultEligibilityShouldBeFound("fileUrl.specified=true");
+        // Get all the eligibilityList where fullName is not null
+        defaultEligibilityShouldBeFound("fullName.specified=true");
 
-        // Get all the eligibilityList where fileUrl is null
-        defaultEligibilityShouldNotBeFound("fileUrl.specified=false");
+        // Get all the eligibilityList where fullName is null
+        defaultEligibilityShouldNotBeFound("fullName.specified=false");
     }
                 @Test
     @Transactional
-    public void getAllEligibilitiesByFileUrlContainsSomething() throws Exception {
+    public void getAllEligibilitiesByFullNameContainsSomething() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where fileUrl contains DEFAULT_FILE_URL
-        defaultEligibilityShouldBeFound("fileUrl.contains=" + DEFAULT_FILE_URL);
+        // Get all the eligibilityList where fullName contains DEFAULT_FULL_NAME
+        defaultEligibilityShouldBeFound("fullName.contains=" + DEFAULT_FULL_NAME);
 
-        // Get all the eligibilityList where fileUrl contains UPDATED_FILE_URL
-        defaultEligibilityShouldNotBeFound("fileUrl.contains=" + UPDATED_FILE_URL);
+        // Get all the eligibilityList where fullName contains UPDATED_FULL_NAME
+        defaultEligibilityShouldNotBeFound("fullName.contains=" + UPDATED_FULL_NAME);
     }
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByFileUrlNotContainsSomething() throws Exception {
+    public void getAllEligibilitiesByFullNameNotContainsSomething() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where fileUrl does not contain DEFAULT_FILE_URL
-        defaultEligibilityShouldNotBeFound("fileUrl.doesNotContain=" + DEFAULT_FILE_URL);
+        // Get all the eligibilityList where fullName does not contain DEFAULT_FULL_NAME
+        defaultEligibilityShouldNotBeFound("fullName.doesNotContain=" + DEFAULT_FULL_NAME);
 
-        // Get all the eligibilityList where fileUrl does not contain UPDATED_FILE_URL
-        defaultEligibilityShouldBeFound("fileUrl.doesNotContain=" + UPDATED_FILE_URL);
+        // Get all the eligibilityList where fullName does not contain UPDATED_FULL_NAME
+        defaultEligibilityShouldBeFound("fullName.doesNotContain=" + UPDATED_FULL_NAME);
     }
 
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByCreatedByIsEqualToSomething() throws Exception {
+    public void getAllEligibilitiesBySsnIsEqualToSomething() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where createdBy equals to DEFAULT_CREATED_BY
-        defaultEligibilityShouldBeFound("createdBy.equals=" + DEFAULT_CREATED_BY);
+        // Get all the eligibilityList where ssn equals to DEFAULT_SSN
+        defaultEligibilityShouldBeFound("ssn.equals=" + DEFAULT_SSN);
 
-        // Get all the eligibilityList where createdBy equals to UPDATED_CREATED_BY
-        defaultEligibilityShouldNotBeFound("createdBy.equals=" + UPDATED_CREATED_BY);
+        // Get all the eligibilityList where ssn equals to UPDATED_SSN
+        defaultEligibilityShouldNotBeFound("ssn.equals=" + UPDATED_SSN);
     }
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByCreatedByIsNotEqualToSomething() throws Exception {
+    public void getAllEligibilitiesBySsnIsNotEqualToSomething() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where createdBy not equals to DEFAULT_CREATED_BY
-        defaultEligibilityShouldNotBeFound("createdBy.notEquals=" + DEFAULT_CREATED_BY);
+        // Get all the eligibilityList where ssn not equals to DEFAULT_SSN
+        defaultEligibilityShouldNotBeFound("ssn.notEquals=" + DEFAULT_SSN);
 
-        // Get all the eligibilityList where createdBy not equals to UPDATED_CREATED_BY
-        defaultEligibilityShouldBeFound("createdBy.notEquals=" + UPDATED_CREATED_BY);
+        // Get all the eligibilityList where ssn not equals to UPDATED_SSN
+        defaultEligibilityShouldBeFound("ssn.notEquals=" + UPDATED_SSN);
     }
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByCreatedByIsInShouldWork() throws Exception {
+    public void getAllEligibilitiesBySsnIsInShouldWork() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where createdBy in DEFAULT_CREATED_BY or UPDATED_CREATED_BY
-        defaultEligibilityShouldBeFound("createdBy.in=" + DEFAULT_CREATED_BY + "," + UPDATED_CREATED_BY);
+        // Get all the eligibilityList where ssn in DEFAULT_SSN or UPDATED_SSN
+        defaultEligibilityShouldBeFound("ssn.in=" + DEFAULT_SSN + "," + UPDATED_SSN);
 
-        // Get all the eligibilityList where createdBy equals to UPDATED_CREATED_BY
-        defaultEligibilityShouldNotBeFound("createdBy.in=" + UPDATED_CREATED_BY);
+        // Get all the eligibilityList where ssn equals to UPDATED_SSN
+        defaultEligibilityShouldNotBeFound("ssn.in=" + UPDATED_SSN);
     }
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByCreatedByIsNullOrNotNull() throws Exception {
+    public void getAllEligibilitiesBySsnIsNullOrNotNull() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where createdBy is not null
-        defaultEligibilityShouldBeFound("createdBy.specified=true");
+        // Get all the eligibilityList where ssn is not null
+        defaultEligibilityShouldBeFound("ssn.specified=true");
 
-        // Get all the eligibilityList where createdBy is null
-        defaultEligibilityShouldNotBeFound("createdBy.specified=false");
+        // Get all the eligibilityList where ssn is null
+        defaultEligibilityShouldNotBeFound("ssn.specified=false");
     }
                 @Test
     @Transactional
-    public void getAllEligibilitiesByCreatedByContainsSomething() throws Exception {
+    public void getAllEligibilitiesBySsnContainsSomething() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where createdBy contains DEFAULT_CREATED_BY
-        defaultEligibilityShouldBeFound("createdBy.contains=" + DEFAULT_CREATED_BY);
+        // Get all the eligibilityList where ssn contains DEFAULT_SSN
+        defaultEligibilityShouldBeFound("ssn.contains=" + DEFAULT_SSN);
 
-        // Get all the eligibilityList where createdBy contains UPDATED_CREATED_BY
-        defaultEligibilityShouldNotBeFound("createdBy.contains=" + UPDATED_CREATED_BY);
+        // Get all the eligibilityList where ssn contains UPDATED_SSN
+        defaultEligibilityShouldNotBeFound("ssn.contains=" + UPDATED_SSN);
     }
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByCreatedByNotContainsSomething() throws Exception {
+    public void getAllEligibilitiesBySsnNotContainsSomething() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where createdBy does not contain DEFAULT_CREATED_BY
-        defaultEligibilityShouldNotBeFound("createdBy.doesNotContain=" + DEFAULT_CREATED_BY);
+        // Get all the eligibilityList where ssn does not contain DEFAULT_SSN
+        defaultEligibilityShouldNotBeFound("ssn.doesNotContain=" + DEFAULT_SSN);
 
-        // Get all the eligibilityList where createdBy does not contain UPDATED_CREATED_BY
-        defaultEligibilityShouldBeFound("createdBy.doesNotContain=" + UPDATED_CREATED_BY);
-    }
-
-
-    @Test
-    @Transactional
-    public void getAllEligibilitiesByCreatedDateIsEqualToSomething() throws Exception {
-        // Initialize the database
-        eligibilityRepository.saveAndFlush(eligibility);
-
-        // Get all the eligibilityList where createdDate equals to DEFAULT_CREATED_DATE
-        defaultEligibilityShouldBeFound("createdDate.equals=" + DEFAULT_CREATED_DATE);
-
-        // Get all the eligibilityList where createdDate equals to UPDATED_CREATED_DATE
-        defaultEligibilityShouldNotBeFound("createdDate.equals=" + UPDATED_CREATED_DATE);
-    }
-
-    @Test
-    @Transactional
-    public void getAllEligibilitiesByCreatedDateIsNotEqualToSomething() throws Exception {
-        // Initialize the database
-        eligibilityRepository.saveAndFlush(eligibility);
-
-        // Get all the eligibilityList where createdDate not equals to DEFAULT_CREATED_DATE
-        defaultEligibilityShouldNotBeFound("createdDate.notEquals=" + DEFAULT_CREATED_DATE);
-
-        // Get all the eligibilityList where createdDate not equals to UPDATED_CREATED_DATE
-        defaultEligibilityShouldBeFound("createdDate.notEquals=" + UPDATED_CREATED_DATE);
-    }
-
-    @Test
-    @Transactional
-    public void getAllEligibilitiesByCreatedDateIsInShouldWork() throws Exception {
-        // Initialize the database
-        eligibilityRepository.saveAndFlush(eligibility);
-
-        // Get all the eligibilityList where createdDate in DEFAULT_CREATED_DATE or UPDATED_CREATED_DATE
-        defaultEligibilityShouldBeFound("createdDate.in=" + DEFAULT_CREATED_DATE + "," + UPDATED_CREATED_DATE);
-
-        // Get all the eligibilityList where createdDate equals to UPDATED_CREATED_DATE
-        defaultEligibilityShouldNotBeFound("createdDate.in=" + UPDATED_CREATED_DATE);
-    }
-
-    @Test
-    @Transactional
-    public void getAllEligibilitiesByCreatedDateIsNullOrNotNull() throws Exception {
-        // Initialize the database
-        eligibilityRepository.saveAndFlush(eligibility);
-
-        // Get all the eligibilityList where createdDate is not null
-        defaultEligibilityShouldBeFound("createdDate.specified=true");
-
-        // Get all the eligibilityList where createdDate is null
-        defaultEligibilityShouldNotBeFound("createdDate.specified=false");
-    }
-
-    @Test
-    @Transactional
-    public void getAllEligibilitiesByLastModifiedByIsEqualToSomething() throws Exception {
-        // Initialize the database
-        eligibilityRepository.saveAndFlush(eligibility);
-
-        // Get all the eligibilityList where lastModifiedBy equals to DEFAULT_LAST_MODIFIED_BY
-        defaultEligibilityShouldBeFound("lastModifiedBy.equals=" + DEFAULT_LAST_MODIFIED_BY);
-
-        // Get all the eligibilityList where lastModifiedBy equals to UPDATED_LAST_MODIFIED_BY
-        defaultEligibilityShouldNotBeFound("lastModifiedBy.equals=" + UPDATED_LAST_MODIFIED_BY);
-    }
-
-    @Test
-    @Transactional
-    public void getAllEligibilitiesByLastModifiedByIsNotEqualToSomething() throws Exception {
-        // Initialize the database
-        eligibilityRepository.saveAndFlush(eligibility);
-
-        // Get all the eligibilityList where lastModifiedBy not equals to DEFAULT_LAST_MODIFIED_BY
-        defaultEligibilityShouldNotBeFound("lastModifiedBy.notEquals=" + DEFAULT_LAST_MODIFIED_BY);
-
-        // Get all the eligibilityList where lastModifiedBy not equals to UPDATED_LAST_MODIFIED_BY
-        defaultEligibilityShouldBeFound("lastModifiedBy.notEquals=" + UPDATED_LAST_MODIFIED_BY);
-    }
-
-    @Test
-    @Transactional
-    public void getAllEligibilitiesByLastModifiedByIsInShouldWork() throws Exception {
-        // Initialize the database
-        eligibilityRepository.saveAndFlush(eligibility);
-
-        // Get all the eligibilityList where lastModifiedBy in DEFAULT_LAST_MODIFIED_BY or UPDATED_LAST_MODIFIED_BY
-        defaultEligibilityShouldBeFound("lastModifiedBy.in=" + DEFAULT_LAST_MODIFIED_BY + "," + UPDATED_LAST_MODIFIED_BY);
-
-        // Get all the eligibilityList where lastModifiedBy equals to UPDATED_LAST_MODIFIED_BY
-        defaultEligibilityShouldNotBeFound("lastModifiedBy.in=" + UPDATED_LAST_MODIFIED_BY);
-    }
-
-    @Test
-    @Transactional
-    public void getAllEligibilitiesByLastModifiedByIsNullOrNotNull() throws Exception {
-        // Initialize the database
-        eligibilityRepository.saveAndFlush(eligibility);
-
-        // Get all the eligibilityList where lastModifiedBy is not null
-        defaultEligibilityShouldBeFound("lastModifiedBy.specified=true");
-
-        // Get all the eligibilityList where lastModifiedBy is null
-        defaultEligibilityShouldNotBeFound("lastModifiedBy.specified=false");
-    }
-                @Test
-    @Transactional
-    public void getAllEligibilitiesByLastModifiedByContainsSomething() throws Exception {
-        // Initialize the database
-        eligibilityRepository.saveAndFlush(eligibility);
-
-        // Get all the eligibilityList where lastModifiedBy contains DEFAULT_LAST_MODIFIED_BY
-        defaultEligibilityShouldBeFound("lastModifiedBy.contains=" + DEFAULT_LAST_MODIFIED_BY);
-
-        // Get all the eligibilityList where lastModifiedBy contains UPDATED_LAST_MODIFIED_BY
-        defaultEligibilityShouldNotBeFound("lastModifiedBy.contains=" + UPDATED_LAST_MODIFIED_BY);
-    }
-
-    @Test
-    @Transactional
-    public void getAllEligibilitiesByLastModifiedByNotContainsSomething() throws Exception {
-        // Initialize the database
-        eligibilityRepository.saveAndFlush(eligibility);
-
-        // Get all the eligibilityList where lastModifiedBy does not contain DEFAULT_LAST_MODIFIED_BY
-        defaultEligibilityShouldNotBeFound("lastModifiedBy.doesNotContain=" + DEFAULT_LAST_MODIFIED_BY);
-
-        // Get all the eligibilityList where lastModifiedBy does not contain UPDATED_LAST_MODIFIED_BY
-        defaultEligibilityShouldBeFound("lastModifiedBy.doesNotContain=" + UPDATED_LAST_MODIFIED_BY);
+        // Get all the eligibilityList where ssn does not contain UPDATED_SSN
+        defaultEligibilityShouldBeFound("ssn.doesNotContain=" + UPDATED_SSN);
     }
 
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByLastModifiedDateIsEqualToSomething() throws Exception {
+    public void getAllEligibilitiesByBirthDayIsEqualToSomething() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where lastModifiedDate equals to DEFAULT_LAST_MODIFIED_DATE
-        defaultEligibilityShouldBeFound("lastModifiedDate.equals=" + DEFAULT_LAST_MODIFIED_DATE);
+        // Get all the eligibilityList where birthDay equals to DEFAULT_BIRTH_DAY
+        defaultEligibilityShouldBeFound("birthDay.equals=" + DEFAULT_BIRTH_DAY);
 
-        // Get all the eligibilityList where lastModifiedDate equals to UPDATED_LAST_MODIFIED_DATE
-        defaultEligibilityShouldNotBeFound("lastModifiedDate.equals=" + UPDATED_LAST_MODIFIED_DATE);
+        // Get all the eligibilityList where birthDay equals to UPDATED_BIRTH_DAY
+        defaultEligibilityShouldNotBeFound("birthDay.equals=" + UPDATED_BIRTH_DAY);
     }
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByLastModifiedDateIsNotEqualToSomething() throws Exception {
+    public void getAllEligibilitiesByBirthDayIsNotEqualToSomething() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where lastModifiedDate not equals to DEFAULT_LAST_MODIFIED_DATE
-        defaultEligibilityShouldNotBeFound("lastModifiedDate.notEquals=" + DEFAULT_LAST_MODIFIED_DATE);
+        // Get all the eligibilityList where birthDay not equals to DEFAULT_BIRTH_DAY
+        defaultEligibilityShouldNotBeFound("birthDay.notEquals=" + DEFAULT_BIRTH_DAY);
 
-        // Get all the eligibilityList where lastModifiedDate not equals to UPDATED_LAST_MODIFIED_DATE
-        defaultEligibilityShouldBeFound("lastModifiedDate.notEquals=" + UPDATED_LAST_MODIFIED_DATE);
+        // Get all the eligibilityList where birthDay not equals to UPDATED_BIRTH_DAY
+        defaultEligibilityShouldBeFound("birthDay.notEquals=" + UPDATED_BIRTH_DAY);
     }
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByLastModifiedDateIsInShouldWork() throws Exception {
+    public void getAllEligibilitiesByBirthDayIsInShouldWork() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where lastModifiedDate in DEFAULT_LAST_MODIFIED_DATE or UPDATED_LAST_MODIFIED_DATE
-        defaultEligibilityShouldBeFound("lastModifiedDate.in=" + DEFAULT_LAST_MODIFIED_DATE + "," + UPDATED_LAST_MODIFIED_DATE);
+        // Get all the eligibilityList where birthDay in DEFAULT_BIRTH_DAY or UPDATED_BIRTH_DAY
+        defaultEligibilityShouldBeFound("birthDay.in=" + DEFAULT_BIRTH_DAY + "," + UPDATED_BIRTH_DAY);
 
-        // Get all the eligibilityList where lastModifiedDate equals to UPDATED_LAST_MODIFIED_DATE
-        defaultEligibilityShouldNotBeFound("lastModifiedDate.in=" + UPDATED_LAST_MODIFIED_DATE);
+        // Get all the eligibilityList where birthDay equals to UPDATED_BIRTH_DAY
+        defaultEligibilityShouldNotBeFound("birthDay.in=" + UPDATED_BIRTH_DAY);
     }
 
     @Test
     @Transactional
-    public void getAllEligibilitiesByLastModifiedDateIsNullOrNotNull() throws Exception {
+    public void getAllEligibilitiesByBirthDayIsNullOrNotNull() throws Exception {
         // Initialize the database
         eligibilityRepository.saveAndFlush(eligibility);
 
-        // Get all the eligibilityList where lastModifiedDate is not null
-        defaultEligibilityShouldBeFound("lastModifiedDate.specified=true");
+        // Get all the eligibilityList where birthDay is not null
+        defaultEligibilityShouldBeFound("birthDay.specified=true");
 
-        // Get all the eligibilityList where lastModifiedDate is null
-        defaultEligibilityShouldNotBeFound("lastModifiedDate.specified=false");
+        // Get all the eligibilityList where birthDay is null
+        defaultEligibilityShouldNotBeFound("birthDay.specified=false");
     }
     /**
      * Executes the search, and checks that the default entity is returned.
@@ -684,14 +540,12 @@ public class EligibilityResourceIT {
         restEligibilityMockMvc.perform(get("/api/eligibilities?sort=id,desc&" + filter))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(eligibility.getId().intValue())))
-            .andExpect(jsonPath("$.[*].fileName").value(hasItem(DEFAULT_FILE_NAME)))
-            .andExpect(jsonPath("$.[*].refId").value(hasItem(DEFAULT_REF_ID)))
-            .andExpect(jsonPath("$.[*].fileUrl").value(hasItem(DEFAULT_FILE_URL)))
-            .andExpect(jsonPath("$.[*].createdBy").value(hasItem(DEFAULT_CREATED_BY)))
-            .andExpect(jsonPath("$.[*].createdDate").value(hasItem(DEFAULT_CREATED_DATE.toString())))
-            .andExpect(jsonPath("$.[*].lastModifiedBy").value(hasItem(DEFAULT_LAST_MODIFIED_BY)))
-            .andExpect(jsonPath("$.[*].lastModifiedDate").value(hasItem(DEFAULT_LAST_MODIFIED_DATE.toString())));
+            .andExpect(jsonPath("$.[*].id").value(hasItem(eligibility.getId())))
+            .andExpect(jsonPath("$.[*].email").value(hasItem(DEFAULT_EMAIL)))
+            .andExpect(jsonPath("$.[*].phone").value(hasItem(DEFAULT_PHONE)))
+            .andExpect(jsonPath("$.[*].fullName").value(hasItem(DEFAULT_FULL_NAME)))
+            .andExpect(jsonPath("$.[*].ssn").value(hasItem(DEFAULT_SSN)))
+            .andExpect(jsonPath("$.[*].birthDay").value(hasItem(DEFAULT_BIRTH_DAY.toString())));
 
         // Check, that the count call also returns 1
         restEligibilityMockMvc.perform(get("/api/eligibilities/count?sort=id,desc&" + filter))

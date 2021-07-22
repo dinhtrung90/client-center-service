@@ -1,7 +1,9 @@
 package com.vts.clientcenter.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.List;
 
@@ -10,17 +12,21 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UploadFileResponse {
+public class UploadFileResponse implements Serializable {
+
+    @JsonProperty("public_id")
     private String publicID;
-    private long version;
+
+    @JsonProperty("signature")
     private String signature;
+
+    @JsonProperty("resource_type")
     private String resourceType;
-    private Instant createdAt;
-    private List<Object> tags;
-    private long bytes;
-    private String type;
-    private String etag;
+
     private String url;
+    @JsonProperty("secure_url")
     private String secureURL;
+
+    @JsonProperty("original_filename")
     private String originalFilename;
 }

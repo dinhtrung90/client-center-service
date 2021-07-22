@@ -4,31 +4,31 @@
   "relationships": [],
   "fields": [
     {
-      "fieldName": "fileName",
-      "fieldType": "String"
+      "fieldName": "email",
+      "fieldType": "String",
+      "fieldValidateRules": ["unique", "maxlength"],
+      "fieldValidateRulesMaxlength": "50"
     },
     {
-      "fieldName": "refId",
-      "fieldType": "String"
+      "fieldName": "phone",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "unique", "maxlength"],
+      "fieldValidateRulesMaxlength": "30"
     },
     {
-      "fieldName": "fileUrl",
-      "fieldType": "String"
+      "fieldName": "fullName",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "50"
     },
     {
-      "fieldName": "createdBy",
-      "fieldType": "String"
+      "fieldName": "ssn",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "unique", "maxlength"],
+      "fieldValidateRulesMaxlength": "20"
     },
     {
-      "fieldName": "createdDate",
-      "fieldType": "Instant"
-    },
-    {
-      "fieldName": "lastModifiedBy",
-      "fieldType": "String"
-    },
-    {
-      "fieldName": "lastModifiedDate",
+      "fieldName": "birthDay",
       "fieldType": "Instant"
     }
   ],

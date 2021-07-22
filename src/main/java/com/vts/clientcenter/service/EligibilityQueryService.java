@@ -89,28 +89,22 @@ public class EligibilityQueryService extends QueryService<Eligibility> {
         Specification<Eligibility> specification = Specification.where(null);
         if (criteria != null) {
             if (criteria.getId() != null) {
-                specification = specification.and(buildRangeSpecification(criteria.getId(), Eligibility_.id));
+                specification = specification.and(buildStringSpecification(criteria.getId(), Eligibility_.id));
             }
-            if (criteria.getFileName() != null) {
-                specification = specification.and(buildStringSpecification(criteria.getFileName(), Eligibility_.fileName));
+            if (criteria.getEmail() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getEmail(), Eligibility_.email));
             }
-            if (criteria.getRefId() != null) {
-                specification = specification.and(buildStringSpecification(criteria.getRefId(), Eligibility_.refId));
+            if (criteria.getPhone() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getPhone(), Eligibility_.phone));
             }
-            if (criteria.getFileUrl() != null) {
-                specification = specification.and(buildStringSpecification(criteria.getFileUrl(), Eligibility_.fileUrl));
+            if (criteria.getFullName() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getFullName(), Eligibility_.fullName));
             }
-            if (criteria.getCreatedBy() != null) {
-                specification = specification.and(buildStringSpecification(criteria.getCreatedBy(), Eligibility_.createdBy));
+            if (criteria.getSsn() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getSsn(), Eligibility_.ssn));
             }
-            if (criteria.getCreatedDate() != null) {
-                specification = specification.and(buildRangeSpecification(criteria.getCreatedDate(), Eligibility_.createdDate));
-            }
-            if (criteria.getLastModifiedBy() != null) {
-                specification = specification.and(buildStringSpecification(criteria.getLastModifiedBy(), Eligibility_.lastModifiedBy));
-            }
-            if (criteria.getLastModifiedDate() != null) {
-                specification = specification.and(buildRangeSpecification(criteria.getLastModifiedDate(), Eligibility_.lastModifiedDate));
+            if (criteria.getBirthDay() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getBirthDay(), Eligibility_.birthDay));
             }
         }
         return specification;

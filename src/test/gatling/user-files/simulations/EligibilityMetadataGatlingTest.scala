@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory
 import scala.concurrent.duration._
 
 /**
- * Performance test for the Eligibility entity.
+ * Performance test for the EligibilityMetadata entity.
  */
-class EligibilityGatlingTest extends Simulation {
+class EligibilityMetadataGatlingTest extends Simulation {
 
     val context: LoggerContext = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
     // Log all HTTP requests
@@ -45,7 +45,7 @@ class EligibilityGatlingTest extends Simulation {
         "Upgrade-Insecure-Requests" -> "1"
     )
 
-    val scn = scenario("Test the Eligibility entity")
+    val scn = scenario("Test the EligibilityMetadata entity")
         .exec(http("First unauthenticated request")
         .get("/api/account")
         .headers(headers_http)
@@ -91,33 +91,29 @@ class EligibilityGatlingTest extends Simulation {
         .check(status.is(200)))
         .pause(10)
         .repeat(2) {
-            exec(http("Get all eligibilities")
-            .get("/services/clientcenterservice/api/eligibilities")
+            exec(http("Get all eligibilityMetadata")
+            .get("/services/clientcenterservice/api/eligibility-metadata")
             .headers(headers_http_authenticated)
             .check(status.is(200)))
             .pause(10 seconds, 20 seconds)
-            .exec(http("Create new eligibility")
-            .post("/services/clientcenterservice/api/eligibilities")
+            .exec(http("Create new eligibilityMetadata")
+            .post("/services/clientcenterservice/api/eligibility-metadata")
             .headers(headers_http_authenticated)
             .body(StringBody("""{
                 "id":null
-                , "email":"SAMPLE_TEXT"
-                , "phone":"SAMPLE_TEXT"
-                , "fullName":"SAMPLE_TEXT"
-                , "ssn":"SAMPLE_TEXT"
-                , "birthDay":"2020-01-01T00:00:00.000Z"
+                , "thumbUrl":"SAMPLE_TEXT"
                 }""")).asJson
             .check(status.is(201))
-            .check(headerRegex("Location", "(.*)").saveAs("new_eligibility_url"))).exitHereIfFailed
+            .check(headerRegex("Location", "(.*)").saveAs("new_eligibilityMetadata_url"))).exitHereIfFailed
             .pause(10)
             .repeat(5) {
-                exec(http("Get created eligibility")
-                .get("/services/clientcenterservice${new_eligibility_url}")
+                exec(http("Get created eligibilityMetadata")
+                .get("/services/clientcenterservice${new_eligibilityMetadata_url}")
                 .headers(headers_http_authenticated))
                 .pause(10)
             }
-            .exec(http("Delete created eligibility")
-            .delete("/services/clientcenterservice${new_eligibility_url}")
+            .exec(http("Delete created eligibilityMetadata")
+            .delete("/services/clientcenterservice${new_eligibilityMetadata_url}")
             .headers(headers_http_authenticated))
             .pause(10)
         }

@@ -1,92 +1,83 @@
 package com.vts.clientcenter.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.vts.clientcenter.config.Constants;
+
 import java.time.Instant;
+import javax.validation.constraints.*;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * A DTO for the {@link com.vts.clientcenter.domain.Eligibility} entity.
  */
 public class EligibilityDTO implements Serializable {
-    
-    private Long id;
 
-    private String fileName;
+    private String id;
 
-    private String refId;
+    @Size(max = 50)
+    private String email;
 
-    private String fileUrl;
+    @NotNull
+    @Size(max = 30)
+    private String phone;
 
-    private String createdBy;
+    @Size(max = 50)
+    private String fullName;
 
-    private Instant createdDate;
+    @NotNull
+    @Size(max = 20)
+    private String ssn;
 
-    private String lastModifiedBy;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Constants.DATE_FORMAT_YYYY_MM_DD)
+    private Date birthDay;
 
-    private Instant lastModifiedDate;
-
-    
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public String getFileName() {
-        return fileName;
+    public String getEmail() {
+        return email;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public String getRefId() {
-        return refId;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setRefId(String refId) {
-        this.refId = refId;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
-    public String getFileUrl() {
-        return fileUrl;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setFileUrl(String fileUrl) {
-        this.fileUrl = fileUrl;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
-    public String getCreatedBy() {
-        return createdBy;
+    public String getSsn() {
+        return ssn;
     }
 
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
+    public void setSsn(String ssn) {
+        this.ssn = ssn;
     }
 
-    public Instant getCreatedDate() {
-        return createdDate;
+    public Date getBirthDay() {
+        return birthDay;
     }
 
-    public void setCreatedDate(Instant createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public String getLastModifiedBy() {
-        return lastModifiedBy;
-    }
-
-    public void setLastModifiedBy(String lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
-    }
-
-    public Instant getLastModifiedDate() {
-        return lastModifiedDate;
-    }
-
-    public void setLastModifiedDate(Instant lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
+    public void setBirthDay(Date birthDay) {
+        this.birthDay = birthDay;
     }
 
     @Override
@@ -111,13 +102,11 @@ public class EligibilityDTO implements Serializable {
     public String toString() {
         return "EligibilityDTO{" +
             "id=" + getId() +
-            ", fileName='" + getFileName() + "'" +
-            ", refId='" + getRefId() + "'" +
-            ", fileUrl='" + getFileUrl() + "'" +
-            ", createdBy='" + getCreatedBy() + "'" +
-            ", createdDate='" + getCreatedDate() + "'" +
-            ", lastModifiedBy='" + getLastModifiedBy() + "'" +
-            ", lastModifiedDate='" + getLastModifiedDate() + "'" +
+            ", email='" + getEmail() + "'" +
+            ", phone='" + getPhone() + "'" +
+            ", fullName='" + getFullName() + "'" +
+            ", ssn='" + getSsn() + "'" +
+            ", birthDay='" + getBirthDay() + "'" +
             "}";
     }
 }

@@ -20,6 +20,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -77,7 +78,7 @@ public class EligibilityResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the eligibilityDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/eligibilities/{id}")
-    public ResponseEntity<EligibilityDTO> getEligibility(@PathVariable Long id) {
+    public ResponseEntity<EligibilityDTO> getEligibility(@PathVariable String id) {
         log.debug("REST request to get Eligibility : {}", id);
         Optional<EligibilityDTO> eligibilityDTO = eligibilityService.findOne(id);
         return ResponseUtil.wrapOrNotFound(eligibilityDTO);

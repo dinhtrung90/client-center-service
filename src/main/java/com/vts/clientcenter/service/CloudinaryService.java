@@ -7,5 +7,5 @@ import java.io.File;
 import java.util.Map;
 
 public interface CloudinaryService {
-    UploadFileResponse uploadFileToCloud(File file, Map<String, Object> metadata);
+    UploadFileResponse uploadFileToCloud(MultipartFile file);
 }

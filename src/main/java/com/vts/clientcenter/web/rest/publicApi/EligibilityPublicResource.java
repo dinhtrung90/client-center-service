@@ -1,16 +1,21 @@
-package com.vts.clientcenter.web.rest;
+package com.vts.clientcenter.web.rest.publicApi;
 
-import com.vts.clientcenter.service.AccountService;
-import com.vts.clientcenter.service.dto.ActivatedPayload;
-import com.vts.clientcenter.service.dto.UserDTO;
-import com.vts.clientcenter.service.dto.UserFullInfoResponse;
+import com.vts.clientcenter.service.CloudinaryService;
+import com.vts.clientcenter.service.EligibilityService;
+import com.vts.clientcenter.service.dto.EligibilityCreationRequest;
+import com.vts.clientcenter.service.dto.EligibilityDTO;
+import com.vts.clientcenter.service.dto.UploadFileResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * REST controller for managing users.
@@ -37,17 +42,36 @@ import javax.validation.Valid;
  * Another option would be to have a specific JPA entity graph to handle this case.
  */
 @RestController
-@RequestMapping("/api")
-public class AccountResource {
-    private final Logger log = LoggerFactory.getLogger(AccountResource.class);
+@RequestMapping("/api/public")
+public class EligibilityPublicResource {
+    private final Logger log = LoggerFactory.getLogger(EligibilityPublicResource.class);
 
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
 
-    private final AccountService accountService;
+    private final EligibilityService eligibilityService;
 
-    public AccountResource(AccountService accountService) {
-        this.accountService = accountService;
+    private final CloudinaryService cloudinaryService;
+
+    public EligibilityPublicResource(EligibilityService accountService, CloudinaryService cloudinaryService) {
+        this.eligibilityService = accountService;
+        this.cloudinaryService = cloudinaryService;
+    }
+
+    @PostMapping("/eligibility/createAccount")
+    public ResponseEntity<EligibilityDTO> createAccount(@Valid @RequestBody EligibilityCreationRequest dto) {
+        EligibilityDTO result = eligibilityService.createEligibility(dto);
+        return ResponseEntity.ok(result);
+    }
+
+
+    @RequestMapping(value="/eligibility/upload", method= RequestMethod.POST)
+    public ResponseEntity<UploadFileResponse> uploadAttachmentFile(@RequestParam("file") MultipartFile multipartFile) throws IOException {
+
+        UploadFileResponse uploadFileResponse = cloudinaryService.uploadFileToCloud(multipartFile);
+
+        return ResponseEntity.ok(uploadFileResponse);
+
     }
 
 }
