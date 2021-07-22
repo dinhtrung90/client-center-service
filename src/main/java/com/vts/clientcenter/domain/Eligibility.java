@@ -1,5 +1,6 @@
 package com.vts.clientcenter.domain;
 
+import com.vts.clientcenter.domain.enumeration.Gender;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
@@ -51,6 +52,12 @@ public class Eligibility extends AbstractAuditingEntity {
     @Column(name = "birth_day")
     private Instant birthDay;
 
+    @Column(name = "gender")
+    @Enumerated(value = EnumType.STRING)
+    private Gender gender;
+
+    @Column(name = "full_address")
+    private String fullAddress;
 
     @OneToMany(mappedBy = "eligibility", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
     Set<EligibilityMetadata> eligibilityMetadata = new HashSet<>();
@@ -148,6 +155,22 @@ public class Eligibility extends AbstractAuditingEntity {
 
     public void setEligibilityMetadata(Set<EligibilityMetadata> eligibilityMetadata) {
         this.eligibilityMetadata = eligibilityMetadata;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
+    }
+
+    public String getFullAddress() {
+        return fullAddress;
+    }
+
+    public void setFullAddress(String fullAddress) {
+        this.fullAddress = fullAddress;
     }
 
     @Override

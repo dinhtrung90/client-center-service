@@ -5,6 +5,8 @@ CREATE TABLE `tv_eligibility` (
                             `phone` varchar(30) DEFAULT NULL,
                             `ssn`  varchar(20) DEFAULT NULL,
                             `birth_day` datetime null,
+                            `gender` varchar(20)DEFAULT NULL,
+                            `full_address` varchar(200) DEFAULT NULL,
                             `created_by` varchar(50) NOT NULL,
                             `created_date` timestamp NULL DEFAULT NULL,
                             `last_modified_by` varchar(50) DEFAULT NULL,

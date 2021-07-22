@@ -2,8 +2,10 @@ package com.vts.clientcenter.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.vts.clientcenter.config.Constants;
+import com.vts.clientcenter.domain.enumeration.Gender;
 
 import java.time.Instant;
+import javax.persistence.Column;
 import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Date;
@@ -31,6 +33,10 @@ public class EligibilityDTO implements Serializable {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Constants.DATE_FORMAT_YYYY_MM_DD)
     private Date birthDay;
+
+    private Gender gender;
+
+    private String fullAddress;
 
     public String getId() {
         return id;
@@ -78,6 +84,22 @@ public class EligibilityDTO implements Serializable {
 
     public void setBirthDay(Date birthDay) {
         this.birthDay = birthDay;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
+    }
+
+    public String getFullAddress() {
+        return fullAddress;
+    }
+
+    public void setFullAddress(String fullAddress) {
+        this.fullAddress = fullAddress;
     }
 
     @Override
