@@ -1,8 +1,7 @@
 package com.vts.clientcenter.service;
 
 import com.google.zxing.WriterException;
-import com.vts.clientcenter.service.dto.EligibilityCreationRequest;
-import com.vts.clientcenter.service.dto.EligibilityDTO;
+import com.vts.clientcenter.service.dto.*;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -48,4 +47,8 @@ public interface EligibilityService {
     void delete(String id);
 
     EligibilityDTO createEligibility(EligibilityCreationRequest dto) throws IOException, WriterException;
+
+    EligibilityDetailDto findByPrimaryId(String id);
+
+    EligibilityPresentStatusDTO receivedPresentCheck(ReceivedPresentDto dto);
 }

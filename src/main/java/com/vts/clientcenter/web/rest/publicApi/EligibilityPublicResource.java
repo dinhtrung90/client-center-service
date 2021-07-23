@@ -3,9 +3,7 @@ package com.vts.clientcenter.web.rest.publicApi;
 import com.google.zxing.WriterException;
 import com.vts.clientcenter.service.CloudinaryService;
 import com.vts.clientcenter.service.EligibilityService;
-import com.vts.clientcenter.service.dto.EligibilityCreationRequest;
-import com.vts.clientcenter.service.dto.EligibilityDTO;
-import com.vts.clientcenter.service.dto.UploadFileResponse;
+import com.vts.clientcenter.service.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -71,6 +69,12 @@ public class EligibilityPublicResource {
         UploadFileResponse uploadFileResponse = cloudinaryService.uploadFileToCloud(multipartFile);
 
         return ResponseEntity.ok(uploadFileResponse);
+    }
+
+    @RequestMapping(value="/eligibility/receivedPresent", method= RequestMethod.POST)
+    public ResponseEntity<EligibilityPresentStatusDTO> receivedPresent(@RequestBody ReceivedPresentDto dto) throws IOException {
+        EligibilityPresentStatusDTO res = eligibilityService.receivedPresentCheck(dto);
+        return ResponseEntity.accepted().body(res);
 
     }
 

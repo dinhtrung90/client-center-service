@@ -6,14 +6,12 @@ import com.vts.clientcenter.config.TestSecurityConfiguration;
 import com.vts.clientcenter.domain.Eligibility;
 import com.vts.clientcenter.repository.EligibilityRepository;
 import com.vts.clientcenter.service.EligibilityService;
-import com.vts.clientcenter.service.dto.EligibilityDTO;
 import com.vts.clientcenter.service.mapper.EligibilityMapper;
-import com.vts.clientcenter.service.dto.EligibilityCriteria;
 import com.vts.clientcenter.service.EligibilityQueryService;
 
+import com.vts.clientcenter.web.rest.admin.AdminEligibilityResource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,16 +24,14 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Integration tests for the {@link EligibilityResource} REST controller.
+ * Integration tests for the {@link AdminEligibilityResource} REST controller.
  */
 @SpringBootTest(classes = { ClientCenterServiceApp.class, TestSecurityConfiguration.class })
 @ExtendWith({ RedisTestContainerExtension.class, MockitoExtension.class })

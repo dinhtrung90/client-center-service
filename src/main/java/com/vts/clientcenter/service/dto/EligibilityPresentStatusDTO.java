@@ -8,7 +8,7 @@ import java.io.Serializable;
  * A DTO for the {@link com.vts.clientcenter.domain.EligibilityPresentStatus} entity.
  */
 public class EligibilityPresentStatusDTO implements Serializable {
-    
+
     private Long id;
 
     @NotNull
@@ -20,9 +20,8 @@ public class EligibilityPresentStatusDTO implements Serializable {
 
     private Instant expiredAt;
 
+    private String eligibilityId;
 
-    private Long eligibilityId;
-    
     public Long getId() {
         return id;
     }
@@ -63,11 +62,12 @@ public class EligibilityPresentStatusDTO implements Serializable {
         this.expiredAt = expiredAt;
     }
 
-    public Long getEligibilityId() {
+
+    public String getEligibilityId() {
         return eligibilityId;
     }
 
-    public void setEligibilityId(Long eligibilityId) {
+    public void setEligibilityId(String eligibilityId) {
         this.eligibilityId = eligibilityId;
     }
 

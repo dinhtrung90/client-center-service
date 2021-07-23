@@ -4,17 +4,15 @@ import com.google.zxing.WriterException;
 import com.vts.clientcenter.domain.EligibilityMetadata;
 import com.vts.clientcenter.domain.EligibilityPresentStatus;
 import com.vts.clientcenter.helpers.QRCodeGenerator;
-import com.vts.clientcenter.repository.EligibilityMetadataRepository;
+import com.vts.clientcenter.repository.EligibilityPresentStatusRepository;
 import com.vts.clientcenter.service.CloudinaryService;
 import com.vts.clientcenter.service.EligibilityService;
 import com.vts.clientcenter.domain.Eligibility;
 import com.vts.clientcenter.repository.EligibilityRepository;
-import com.vts.clientcenter.service.dto.EligibilityCreationRequest;
-import com.vts.clientcenter.service.dto.EligibilityDTO;
-import com.vts.clientcenter.service.dto.EligibilityMetadataDTO;
-import com.vts.clientcenter.service.dto.UploadFileResponse;
+import com.vts.clientcenter.service.dto.*;
 import com.vts.clientcenter.service.mapper.EligibilityMapper;
 import com.vts.clientcenter.service.mapper.EligibilityMetadataMapper;
+import com.vts.clientcenter.service.mapper.EligibilityPresentStatusMapper;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import jodd.util.RandomString;
 import org.slf4j.Logger;
@@ -22,7 +20,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -49,17 +46,20 @@ public class EligibilityServiceImpl implements EligibilityService {
 
     private final EligibilityMetadataMapper eligibilityMetadataMapper;
 
-    private final EligibilityMetadataRepository eligibilityMetadataRepository;
+    private final EligibilityPresentStatusMapper eligibilityPresentStatusMapper;
+
+    private final EligibilityPresentStatusRepository eligibilityPresentStatusRepository;
 
     private final QRCodeGenerator qrCodeGenerator;
 
     private final CloudinaryService cloudinaryService;
 
-    public EligibilityServiceImpl(EligibilityRepository eligibilityRepository, EligibilityMapper eligibilityMapper, EligibilityMetadataMapper eligibilityMetadataMapper, EligibilityMetadataRepository eligibilityMetadataRepository, QRCodeGenerator qrCodeGenerator, CloudinaryService cloudinaryService) {
+    public EligibilityServiceImpl(EligibilityRepository eligibilityRepository, EligibilityMapper eligibilityMapper, EligibilityMetadataMapper eligibilityMetadataMapper, EligibilityPresentStatusMapper eligibilityPresentStatusMapper, EligibilityPresentStatusRepository eligibilityPresentStatusRepository, QRCodeGenerator qrCodeGenerator, CloudinaryService cloudinaryService) {
         this.eligibilityRepository = eligibilityRepository;
         this.eligibilityMapper = eligibilityMapper;
         this.eligibilityMetadataMapper = eligibilityMetadataMapper;
-        this.eligibilityMetadataRepository = eligibilityMetadataRepository;
+        this.eligibilityPresentStatusMapper = eligibilityPresentStatusMapper;
+        this.eligibilityPresentStatusRepository = eligibilityPresentStatusRepository;
         this.qrCodeGenerator = qrCodeGenerator;
         this.cloudinaryService = cloudinaryService;
     }
@@ -104,6 +104,11 @@ public class EligibilityServiceImpl implements EligibilityService {
         };
 
         EligibilityDTO eligibilityDTO = dto.getEligibilityDTO();
+
+        Optional<Eligibility> eligibilityEmployeeIdOptional = eligibilityRepository.findByEmployeeId(eligibilityDTO.getEmployeeId());
+        if (eligibilityEmployeeIdOptional.isPresent()) {
+            throw new BadRequestAlertException("EmployeeId has existed.", "Account", EMPLOYEE_ID_HAS_EXISTED);
+        }
 
         Optional<Eligibility> eligibilityOptional = eligibilityRepository.findByEmail(eligibilityDTO.getEmail());
         if (eligibilityOptional.isPresent()) {
@@ -157,5 +162,65 @@ public class EligibilityServiceImpl implements EligibilityService {
             .expiredAt(expiredAt)
             .qrCodeUrl(Objects.isNull(uploadFileResponse.getUrl()) ? null: uploadFileResponse.getUrl());
 
+    }
+
+    @Override
+    public EligibilityDetailDto findByPrimaryId(String id) {
+
+        if (Objects.isNull(id)) {
+            throw new BadRequestAlertException("Id not null.", "Account", ID_NOT_NULL);
+        }
+
+        Optional<Eligibility> eligibilityOptional = eligibilityRepository.findByPrimaryId(id);
+        if (!eligibilityOptional.isPresent()) {
+            throw new BadRequestAlertException("Eligibility not found.", "Account", ELIGIBILITY_NOT_FOUND);
+        }
+
+        Eligibility eligibility = eligibilityOptional.get();
+
+        return EligibilityDetailDto.builder()
+            .metadata(eligibilityMetadataMapper.toDto(new ArrayList<>(eligibility.getEligibilityMetadata())))
+            .eligibility(eligibilityMapper.toDto(eligibility))
+            .progress(eligibilityPresentStatusMapper.toDto(new ArrayList<>(eligibility.getEligibilityPresentStatuses())))
+            .build();
+    }
+
+    @Override
+    public EligibilityPresentStatusDTO receivedPresentCheck(ReceivedPresentDto dto) {
+
+        Optional<Eligibility> eligibilityOptional = eligibilityRepository.findByPhoneOrEmployeeId(dto.getPhoneOrEmployeeId(), dto.getPhoneOrEmployeeId());
+
+        if (!eligibilityOptional.isPresent()) {
+            throw new BadRequestAlertException("You not register yet.", "Account", ELIGIBILITY_NOT_FOUND);
+        }
+
+        Eligibility eligibility = eligibilityOptional.get();
+
+        if (CollectionUtils.isEmpty(eligibility.getEligibilityPresentStatuses())){
+            throw new BadRequestAlertException("You not register yet.", "Account", ELIGIBILITY_NOT_FOUND);
+        }
+
+        Optional<EligibilityPresentStatus> existedPresent = eligibility.getEligibilityPresentStatuses()
+            .stream()
+            .filter(p -> p.getCode().equals(dto.getCode()))
+            .findFirst();
+
+        if (!existedPresent.isPresent()) {
+            throw new BadRequestAlertException("Code is not valid.", "Account", ELIGIBILITY_NOT_FOUND);
+        }
+
+        EligibilityPresentStatus eligibilityPresentStatus = existedPresent.get();
+        if (eligibilityPresentStatus.getExpiredAt().isBefore(Instant.now())) {
+            throw new BadRequestAlertException("Code has expired.", "Code", RECEIVED_PRESENT_BEFORE);
+        }
+
+        if (eligibilityPresentStatus.isHasPresent()) {
+            throw new BadRequestAlertException("You have received present.", "Code", RECEIVED_PRESENT_BEFORE);
+        }
+
+        eligibilityPresentStatus.setHasPresent(true);
+        eligibilityPresentStatusRepository.save(eligibilityPresentStatus);
+        eligibilityPresentStatusMapper.toDto(eligibilityPresentStatus);
+        return eligibilityPresentStatusMapper.toDto(eligibilityPresentStatus);
     }
 }
