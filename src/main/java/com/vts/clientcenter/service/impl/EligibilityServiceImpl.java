@@ -212,7 +212,7 @@ public class EligibilityServiceImpl implements EligibilityService {
 
         EligibilityPresentStatus eligibilityPresentStatus = existedPresent.get();
         if (eligibilityPresentStatus.getExpiredAt().isBefore(Instant.now())) {
-            throw new BadRequestAlertException("Code has expired.", "Code", RECEIVED_PRESENT_BEFORE);
+            throw new BadRequestAlertException("Code has expired.", "Code", CODE_PRESENT_EXPIRED);
         }
 
         if (eligibilityPresentStatus.isHasPresent()) {
