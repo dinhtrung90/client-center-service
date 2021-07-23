@@ -56,8 +56,8 @@ public final class Constants {
     public static final String EMAIL_HAS_EXISTED = "EMAIL_HAS_EXISTED";
     public static final String PHONE_HAS_EXISTED = "PHONE_HAS_EXISTED";
     public static final Integer EXPIRED_DAY_CODE = 30;
-    public static final Integer QRCODE_WIDTH = 40;
-    public static final Integer QRCODE_HEIGHT = 40;
+    public static final Integer QRCODE_WIDTH = 100;
+    public static final Integer QRCODE_HEIGHT = 100;
 
     private Constants() {
 
