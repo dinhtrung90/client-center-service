@@ -8,4 +8,5 @@ import java.util.Map;
 
 public interface CloudinaryService {
     UploadFileResponse uploadFileToCloud(MultipartFile file);
+    UploadFileResponse uploadFileToCloudByBytes(byte[] file);
 }

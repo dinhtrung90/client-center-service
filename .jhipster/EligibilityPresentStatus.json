@@ -1,0 +1,42 @@
+{
+  "fluentMethods": true,
+  "clientRootFolder": "ClientCenterService",
+  "relationships": [
+    {
+      "relationshipName": "eligibility",
+      "otherEntityName": "eligibility",
+      "relationshipType": "many-to-one",
+      "otherEntityField": "id",
+      "otherEntityRelationshipName": "eligibilityPresentStatus"
+    }
+  ],
+  "fields": [
+    {
+      "fieldName": "code",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "qrCodeUrl",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "hasPresent",
+      "fieldType": "Boolean"
+    },
+    {
+      "fieldName": "expiredAt",
+      "fieldType": "Instant"
+    }
+  ],
+  "changelogDate": "20210723025433",
+  "dto": "mapstruct",
+  "searchEngine": false,
+  "service": "serviceImpl",
+  "entityTableName": "eligibility_present_status",
+  "databaseType": "sql",
+  "readOnly": true,
+  "jpaMetamodelFiltering": true,
+  "pagination": "infinite-scroll",
+  "microserviceName": "ClientCenterService"
+}

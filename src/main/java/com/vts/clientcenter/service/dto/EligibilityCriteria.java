@@ -37,6 +37,12 @@ public class EligibilityCriteria implements Serializable, Criteria {
 
     private InstantFilter birthDay;
 
+    private StringFilter company;
+
+    private StringFilter employeeId;
+
+    private StringFilter otherCompany;
+
     public EligibilityCriteria() {
     }
 
@@ -103,6 +109,33 @@ public class EligibilityCriteria implements Serializable, Criteria {
         this.birthDay = birthDay;
     }
 
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    public StringFilter getCompany() {
+        return company;
+    }
+
+    public void setCompany(StringFilter company) {
+        this.company = company;
+    }
+
+    public StringFilter getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(StringFilter employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public StringFilter getOtherCompany() {
+        return otherCompany;
+    }
+
+    public void setOtherCompany(StringFilter otherCompany) {
+        this.otherCompany = otherCompany;
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -31,6 +31,17 @@ public class Eligibility extends AbstractAuditingEntity {
     @Column(name = "id", updatable = false, nullable = false)
     private String id;
 
+    @Column(name = "company")
+    @NotNull
+    private String company;
+
+    @Column(name = "other_company")
+    private String otherCompany;
+
+    @Column(name = "employee_id")
+    @NotNull
+    private String employeeId;
+
     @Size(max = 50)
     @Column(name = "email", length = 50, unique = true)
     private String email;
@@ -62,6 +73,9 @@ public class Eligibility extends AbstractAuditingEntity {
     @OneToMany(mappedBy = "eligibility", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
     Set<EligibilityMetadata> eligibilityMetadata = new HashSet<>();
 
+
+    @OneToMany(mappedBy = "eligibility", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    Set<EligibilityPresentStatus> eligibilityPresentStatuses = new HashSet<>();
     // jhipster-needle-entity-add-field - JHipster will add fields here
 
     public String getId() {
@@ -171,6 +185,51 @@ public class Eligibility extends AbstractAuditingEntity {
 
     public void setFullAddress(String fullAddress) {
         this.fullAddress = fullAddress;
+    }
+
+    public String getCompany() {
+        return company;
+    }
+
+    public void setCompany(String company) {
+        this.company = company;
+    }
+
+    public String getOtherCompany() {
+        return otherCompany;
+    }
+
+    public void setOtherCompany(String otherCompany) {
+        this.otherCompany = otherCompany;
+    }
+
+    public String getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(String employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public Set<EligibilityPresentStatus> getEligibilityPresentStatuses() {
+        return eligibilityPresentStatuses;
+    }
+
+    public void setEligibilityPresentStatuses(Set<EligibilityPresentStatus> eligibilityPresentStatuses) {
+        this.eligibilityPresentStatuses = eligibilityPresentStatuses;
+    }
+
+    public Eligibility addEligibilityPresentStatus(EligibilityPresentStatus presentStatus) {
+        if (this.eligibilityPresentStatuses.contains(presentStatus)) { return this;}
+        this.eligibilityPresentStatuses.add(presentStatus);
+        presentStatus.setEligibility(this);
+        return this;
+    }
+
+    public void removeEligibilityPresentStatus(EligibilityPresentStatus presentStatus) {
+        if (!this.eligibilityPresentStatuses.contains(presentStatus)) { return ;}
+        this.eligibilityPresentStatuses.remove(presentStatus);
+        presentStatus.setEligibility(null);
     }
 
     @Override

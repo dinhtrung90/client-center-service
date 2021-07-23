@@ -63,4 +63,23 @@ public class CloudinaryServiceImpl implements CloudinaryService {
             throw new BadRequestAlertException(e.getMessage(), "CLOUDINARY_UPLOADS", "ERROR_UPLOAD_FILE");
         }
     }
+
+    @Override
+    public UploadFileResponse uploadFileToCloudByBytes(byte[] bytes) {
+        try {
+            Map response = this.cloudinary.uploader().upload(bytes,  ObjectUtils.asMap("resource_type", "auto"));
+            return UploadFileResponse
+                .builder()
+                .originalFilename(response.get("original_filename").toString())
+                .publicID(response.get("public_id").toString())
+                .url(response.get("url").toString())
+                .resourceType(response.get("resource_type").toString())
+                .signature(response.get("signature").toString())
+                .secureURL(response.get("secure_url").toString())
+                .build();
+        } catch (Exception e) {
+            log.error("upload file with error: {}", e.getMessage());
+            throw new BadRequestAlertException(e.getMessage(), "CLOUDINARY_UPLOADS", "ERROR_UPLOAD_FILE");
+        }
+    }
 }

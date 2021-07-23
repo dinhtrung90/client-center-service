@@ -38,6 +38,16 @@ public class EligibilityDTO implements Serializable {
 
     private String fullAddress;
 
+    private String employeeId;
+
+    private String company;
+
+    private String otherCompany;
+
+    private String code;
+
+    private Instant expiredDate;
+
     public String getId() {
         return id;
     }
@@ -100,6 +110,46 @@ public class EligibilityDTO implements Serializable {
 
     public void setFullAddress(String fullAddress) {
         this.fullAddress = fullAddress;
+    }
+
+    public String getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(String employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public String getCompany() {
+        return company;
+    }
+
+    public void setCompany(String company) {
+        this.company = company;
+    }
+
+    public String getOtherCompany() {
+        return otherCompany;
+    }
+
+    public void setOtherCompany(String otherCompany) {
+        this.otherCompany = otherCompany;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public Instant getExpiredDate() {
+        return expiredDate;
+    }
+
+    public void setExpiredDate(Instant expiredDate) {
+        this.expiredDate = expiredDate;
     }
 
     @Override

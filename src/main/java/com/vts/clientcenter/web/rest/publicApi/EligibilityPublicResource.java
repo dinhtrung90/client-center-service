@@ -1,5 +1,6 @@
 package com.vts.clientcenter.web.rest.publicApi;
 
+import com.google.zxing.WriterException;
 import com.vts.clientcenter.service.CloudinaryService;
 import com.vts.clientcenter.service.EligibilityService;
 import com.vts.clientcenter.service.dto.EligibilityCreationRequest;
@@ -59,11 +60,10 @@ public class EligibilityPublicResource {
     }
 
     @PostMapping("/eligibility/createAccount")
-    public ResponseEntity<EligibilityDTO> createAccount(@Valid @RequestBody EligibilityCreationRequest dto) {
+    public ResponseEntity<EligibilityDTO> createAccount(@Valid @RequestBody EligibilityCreationRequest dto) throws IOException, WriterException {
         EligibilityDTO result = eligibilityService.createEligibility(dto);
         return ResponseEntity.ok(result);
     }
-
 
     @RequestMapping(value="/eligibility/upload", method= RequestMethod.POST)
     public ResponseEntity<UploadFileResponse> uploadAttachmentFile(@RequestParam("file") MultipartFile multipartFile) throws IOException {
