@@ -154,7 +154,8 @@ public class EligibilityServiceImpl implements EligibilityService {
 
         byte[] qrCodeImage = qrCodeGenerator.getQRCodeImage(code, QRCODE_WIDTH, QRCODE_HEIGHT);
 
-        UploadFileResponse uploadFileResponse = cloudinaryService.uploadFileToCloudByBytes(qrCodeImage);
+        UploadFileResponse uploadFileResponse = cloudinaryService.uploadFileToCloudByBytes(qrCodeImage, eligibility.getId(), FOLDER_ELIGIBILITY);
+
         return new EligibilityPresentStatus()
             .eligibility(eligibility)
             .hasPresent(false)

@@ -59,6 +59,7 @@ public final class Constants {
     public static final String ELIGIBILITY_NOT_FOUND = "ELIGIBILITY_NOT_FOUND";
     public static final String CODE_PRESENT_EXPIRED = "CODE_PRESENT_EXPIRED";
     public static final String RECEIVED_PRESENT_BEFORE = "RECEIVED_PRESENT_BEFORE";
+    public static final String FOLDER_ELIGIBILITY = "tvsales/eligibility";
     public static final Integer EXPIRED_DAY_CODE = 30;
     public static final Integer QRCODE_WIDTH = 100;
     public static final Integer QRCODE_HEIGHT = 100;

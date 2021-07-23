@@ -45,9 +45,9 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     }
 
     @Override
-    public UploadFileResponse uploadFileToCloud(MultipartFile file) {
+    public UploadFileResponse uploadFileToCloud(MultipartFile file, String folderName) {
         try {
-            Map response = this.cloudinary.uploader().upload(file.getBytes(),  ObjectUtils.asMap("resource_type", "image"));
+            Map response = this.cloudinary.uploader().upload(file.getBytes(),  ObjectUtils.asMap("resource_type", "image", "folder", folderName));
 
             return UploadFileResponse
                 .builder()
@@ -65,9 +65,9 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     }
 
     @Override
-    public UploadFileResponse uploadFileToCloudByBytes(byte[] bytes) {
+    public UploadFileResponse uploadFileToCloudByBytes(byte[] bytes, String eligibilityId, String folderName) {
         try {
-            Map response = this.cloudinary.uploader().upload(bytes,  ObjectUtils.asMap("resource_type", "auto"));
+            Map response = this.cloudinary.uploader().upload(bytes,  ObjectUtils.asMap("resource_type", "auto", "public_id", eligibilityId, "folder", folderName));
             return UploadFileResponse
                 .builder()
                 .originalFilename(response.get("original_filename").toString())

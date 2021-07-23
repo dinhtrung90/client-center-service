@@ -7,6 +7,6 @@ import java.io.File;
 import java.util.Map;
 
 public interface CloudinaryService {
-    UploadFileResponse uploadFileToCloud(MultipartFile file);
-    UploadFileResponse uploadFileToCloudByBytes(byte[] file);
+    UploadFileResponse uploadFileToCloud(MultipartFile file, String folderName);
+    UploadFileResponse uploadFileToCloudByBytes(byte[] file, String eligibilityId, String folderName);
 }

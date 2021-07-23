@@ -1,6 +1,7 @@
 package com.vts.clientcenter.web.rest.publicApi;
 
 import com.google.zxing.WriterException;
+import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.service.CloudinaryService;
 import com.vts.clientcenter.service.EligibilityService;
 import com.vts.clientcenter.service.dto.*;
@@ -66,7 +67,7 @@ public class EligibilityPublicResource {
     @RequestMapping(value="/eligibility/upload", method= RequestMethod.POST)
     public ResponseEntity<UploadFileResponse> uploadAttachmentFile(@RequestParam("file") MultipartFile multipartFile) throws IOException {
 
-        UploadFileResponse uploadFileResponse = cloudinaryService.uploadFileToCloud(multipartFile);
+        UploadFileResponse uploadFileResponse = cloudinaryService.uploadFileToCloud(multipartFile, Constants.FOLDER_ELIGIBILITY);
 
         return ResponseEntity.ok(uploadFileResponse);
     }
