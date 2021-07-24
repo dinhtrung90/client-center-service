@@ -39,7 +39,8 @@ public interface UserRepository extends JpaRepository<User, String>, JpaSpecific
         "where u.id =:userId")
     Optional<User> findByUserId(@Param("userId") String userId);
 
-    @Query("select u from User u " +
+    @Query("select u from User u left " +
+        "join fetch u.userProfile " +
         "left join fetch u.authorities " +
         "where u.id =:userId")
     Optional<User> findByUserIdEagerAuthority(@Param("userId") String userId);

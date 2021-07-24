@@ -9,6 +9,7 @@ import javax.validation.constraints.*;
 import lombok.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
 
 /**
  * A UserProfile.
@@ -24,9 +25,6 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 public class UserProfile extends AbstractAuditingEntity {
     private static final long serialVersionUID = 1L;
 
-    @NotNull
-    @Size(max = 100)
-    @Column(name = "id", length = 100, nullable = false, unique = true)
     @Id
     private String id;
 
@@ -49,11 +47,13 @@ public class UserProfile extends AbstractAuditingEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "id")
     private User user;
 
-    public UserProfile user(User user) {
+    public UserProfile addUser(User user) {
+        if (this.user != null) return this;
         this.user = user;
+        user.setUserProfile(this);
         return this;
     }
 }

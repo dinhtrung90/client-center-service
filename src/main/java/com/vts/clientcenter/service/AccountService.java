@@ -167,7 +167,7 @@ public class AccountService {
         userRepository.save(user);
         this.clearUserCaches(user);
 
-        UserProfileDTO userProfileDTO = userProfileMapper.toDto(userProfileRepository.getOne(userId));
+        UserProfileDTO userProfileDTO = userProfileMapper.toDto(user.getUserProfile());
 
         return UserFullInfoResponse.builder()
             .userDto(userMapper.userToDto(user))
@@ -269,20 +269,41 @@ public class AccountService {
         }
 
         // update info local
-        user.setFirstName(userDto.getFirstName());
-        user.setLastName(userDto.getLastName());
-        user.setLastModifiedBy(createdBy);
-        user.setLastModifiedDate(Instant.now());
-        user.setLangKey(userDto.getLangKey() != null ? userDto.getLangKey() : DEFAULT_LANGUAGE);
+        if (Objects.nonNull(userDto.getFirstName())) {
+            user.setFirstName(userDto.getFirstName());
+        }
+
+        if (Objects.nonNull(userDto.getLastName())) {
+            user.setLastName(userDto.getLastName());
+        }
+
+        if (Objects.nonNull(userDto.getLangKey())) {
+            user.setLangKey(userDto.getLangKey());
+        }
+
         getAccountStatusByNewStatus(userDto.getAccountStatus(), user);
 
         UserProfile profile = user.getUserProfile();
-        profile.setGender(userDto.getGender());
-        profile.setPhone(userDto.getMobilePhone());
-        profile.setBirthDate(userDto.getBirthDate().toInstant());
-        profile.setHomePhone(userDto.getMobilePhone());
-        profile.setLastModifiedBy(createdBy);
-        profile.setLastModifiedDate(Instant.now());
+        if (Objects.isNull(user.getUserProfile())) {
+            profile = new UserProfile();
+            profile.addUser(user);
+        }
+
+        if (Objects.nonNull(userDto.getGender())) {
+            profile.setGender(userDto.getGender());
+        }
+
+        if (Objects.nonNull(userDto.getMobilePhone())) {
+            profile.setPhone(userDto.getMobilePhone());
+        }
+
+        if (Objects.nonNull(userDto.getBirthDate())) {
+            profile.setBirthDate(userDto.getBirthDate().toInstant());
+        }
+
+        if (Objects.nonNull(userDto.getMobilePhone())) {
+            profile.setHomePhone(userDto.getMobilePhone());
+        }
 
         keycloakFacade.updateUser(setting.getRealmApp(), user, userDto.getTempPassword(), userDto.isIsTempPassword());
 

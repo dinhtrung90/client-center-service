@@ -180,7 +180,7 @@ public class UserService {
 
     @Transactional
     public User syncUserFromKeycloak(Map<String, Object> details, User user) {
-        Optional<User> existingUser = userRepository.findByUserIdEagerAuthority(user.getLogin());
+        Optional<User> existingUser = userRepository.findByUserIdEagerAuthority(user.getId());
         User newUser = new User();
         if (!existingUser.isPresent()) {
             // save account in to sync users between IdP and JHipster's local database
@@ -200,29 +200,34 @@ public class UserService {
 
             profile.setUser(newUser);
 
+            newUser.setUserProfile(profile);
+
             userRepository.save(newUser);
 
             this.clearUserCaches(newUser);
         } else {
             newUser = existingUser.get();
-            log.debug("Updating user '{}' in local database", user.getLogin());
+            log.debug("Updating user '{}' in local database", newUser.getLogin());
             UserRepresentation userRepresentation = mapUserRepresentationToUser(user.getId(), newUser, user.getLogin());
 
-            UserProfile profile = newUser.getUserProfile();
+            UserProfile profile = Objects.isNull(newUser.getUserProfile()) ? UserProfile.builder()
+                .build(): newUser.getUserProfile();
 
             mapUserRepresentationToProfile(userRepresentation, profile);
 
-            Set<Authority> userRoles = syncRolesByUserId(user.getId());
+            profile.addUser(newUser);
+
+            Set<Authority> userRoles = syncRolesByUserId(newUser.getId());
 
             newUser.addAuthorities(new ArrayList<>(userRoles));
-
             userRepository.save(newUser);
             this.clearUserCaches(newUser);
         }
         return newUser;
     }
 
-    private Set<Authority>  syncRolesByUserId(String userId) {
+    @Transactional
+    public Set<Authority>  syncRolesByUserId(String userId) {
         List<AuthorityDto> effectiveRoles = keycloakFacade.findEffectiveRoleByUserId(setting.getRealmApp(), userId);
         List<String> roles = effectiveRoles.stream().map(AuthorityDto::getName).collect(Collectors.toList());
         return authorityRepository.findAllByNameIn(roles);
@@ -241,7 +246,7 @@ public class UserService {
             if (!CollectionUtils.isEmpty(phones)) {
                 profile.setPhone(phones.get(0));
             } else {
-                profile.setPhone("Pls provide phone");
+                profile.setPhone("N/A");
             }
         }
     }

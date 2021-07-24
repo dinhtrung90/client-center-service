@@ -79,7 +79,7 @@ public class User extends AbstractAuditingEntity {
     private Set<UserAddress> userAddresses= new HashSet<>();
 
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "user")
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private UserProfile userProfile;
 
     @Column(name = "is_approved")
@@ -168,11 +168,13 @@ public class User extends AbstractAuditingEntity {
     }
 
     public void addAuthority(Authority authority) {
+        if (this.authorities.contains(authority)) { return; }
         this.authorities.add(authority);
         authority.getUsers().add(this);
     }
 
     public void removeAuthority(Authority authority) {
+        if (!this.authorities.contains(authority)) { return; }
         this.authorities.remove(authority);
         authority.getUsers().remove(this);
     }
@@ -233,7 +235,6 @@ public class User extends AbstractAuditingEntity {
     }
 
     public void addAuthorities(List<Authority> assignRoles)  {
-        this.authorities.clear();
         assignRoles.forEach(this::addAuthority);
     }
 

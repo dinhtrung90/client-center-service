@@ -19,8 +19,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserProfileDTO implements Serializable {
-    @NotNull
-    @Size(max = 20)
+
     private String id;
 
     @NotNull
