@@ -1,5 +1,6 @@
 package com.vts.clientcenter.service;
 
+import com.vts.clientcenter.domain.UserOrganizationMembership;
 import com.vts.clientcenter.service.dto.OrganizationDTO;
 
 import com.vts.clientcenter.service.dto.OrganizationUpdateRequest;
@@ -55,5 +56,7 @@ public interface OrganizationService {
     Optional<OrganizationFullResponse> findByUUID(String uuid);
 
     void removeOrganizationFromKeycloak(String id, String name);
+
+    UserOrganizationMembership assignUserToOrganization(String userId, String organizationId);
 
 }

@@ -110,11 +110,6 @@ public class EligibilityServiceImpl implements EligibilityService {
             throw new BadRequestAlertException("EmployeeId has existed.", "Account", EMPLOYEE_ID_HAS_EXISTED);
         }
 
-        Optional<Eligibility> eligibilityOptional = eligibilityRepository.findByEmail(eligibilityDTO.getEmail());
-        if (eligibilityOptional.isPresent()) {
-            throw new BadRequestAlertException("Email has existed.", "Account", EMAIL_HAS_EXISTED);
-        }
-
         Optional<Eligibility> eligibilityPhoneOptional = eligibilityRepository.findByPhone(eligibilityDTO.getPhone());
 
         if (eligibilityPhoneOptional.isPresent()) {

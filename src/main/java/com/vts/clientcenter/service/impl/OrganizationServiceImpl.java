@@ -31,8 +31,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
-import static com.vts.clientcenter.config.Constants.BACKGROUND_COLOR;
-import static com.vts.clientcenter.config.Constants.PRIMARY_COLOR;
+import static com.vts.clientcenter.config.Constants.*;
 
 /**
  * Service Implementation for managing {@link Organization}.
@@ -275,5 +274,39 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Async
     public void removeOrganizationFromKeycloak(String clientUUID, String clientName) {
         keycloakFacade.removeOrganizationFromKeycloak(setting.getRealmApp(), clientUUID, clientName);
+    }
+
+    @Transactional
+    public UserOrganizationMembership assignUserToOrganization(String userId, String organizationId) {
+
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (!userOptional.isPresent()) {
+            throw new BadRequestAlertException("User not found.", "User", USER_NOT_FOUND);
+        }
+
+        Optional<Organization> organizationOptional = organizationRepository.findById(organizationId);
+
+        if (!organizationOptional.isPresent()) {
+            throw new BadRequestAlertException("Not found any organization.", "Organization", Constants.ORGANIZATION_NOT_FOUND);
+        }
+
+        Optional<User> userExistedOptional = organizationRepository.getUserMembersInOrganization(organizationId, userId);
+        if (userExistedOptional.isPresent()) {
+            throw new BadRequestAlertException("User has assign to organization.", "Organization", Constants.USER_HAS_ASSIGNED_ORGANIZATION);
+        }
+
+        Organization organization = organizationOptional.get();
+
+        User user = userOptional.get();
+
+        UserOrganizationMembership userOrganizationMembership = new UserOrganizationMembership();
+        userOrganizationMembership.setOrganization(organization);
+        userOrganizationMembership.setUser(user);
+
+        organization.addUserMemberShip(userOrganizationMembership);
+
+        organizationRepository.save(organization);
+
+        return userOrganizationMembership;
     }
 }

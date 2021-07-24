@@ -1,5 +1,6 @@
 package com.vts.clientcenter.web.rest.admin;
 
+import com.vts.clientcenter.domain.UserOrganizationMembership;
 import com.vts.clientcenter.service.OrganizationQueryService;
 import com.vts.clientcenter.service.OrganizationService;
 import com.vts.clientcenter.service.dto.*;
@@ -97,6 +98,14 @@ public class AdminOrganizationResource {
         log.debug("REST request to get Organization : {}", uuid);
         Optional<OrganizationFullResponse> organizationDTO = organizationService.findByUUID(uuid);
         return ResponseUtil.wrapOrNotFound(organizationDTO);
+    }
+
+    @PostMapping("/organization/assignUser/{userId}/")
+    @PreAuthorize("hasPermission('Organization', 'Create')")
+    public ResponseEntity<UserOrganizationMembership> assignUserForOrganization(@RequestBody AssignUserRequest request) {
+        log.debug("REST request to assign user to Organization : {}", request.getUserId());
+        UserOrganizationMembership res = organizationService.assignUserToOrganization(request.getUserId(), request.getOrganizationId());
+        return ResponseEntity.ok(res);
     }
 
 }

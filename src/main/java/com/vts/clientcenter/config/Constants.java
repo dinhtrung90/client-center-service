@@ -63,6 +63,7 @@ public final class Constants {
     public static final Integer EXPIRED_DAY_CODE = 30;
     public static final Integer QRCODE_WIDTH = 100;
     public static final Integer QRCODE_HEIGHT = 100;
+    public static final String USER_HAS_ASSIGNED_ORGANIZATION = "USER_HAS_ASSIGNED_ORGANIZATION";
 
     private Constants() {
 

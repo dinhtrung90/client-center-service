@@ -237,6 +237,11 @@ public class Organization extends AbstractAuditingEntity {
         isEnabled = enabled;
     }
 
+    public void addUserMemberShip(UserOrganizationMembership userOrganizationMembership) {
+        if (this.organizationUserMappings.contains(userOrganizationMembership))  return;
+        this.organizationUserMappings.add(userOrganizationMembership);
+        userOrganizationMembership.setOrganization(this);
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) {
