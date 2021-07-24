@@ -51,4 +51,8 @@ public interface UserRepository extends JpaRepository<User, String>, JpaSpecific
     @Query("delete from UserOrganizationMembership m where m.organization.id = ?1")
     int deleteBulkByOrganizationIdentifier(String organizationId);
 
+    @Query("select u from User u" +
+        " left join fetch u.userOrganizationMappings m" +
+        " where m.organization.id = :organizationId and u.id = :userId")
+    Optional<User> getUserMembersInOrganization(@Param("organizationId") String id, @Param("userId") String userId);
 }

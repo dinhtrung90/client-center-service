@@ -6,9 +6,9 @@ import com.vts.clientcenter.config.OrganizationConfig;
 import com.vts.clientcenter.domain.*;
 import com.vts.clientcenter.events.OrganizationCreatedEvent;
 import com.vts.clientcenter.repository.ClientAppRepository;
+import com.vts.clientcenter.repository.OrganizationRepository;
 import com.vts.clientcenter.repository.UserRepository;
 import com.vts.clientcenter.service.OrganizationService;
-import com.vts.clientcenter.repository.OrganizationRepository;
 import com.vts.clientcenter.service.dto.*;
 import com.vts.clientcenter.service.keycloak.KeycloakFacade;
 import com.vts.clientcenter.service.mapper.AuthorityMapper;
@@ -18,7 +18,6 @@ import com.vts.clientcenter.service.mapper.OrganizationMapper;
 import com.vts.clientcenter.web.rest.errors.BadRequestAlertException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
@@ -290,7 +289,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             throw new BadRequestAlertException("Not found any organization.", "Organization", Constants.ORGANIZATION_NOT_FOUND);
         }
 
-        Optional<User> userExistedOptional = organizationRepository.getUserMembersInOrganization(organizationId, userId);
+        Optional<User> userExistedOptional = userRepository.getUserMembersInOrganization(organizationId, userId);
         if (userExistedOptional.isPresent()) {
             throw new BadRequestAlertException("User has assign to organization.", "Organization", Constants.USER_HAS_ASSIGNED_ORGANIZATION);
         }
