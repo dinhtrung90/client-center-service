@@ -47,7 +47,8 @@ app:
         internal:
           client-center: ${app.kafka-prefix}-cc-internal-topic
 
-
+  elasticsearch:
+    url: localhost:9200
 
 
 

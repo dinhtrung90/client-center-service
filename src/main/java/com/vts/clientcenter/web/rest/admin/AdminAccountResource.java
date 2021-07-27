@@ -1,7 +1,7 @@
 package com.vts.clientcenter.web.rest.admin;
 
 import com.vts.clientcenter.service.AccountService;
-import com.vts.clientcenter.service.UserAddressService;
+import com.vts.clientcenter.service.UserSearchService;
 import com.vts.clientcenter.service.dto.*;
 import io.github.jhipster.web.util.HeaderUtil;
 import io.github.jhipster.web.util.PaginationUtil;
@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
+import javax.ws.rs.QueryParam;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -61,8 +62,11 @@ public class AdminAccountResource {
 
     private final AccountService accountService;
 
-    public AdminAccountResource(AccountService accountService) {
+    private final UserSearchService userSearchService;
+
+    public AdminAccountResource(AccountService accountService, UserSearchService userSearchService) {
         this.accountService = accountService;
+        this.userSearchService = userSearchService;
     }
 
     @PostMapping("/account/create")
@@ -206,5 +210,15 @@ public class AdminAccountResource {
         return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, userId)).build();
     }
 
+    @GetMapping("/_search/users/{query}")
+    @PreAuthorize("hasPermission('Account', 'Read')")
+    public List<UserDTO> search(@PathVariable String query) {
+        return userSearchService.searchUserByKeyword(query);
+    }
 
+    @GetMapping("/account/search")
+    @PreAuthorize("hasPermission('Account', 'Read')")
+    public List<UserDTO> searchByName(@RequestParam("keyword") String query) {
+        return userSearchService.processSearchNameByKeyword(query);
+    }
 }

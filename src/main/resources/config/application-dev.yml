@@ -98,6 +98,20 @@ spring:
   batch:
     job:
       enabled: false
+
+  elasticsearch:
+    rest:
+      uris: ${app.elasticsearch.url}
+  data:
+    elasticsearch:
+      repositories:
+        enabled:
+          true
+
+management:
+  health:
+    elasticsearch:
+      enabled: true
 #    initialize-schema: always
 server:
   port: 8088
@@ -174,3 +188,6 @@ okta:
   client-id: 0oalhgrpkTSLs0spA5d6
   domain: https://dev-50654898.okta.com
   api-token: 007EPnMkRqf9Bj90T8eN0kyHuza7aNebCK-4Iv4wou
+
+
+

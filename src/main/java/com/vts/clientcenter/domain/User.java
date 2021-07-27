@@ -16,6 +16,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
@@ -25,10 +28,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "jhi_user")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @EntityListeners(AuditingEntityListener.class)
-public class User extends AbstractAuditingEntity {
+@Document(indexName = "user_index", type = "user")
+public class User extends AbstractAuditingEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
+    @Field(type = FieldType.Keyword)
     private String id;
 
     @NotNull
@@ -39,15 +44,18 @@ public class User extends AbstractAuditingEntity {
 
     @Size(max = 50)
     @Column(name = "first_name", length = 50)
+    @Field(type = FieldType.Text, name = "firstName")
     private String firstName;
 
     @Size(max = 50)
     @Column(name = "last_name", length = 50)
+    @Field(type = FieldType.Text, name = "lastName")
     private String lastName;
 
     @Email
     @Size(min = 5, max = 254)
     @Column(length = 254, unique = true)
+    @Field(type = FieldType.Text, name = "email")
     private String email;
 
     @Size(min = 2, max = 10)
@@ -62,6 +70,7 @@ public class User extends AbstractAuditingEntity {
 
     @Column(name = "account_status")
     @Enumerated(EnumType.STRING)
+    @Field(type = FieldType.Keyword, name = "accountStatus")
     private AccountStatus accountStatus;
 
     @JsonIgnore
