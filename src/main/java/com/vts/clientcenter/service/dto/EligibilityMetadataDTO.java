@@ -13,6 +13,8 @@ public class EligibilityMetadataDTO implements Serializable {
 
     private String fileName;
 
+    private String signature;
+
     public String getId() {
         return id;
     }
@@ -35,6 +37,14 @@ public class EligibilityMetadataDTO implements Serializable {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
     }
 
     @Override
