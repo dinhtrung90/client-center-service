@@ -102,8 +102,8 @@ public class EligibilityPublicResource {
      * @param id the id of the eligibilityDTO to retrieve.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the eligibilityDTO, or with status {@code 404 (Not Found)}.
      */
-    @GetMapping("/eligibility/{id}")
-    public ResponseEntity<EligibilityDetailDto> getEligibility(@PathVariable String id) {
+    @GetMapping("/eligibility/get/{id}")
+    public ResponseEntity<EligibilityDetailDto> getEligibilityById(@PathVariable String id) {
         log.debug("REST request to get Eligibility : {}", id);
         EligibilityDetailDto res = eligibilityService.findByPrimaryId(id);
         return ResponseEntity.ok(res);
