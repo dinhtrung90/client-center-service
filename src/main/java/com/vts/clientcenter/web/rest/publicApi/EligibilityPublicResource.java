@@ -3,19 +3,24 @@ package com.vts.clientcenter.web.rest.publicApi;
 import com.google.zxing.WriterException;
 import com.vts.clientcenter.config.Constants;
 import com.vts.clientcenter.service.CloudinaryService;
+import com.vts.clientcenter.service.EligibilityQueryService;
 import com.vts.clientcenter.service.EligibilityService;
 import com.vts.clientcenter.service.dto.*;
+import io.github.jhipster.web.util.PaginationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 /**
  * REST controller for managing users.
@@ -53,9 +58,12 @@ public class EligibilityPublicResource {
 
     private final CloudinaryService cloudinaryService;
 
-    public EligibilityPublicResource(EligibilityService accountService, CloudinaryService cloudinaryService) {
+    private final EligibilityQueryService eligibilityQueryService;
+
+    public EligibilityPublicResource(EligibilityService accountService, CloudinaryService cloudinaryService, EligibilityQueryService eligibilityQueryService) {
         this.eligibilityService = accountService;
         this.cloudinaryService = cloudinaryService;
+        this.eligibilityQueryService = eligibilityQueryService;
     }
 
     @PostMapping("/eligibility/createAccount")
@@ -77,6 +85,28 @@ public class EligibilityPublicResource {
         EligibilityPresentStatusDTO res = eligibilityService.receivedPresentCheck(dto);
         return ResponseEntity.accepted().body(res);
 
+    }
+
+    @GetMapping("/eligibility/list")
+    public ResponseEntity<List<EligibilityDTO>> getListEligibility(EligibilityCriteria criteria, Pageable pageable) {
+        log.debug("REST request to get eligibility by criteria: {}", criteria);
+        Page<EligibilityDTO> page = eligibilityQueryService.findByCriteria(criteria, pageable);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+        return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
+
+
+    /**
+     * {@code GET  /eligibilities/:id} : get the "id" eligibility.
+     *
+     * @param id the id of the eligibilityDTO to retrieve.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the eligibilityDTO, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/eligibility/{id}")
+    public ResponseEntity<EligibilityDetailDto> getEligibility(@PathVariable String id) {
+        log.debug("REST request to get Eligibility : {}", id);
+        EligibilityDetailDto res = eligibilityService.findByPrimaryId(id);
+        return ResponseEntity.ok(res);
     }
 
 }
