@@ -88,10 +88,9 @@ public class EligibilityPublicResource {
     }
 
     @GetMapping("/eligibility/list")
-    public ResponseEntity<List<EligibilityDetailDto>> getListEligibility(EligibilityCriteria criteria, Pageable pageable) {
+    public ResponseEntity<List<EligibilityDTO>> getListEligibility(EligibilityCriteria criteria, Pageable pageable) {
         log.debug("REST request to get eligibility by criteria: {}", criteria);
-        Page<EligibilityDetailDto> page = eligibilityQueryService.findByCriteria(criteria, pageable);
-
+        Page<EligibilityDTO> page = eligibilityQueryService.findByCriteria(criteria, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }

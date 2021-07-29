@@ -2,16 +2,12 @@ package com.vts.clientcenter.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.vts.clientcenter.service.dto.EligibilityDetailDto;
 import com.vts.clientcenter.service.mapper.EligibilityMetadataMapper;
-import com.vts.clientcenter.service.mapper.EligibilityPresentStatusMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -44,13 +40,11 @@ public class EligibilityQueryService extends QueryService<Eligibility> {
 
     private final EligibilityMetadataMapper eligibilityMetadataMapper;
 
-    private final EligibilityPresentStatusMapper eligibilityPresentStatusMapper;
 
-    public EligibilityQueryService(EligibilityRepository eligibilityRepository, EligibilityMapper eligibilityMapper, EligibilityMetadataMapper eligibilityMetadataMapper, EligibilityPresentStatusMapper eligibilityPresentStatusMapper) {
+    public EligibilityQueryService(EligibilityRepository eligibilityRepository, EligibilityMapper eligibilityMapper, EligibilityMetadataMapper eligibilityMetadataMapper) {
         this.eligibilityRepository = eligibilityRepository;
         this.eligibilityMapper = eligibilityMapper;
         this.eligibilityMetadataMapper = eligibilityMetadataMapper;
-        this.eligibilityPresentStatusMapper = eligibilityPresentStatusMapper;
     }
 
     /**
@@ -72,19 +66,11 @@ public class EligibilityQueryService extends QueryService<Eligibility> {
      * @return the matching entities.
      */
     @Transactional(readOnly = true)
-    public Page<EligibilityDetailDto> findByCriteria(EligibilityCriteria criteria, Pageable page) {
+    public Page<EligibilityDTO> findByCriteria(EligibilityCriteria criteria, Pageable page) {
         log.debug("find by criteria : {}, page: {}", criteria, page);
         final Specification<Eligibility> specification = createSpecification(criteria);
-
-
-        List<EligibilityDetailDto> collectOfDetails = eligibilityRepository.findAll(specification, page)
-            .map(eligibility -> EligibilityDetailDto.builder()
-                .metadata(eligibilityMetadataMapper.toDto(new ArrayList<>(eligibility.getEligibilityMetadata())))
-                .eligibility(eligibilityMapper.toDto(eligibility))
-                .progress(eligibilityPresentStatusMapper.toDto(new ArrayList<>(eligibility.getEligibilityPresentStatuses())))
-                .build()).stream().collect(Collectors.toList());
-
-        return new PageImpl<>(collectOfDetails, page, collectOfDetails.size());
+        return eligibilityRepository.findAll(specification, page)
+            .map(eligibilityMapper::toDto);
     }
 
     /**
