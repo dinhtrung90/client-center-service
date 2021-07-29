@@ -38,20 +38,20 @@ public class AdminEligibilityResource {
         this.eligibilityQueryService = eligibilityQueryService;
     }
 
-    /**
-     * {@code GET  /eligibilities} : get all the eligibilities.
-     *
-     * @param pageable the pagination information.
-     * @param criteria the criteria which the requested entities should match.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of eligibilities in body.
-     */
-    @GetMapping("/eligibility")
-    public ResponseEntity<List<EligibilityDTO>> getAllEligibility(EligibilityCriteria criteria, Pageable pageable) {
-        log.debug("REST request to get eligibility by criteria: {}", criteria);
-        Page<EligibilityDTO> page = eligibilityQueryService.findByCriteria(criteria, pageable);
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
-        return ResponseEntity.ok().headers(headers).body(page.getContent());
-    }
+//    /**
+//     * {@code GET  /eligibilities} : get all the eligibilities.
+//     *
+//     * @param pageable the pagination information.
+//     * @param criteria the criteria which the requested entities should match.
+//     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of eligibilities in body.
+//     */
+//    @GetMapping("/eligibility")
+//    public ResponseEntity<List<EligibilityDTO>> getAllEligibility(EligibilityCriteria criteria, Pageable pageable) {
+//        log.debug("REST request to get eligibility by criteria: {}", criteria);
+//        Page<EligibilityDTO> page = eligibilityQueryService.findByCriteria(criteria, pageable);
+//        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
+//        return ResponseEntity.ok().headers(headers).body(page.getContent());
+//    }
 
 
     /**
