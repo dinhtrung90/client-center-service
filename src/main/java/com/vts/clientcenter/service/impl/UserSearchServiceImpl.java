@@ -40,7 +40,7 @@ public class UserSearchServiceImpl implements UserSearchService {
 
     @Override
     public List<UserDTO> processSearchNameByKeyword(String query) {
-        QueryBuilder queryBuilder = QueryBuilders.multiMatchQuery(query, "email")
+        QueryBuilder queryBuilder = QueryBuilders.multiMatchQuery(query, "firstName", "lastName", "email", "userProfile.phone")
             .fuzziness(Fuzziness.AUTO);
         return StreamSupport
             .stream(userSearchRepository.search(queryBuilder).spliterator(), false)

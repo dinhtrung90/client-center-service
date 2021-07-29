@@ -97,9 +97,6 @@ public class UserProfileQueryService extends QueryService<UserProfile> {
             if (criteria.getGender() != null) {
                 specification = specification.and(buildSpecification(criteria.getGender(), UserProfile_.gender));
             }
-            if (criteria.getBirthDate() != null) {
-                specification = specification.and(buildRangeSpecification(criteria.getBirthDate(), UserProfile_.birthDate));
-            }
             if (criteria.getCreatedDate() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getCreatedDate(), UserProfile_.createdDate));
             }

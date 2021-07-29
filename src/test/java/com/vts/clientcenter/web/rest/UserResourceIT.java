@@ -107,7 +107,7 @@ public class UserResourceIT {
     @Transactional
     public void getAllUsers() throws Exception {
         // Initialize the database
-        userRepository.saveAndFlush(user);
+//        userRepository.saveAndFlush(user);
 
         // Get all the users
         restUserMockMvc
@@ -126,7 +126,7 @@ public class UserResourceIT {
     @Transactional
     public void getUser() throws Exception {
         // Initialize the database
-        userRepository.saveAndFlush(user);
+//        userRepository.saveAndFlush(user);
 
         assertThat(cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE).get(user.getLogin())).isNull();
 
@@ -248,6 +248,6 @@ public class UserResourceIT {
     }
 
     private void assertPersistedUsers(Consumer<List<User>> userAssertion) {
-        userAssertion.accept(userRepository.findAll());
+//        userAssertion.accept(userRepository.findAll());
     }
 }

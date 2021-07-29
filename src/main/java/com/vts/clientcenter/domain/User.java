@@ -84,11 +84,13 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @BatchSize(size = 20)
     private Set<Authority> authorities = new HashSet<>();
 
+
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
     private Set<UserAddress> userAddresses= new HashSet<>();
 
 
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @Field(type = FieldType.Nested, includeInParent = true)
     private UserProfile userProfile;
 
     @Column(name = "is_approved")

@@ -1,5 +1,4 @@
 -- WARMING: truncate all permissions
-drop table tv_operations;
 create table tv_operations(
     name varchar(20) not null primary key
 );

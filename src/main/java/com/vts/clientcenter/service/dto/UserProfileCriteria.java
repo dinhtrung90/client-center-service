@@ -4,14 +4,7 @@ import java.io.Serializable;
 import java.util.Objects;
 import io.github.jhipster.service.Criteria;
 import com.vts.clientcenter.domain.enumeration.Gender;
-import io.github.jhipster.service.filter.BooleanFilter;
-import io.github.jhipster.service.filter.DoubleFilter;
-import io.github.jhipster.service.filter.Filter;
-import io.github.jhipster.service.filter.FloatFilter;
-import io.github.jhipster.service.filter.IntegerFilter;
-import io.github.jhipster.service.filter.LongFilter;
-import io.github.jhipster.service.filter.StringFilter;
-import io.github.jhipster.service.filter.InstantFilter;
+import io.github.jhipster.service.filter.*;
 
 /**
  * Criteria class for the {@link com.vts.clientcenter.domain.UserProfile} entity. This class is used
@@ -50,7 +43,7 @@ public class UserProfileCriteria implements Serializable, Criteria {
 
     private GenderFilter gender;
 
-    private InstantFilter birthDate;
+    private ZonedDateTimeFilter birthDate;
 
     private InstantFilter createdDate;
 
@@ -103,11 +96,11 @@ public class UserProfileCriteria implements Serializable, Criteria {
         this.gender = gender;
     }
 
-    public InstantFilter getBirthDate() {
+    public ZonedDateTimeFilter getBirthDate() {
         return birthDate;
     }
 
-    public void setBirthDate(InstantFilter birthDate) {
+    public void setBirthDate(ZonedDateTimeFilter birthDate) {
         this.birthDate = birthDate;
     }
 

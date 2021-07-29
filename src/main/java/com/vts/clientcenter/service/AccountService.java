@@ -7,6 +7,7 @@ import com.vts.clientcenter.domain.enumeration.AccountStatus;
 import com.vts.clientcenter.domain.enumeration.ActionsEmail;
 import com.vts.clientcenter.events.UserCreatedEvent;
 import com.vts.clientcenter.repository.*;
+import com.vts.clientcenter.repository.search.UserSearchRepository;
 import com.vts.clientcenter.security.SecurityUtils;
 import com.vts.clientcenter.service.dto.*;
 import com.vts.clientcenter.service.keycloak.KeycloakFacade;
@@ -87,8 +88,10 @@ public class AccountService {
     @Autowired
     private ClientAppRepository clientAppRepository;
 
-    @Transactional
+    @Autowired
+    private UserSearchRepository userSearchRepository;
 
+    @Transactional
     public UserReferenceDto createUserAccount(CreateAccountRequest request) {
 
         String userLogin = SecurityUtils.getCurrentUserLogin().orElse(Constants.SYSTEM_ACCOUNT);
@@ -123,7 +126,7 @@ public class AccountService {
         UserProfile profile = new UserProfile();
         profile.setHomePhone(request.getHomePhone());
         profile.setPhone(request.getMobilePhone());
-        profile.setBirthDate(request.getBirthDate().toInstant());
+        profile.setBirthDate(request.getBirthDate());
         profile.setGender(request.getGender());
         profile.setUser(user);
         user.setUserProfile(profile);
@@ -140,6 +143,8 @@ public class AccountService {
             referenceDto.getUserId(),
             (requiredActions)
         );
+
+        userSearchRepository.save(user);
 
         return referenceDto;
     }
@@ -298,7 +303,7 @@ public class AccountService {
         }
 
         if (Objects.nonNull(userDto.getBirthDate())) {
-            profile.setBirthDate(userDto.getBirthDate().toInstant());
+            profile.setBirthDate(userDto.getBirthDate());
         }
 
         if (Objects.nonNull(userDto.getMobilePhone())) {
